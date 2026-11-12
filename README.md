@@ -43,6 +43,20 @@ terra-interface/
 │   ├── tsconfig.json        # TypeScript Compiler Config
 │   └── package.json         # Backend Dependencies
 │
+├── docs/                    # Master Architectural & Technical Specifications (12 docs)
+│   ├── architecture-overview.md
+│   ├── console-architecture.md
+│   ├── core-architecture.md
+│   ├── canonical-homestead-model.md
+│   ├── database-erd.md
+│   ├── batch-engine-spec.md
+│   ├── product-unit-catalog-spec.md
+│   ├── resource-flow-spec.md
+│   ├── inventory-ledger-spec.md
+│   ├── api-contracts.md
+│   ├── migration-plan.md
+│   └── implementation-roadmap.md
+│
 ├── .gitignore
 ├── package.json             # Root Workspace Scripts
 └── README.md
@@ -79,3 +93,25 @@ npm run start:dev
 ```bash
 npm run prisma:studio
 ```
+
+---
+
+## Architectural Documentation
+
+The project includes an exhaustive, production-grade architectural specification suite in [`docs/`](./docs/):
+
+| Document | Topic |
+| :--- | :--- |
+| **[`architecture-overview.md`](./docs/architecture-overview.md)** | High-level system context, boundaries, and principles |
+| **[`console-architecture.md`](./docs/console-architecture.md)** | Next.js feature architecture, Light Nature UI, and embedded CRUD |
+| **[`core-architecture.md`](./docs/core-architecture.md)** | NestJS domain modular monolith, layered patterns, and Swagger |
+| **[`canonical-homestead-model.md`](./docs/canonical-homestead-model.md)** | Vincent's Farm 300 m² Master Plan (7 zones, facilities, equipment) |
+| **[`database-erd.md`](./docs/database-erd.md)** | Full Mermaid Entity-Relationship Diagram across 12 domains |
+| **[`batch-engine-spec.md`](./docs/batch-engine-spec.md)** | Universal batch state machine, lifecycle transitions, multi-harvest |
+| **[`product-unit-catalog-spec.md`](./docs/product-unit-catalog-spec.md)** | Dynamic product taxonomy and dimension-safe unit conversion matrix |
+| **[`resource-flow-spec.md`](./docs/resource-flow-spec.md)** | Directed circular loops (95.4% efficiency) and mass/energy balances |
+| **[`inventory-ledger-spec.md`](./docs/inventory-ledger-spec.md)** | Immutable double-entry stock movement ledger |
+| **[`api-contracts.md`](./docs/api-contracts.md)** | Complete `/api/v1/` REST endpoint inventory and DTOs |
+| **[`migration-plan.md`](./docs/migration-plan.md)** | 4-phase zero-downtime database and code migration protocols |
+| **[`implementation-roadmap.md`](./docs/implementation-roadmap.md)** | 6-sprint prioritized implementation roadmap and acceptance criteria |
+
