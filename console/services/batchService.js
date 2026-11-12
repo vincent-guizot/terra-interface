@@ -1,24 +1,39 @@
-import { ApiClient } from './apiClient';
+import { ApiClient, ApiError } from './apiClient';
 import { initialCultivationData } from '../data/operationsData';
 
 export class BatchService {
   static async getBatches(domain, status) {
-    const remoteData = await ApiClient.get('/batches', { domain, status });
-    if (remoteData) return remoteData;
-    // Fallback to local data
-    return initialCultivationData.batches;
+    try {
+      return await ApiClient.get('/batches', { domain, status });
+    } catch (err) {
+      if (ApiClient.isDemoMode()) {
+        console.warn('[BatchService] Running in DEMO mode, returning local fixture data.');
+        return initialCultivationData.batches;
+      }
+      throw err;
+    }
+  }
+
+  static async getBatchById(id) {
+    return ApiClient.get(`/batches/${id}`);
   }
 
   static async createBatch(batchData) {
-    const remoteResult = await ApiClient.post('/batches', batchData);
-    if (remoteResult) return remoteResult;
-    return {
-      id: `bat-${Date.now()}`,
-      ...batchData,
-      status: 'ACTIVE',
-      harvests: [],
-      auditLogs: [{ date: 'Just now', action: 'Universal Batch Created', user: 'Vincent' }],
-    };
+    try {
+      return await ApiClient.post('/batches', batchData);
+    } catch (err) {
+      if (ApiClient.isDemoMode()) {
+        console.warn('[BatchService] Running in DEMO mode, generating local mock batch.');
+        return {
+          id: `bat-${Date.now()}`,
+          ...batchData,
+          status: 'ACTIVE',
+          harvests: [],
+          auditLogs: [{ date: 'Just now', action: 'Universal Batch Created (Demo Mode)', user: 'Vincent' }],
+        };
+      }
+      throw err;
+    }
   }
 
   static async transitionStatus(batchId, newStatus, reason) {

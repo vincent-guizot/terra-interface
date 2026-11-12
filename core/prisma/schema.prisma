@@ -13,135 +13,180 @@ generator client {
 }
 
 // =========================================================================
-// 01. HOMESTEAD CORE & SPATIAL MASTER PLAN
+// DOMAIN A: IDENTITY, PROPERTY & SPATIAL HIERARCHY
 // =========================================================================
 
 model Homestead {
-  id              String       @id @default(uuid())
-  name            String       @default("Vincent's Farm")
-  totalAreaSqm    Float        @default(300.0)
-  dimensions      String       @default("15m x 20m")
-  location        String       @default("West Java, Indonesia")
-  climateType     String       @default("Tropical Highland Monsoon")
-  stewardName     String       @default("Vincent")
-  zones           Zone[]
-  productionTypes ProductionType[]
-  inventoryItems  InventoryItem[]
+  id               String            @id @default(uuid())
+  name             String            @default("Vincent's Farm")
+  totalAreaSqm     Float             @default(300.0)
+  dimensions       String            @default("15m x 20m")
+  location         String            @default("West Java, Indonesia")
+  climateType      String            @default("Tropical Highland Monsoon")
+  latitude         Float             @default(-6.9175)
+  longitude        Float             @default(107.6191)
+  stewardName      String            @default("Vincent")
+  sitePlanVersions SitePlanVersion[]
+  zones            Zone[]
+  productionTypes  ProductionType[]
+  productCategories ProductCategory[]
+  inventoryItems   InventoryItem[]
   storageLocations StorageLocation[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model SitePlanVersion {
+  id          String    @id @default(uuid())
+  homesteadId String
+  homestead   Homestead @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
+  versionName String    // e.g., "Approved Master Plan 2026"
+  isCurrent   Boolean   @default(true)
+  svgLayout   String?   @db.Text
+  createdAt   DateTime  @default(now())
 }
 
 model Zone {
-  id              String       @id @default(uuid())
-  code            String       @unique // e.g. "Z-01", "Z-02"
-  name            String       // e.g. "Smart Micro-Greenhouse"
-  homesteadId     String
-  homestead       Homestead    @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
-  areaSqm         Float        // e.g. 35.0
-  type            String       // Cultivation, Aquaculture, Poultry, Solar, Water, Living
-  colorHex        String       @default("#10B981")
-  batches         Batch[]
-  telemetryLogs   TelemetryLog[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id            String             @id @default(uuid())
+  code          String             @unique // e.g. "Z-01", "Z-02"
+  name          String             // e.g. "Smart Micro-Greenhouse"
+  homesteadId   String
+  homestead     Homestead          @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
+  areaSqm       Float              // e.g. 35.0
+  type          String             // Cultivation, Aquaculture, Poultry, Solar, Water, Living
+  domainTag     String?            @default("CULTIVATION")
+  colorHex      String             @default("#10B981")
+  buildings     Building[]
+  facilities    Facility[]
+  batches       Batch[]
+  sensorDevices SensorDevice[]
+  telemetryLogs TelemetryReading[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model Building {
+  id           String     @id @default(uuid())
+  zoneId       String
+  zone         Zone       @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  name         String     // e.g. "Polycarbonate Greenhouse", "Poultry Coop Shed"
+  footprintSqm Float
+  roofAreaSqm  Float      @default(0.0)
+  facilities   Facility[]
+  createdAt    DateTime   @default(now())
+}
+
+model Facility {
+  id         String      @id @default(uuid())
+  zoneId     String
+  zone       Zone        @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  buildingId String?
+  building   Building?   @relation(fields: [buildingId], references: [id])
+  name       String      // e.g. "Vertical NFT Line 1", "Bio-Pond Alpha", "BSF Stack Rack"
+  type       String      // NFT_RACK, BIO_POND, POULTRY_COOP, BSF_RACK, COMPOST_BAY, CISTERN
+  equipment  Equipment[]
+  createdAt  DateTime    @default(now())
+}
+
+model Equipment {
+  id             String   @id @default(uuid())
+  facilityId     String
+  facility       Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  name           String   // e.g. "Resun LP-100 Air Pump", "Growatt 8kW Hybrid Inverter"
+  modelNumber    String?
+  ratedPowerWatt Float    @default(0.0)
+  status         String   @default("OPERATIONAL") // OPERATIONAL, MAINTENANCE, OFFLINE
+  createdAt      DateTime @default(now())
 }
 
 // =========================================================================
-// 02. UNIVERSAL BATCH LIFECYCLE & OUTPUT ENGINE
-// Standard Lifecycle: DRAFT -> PLANNED -> ACTIVE -> ON_HOLD -> COMPLETED / CANCELLED
+// DOMAIN B: DYNAMIC PRODUCT CATALOG & CONFIGURATION (Zero Hardcoding)
 // =========================================================================
 
-enum BatchStatus {
-  DRAFT
-  PLANNED
-  ACTIVE
-  ON_HOLD
-  COMPLETED
-  CANCELLED
+model ProductCategory {
+  id          String              @id @default(uuid())
+  homesteadId String
+  homestead   Homestead           @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
+  name        String              // e.g. "Leafy Greens", "Fungi", "Poultry", "Finfish"
+  domain      String              // CULTIVATION, LIVESTOCK, AQUACULTURE, CIRCULAR
+  icon        String?             @default("Grass")
+  products    ProductDefinition[]
+  createdAt   DateTime            @default(now())
 }
 
-model Batch {
-  id               String          @id @default(uuid())
-  batchCode        String          @unique // e.g. "BAT-2026-CUL-01"
-  name             String          // Human-readable batch title
-  domain           String          // CULTIVATION, LIVESTOCK, AQUACULTURE, CIRCULAR
-  productionTypeId String?
-  productionType   ProductionType? @relation(fields: [productionTypeId], references: [id])
-  zoneId           String
-  zone             Zone            @relation(fields: [zoneId], references: [id])
-  status           BatchStatus     @default(ACTIVE)
-
-  startDate        DateTime
-  expectedEndDate  DateTime?
-  actualEndDate    DateTime?
-
-  initialQuantity  Float           @default(1.0)
-  currentQuantity  Float           @default(1.0)
-  measurementUnit  String          // kg, pcs, head, birds, trays
-
-  healthIndex      Float?          @default(95.0) // 0 - 100%
-  notes            String?
-
-  outputs          BatchOutput[]   // Supports MULTIPLE harvests / outputs per batch
-  records          GrowingRecord[]
-  auditLogs        BatchHistory[]
-  customValues     BatchCustomFieldValue[]
-
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-
-  @@index([domain, status])
-  @@index([zoneId])
+model ProductDefinition {
+  id             String                  @id @default(uuid())
+  categoryId     String
+  category       ProductCategory         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name           String                  // e.g. "Bok Choy White Stem", "Nile Tilapia"
+  sku            String                  @unique
+  defaultUnitId  String?
+  defaultUnit    MeasurementUnit?        @relation(fields: [defaultUnitId], references: [id])
+  densityKgPerL  Float?                  // Required for mass <-> volume conversion
+  customFields   CustomFieldDefinition[]
+  batches        Batch[]
+  inventoryItems InventoryItem[]
+  createdAt      DateTime                @default(now())
 }
 
-model BatchOutput {
-  id              String      @id @default(uuid())
-  batchId         String
-  batch           Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  harvestDate     DateTime    @default(now())
-  productName     String      // e.g. "Fresh Pastured Eggs", "Nile Tilapia Fillets"
-  quantity        Float
-  measurementUnit String      // kg, pcs, liters
-  qualityGrade    String?     @default("Grade A") // Grade A, Prime, Processing
-  destination     String?     // Homestead Pantry, Freezing, Composting, Direct Consume
-  stewardName     String      @default("Vincent")
-  notes           String?
-  createdAt       DateTime    @default(now())
+model MeasurementUnit {
+  id          String            @id @default(uuid())
+  symbol      String            @unique // kg, g, L, mL, pcs, head, birds, trays
+  name        String            // Kilogram, Liter, Piece, etc.
+  dimension   String            // MASS, VOLUME, DISCRETE, ENERGY, AREA
+  products    ProductDefinition[]
+  sourceConvs UnitConversion[]  @relation("SourceUnit")
+  targetConvs UnitConversion[]  @relation("TargetUnit")
 }
 
-model BatchHistory {
-  id          String      @id @default(uuid())
-  batchId     String
-  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  action      String      // "Batch Created", "Status changed to Active", "Harvest Logged"
-  details     String?
-  performedBy String      @default("Vincent")
-  timestamp   DateTime    @default(now())
+model UnitConversion {
+  id           String          @id @default(uuid())
+  sourceUnitId String
+  sourceUnit   MeasurementUnit @relation("SourceUnit", fields: [sourceUnitId], references: [id])
+  targetUnitId String
+  targetUnit   MeasurementUnit @relation("TargetUnit", fields: [targetUnitId], references: [id])
+  multiplier   Float           // target = source * multiplier
 }
 
-// =========================================================================
-// 03. CONFIGURABLE PRODUCTION ENGINE (Zero Hardcoding)
-// =========================================================================
+model CustomFieldDefinition {
+  id                  String            @id @default(uuid())
+  productDefinitionId String
+  productDefinition   ProductDefinition @relation(fields: [productDefinitionId], references: [id], onDelete: Cascade)
+  key                 String            // e.g. "brix_rating", "target_fcr", "crude_protein"
+  label               String
+  dataType            String            // NUMBER, TEXT, BOOLEAN, DATE
+  isRequired          Boolean           @default(false)
+  values              CustomFieldValue[]
+}
 
+model CustomFieldValue {
+  id         String                @id @default(uuid())
+  fieldDefId String
+  fieldDef   CustomFieldDefinition @relation(fields: [fieldDefId], references: [id], onDelete: Cascade)
+  batchId    String
+  batch      Batch                 @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  value      String
+}
+
+// Backward-compatible configuration models
 model ProductionType {
-  id              String            @id @default(uuid())
-  homesteadId     String
-  homestead       Homestead         @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
-  domain          String            // Cultivation, Livestock, Aquaculture, Circular
-  name            String            // e.g. "Microgreens & Fungi", "Dual-purpose Poultry"
-  defaultUnit     String            @default("kg")
-  customFields    CustomField[]
-  batches         Batch[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id           String                  @id @default(uuid())
+  homesteadId  String
+  homestead    Homestead               @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
+  domain       String                  // Cultivation, Livestock, Aquaculture, Circular
+  name         String                  // e.g. "Microgreens & Fungi", "Dual-purpose Poultry"
+  defaultUnit  String                  @default("kg")
+  customFields CustomField[]
+  batches      Batch[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
 }
 
 model CustomField {
   id               String                  @id @default(uuid())
   productionTypeId String
   productionType   ProductionType          @relation(fields: [productionTypeId], references: [id], onDelete: Cascade)
-  fieldName        String                  // e.g. "Crude Protein %", "Brix Index", "FCR"
+  fieldName        String                  // e.g. "Crude Protein %", "Brix Index"
   fieldType        String                  // NUMBER, TEXT, BOOLEAN, DATE
   isRequired       Boolean                 @default(false)
   values           BatchCustomFieldValue[]
@@ -157,20 +202,184 @@ model BatchCustomFieldValue {
 }
 
 // =========================================================================
-// 04. OPERATIONAL MODULES: RECORDS, INVENTORY & HARDWARE
+// DOMAIN C: UNIVERSAL BATCH LIFECYCLE & DETAIL ENGINES
+// Standard Lifecycle: DRAFT -> PLANNED -> ACTIVE -> ON_HOLD -> COMPLETED / CANCELLED
 // =========================================================================
 
-model GrowingRecord {
-  id          String      @id @default(uuid())
-  batchId     String
-  batch       Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
-  recordDate  DateTime    @default(now())
-  recordType  String      // Feeding, Irrigation, Pruning, Health Check, Soil Probe
-  parameter1  String?     // e.g. "Moisture: 38%"
-  parameter2  String?     // e.g. "pH: 7.1"
-  notes       String?
-  stewardName String      @default("Vincent")
+enum BatchStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
 }
+
+model Batch {
+  id                  String             @id @default(uuid())
+  batchCode           String             @unique // e.g. "BAT-2026-CUL-01"
+  name                String             // Human-readable batch title
+  domain              String             // CULTIVATION, LIVESTOCK, AQUACULTURE, CIRCULAR
+  productionTypeId    String?
+  productionType      ProductionType?    @relation(fields: [productionTypeId], references: [id])
+  productDefinitionId String?
+  productDefinition   ProductDefinition? @relation(fields: [productDefinitionId], references: [id])
+  zoneId              String
+  zone                Zone               @relation(fields: [zoneId], references: [id])
+  status              BatchStatus        @default(ACTIVE)
+
+  startDate           DateTime
+  expectedEndDate     DateTime?
+  actualEndDate       DateTime?
+
+  initialQuantity     Float              @default(1.0)
+  currentQuantity     Float              @default(1.0)
+  measurementUnit     String             // kg, pcs, head, birds, trays
+
+  healthIndex         Float?             @default(95.0) // 0 - 100%
+  notes               String?
+
+  // 1-to-1 Domain Detail Extensions
+  cultivationDetail   CultivationBatchDetail?
+  livestockDetail     LivestockBatchDetail?
+  aquacultureDetail   AquacultureBatchDetail?
+  bsfDetail           BsfBatchDetail?
+  compostDetail       CompostBatchDetail?
+
+  outputs             BatchOutput[]      // Multi-harvest outputs
+  records             GrowingRecord[]
+  auditLogs           BatchHistory[]
+  statusHistory       BatchStatusHistory[]
+  events              BatchEvent[]
+  customValues        BatchCustomFieldValue[]
+  dynamicFieldValues  CustomFieldValue[]
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([domain, status])
+  @@index([zoneId])
+}
+
+model BatchStatusHistory {
+  id         String      @id @default(uuid())
+  batchId    String
+  batch      Batch       @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  fromStatus BatchStatus
+  toStatus   BatchStatus
+  reason     String?
+  changedBy  String      @default("Vincent")
+  timestamp  DateTime    @default(now())
+}
+
+model BatchEvent {
+  id         String   @id @default(uuid())
+  batchId    String
+  batch      Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  eventType  String   // FEEDING, OBSERVATION, TREATMENT, MORTALITY, WATER_TEST
+  data       Json
+  recordedBy String   @default("Vincent")
+  timestamp  DateTime @default(now())
+}
+
+model BatchOutput {
+  id              String         @id @default(uuid())
+  batchId         String
+  batch           Batch          @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  harvestDate     DateTime       @default(now())
+  productName     String         // e.g. "Fresh Pastured Eggs", "Nile Tilapia Fillets"
+  quantity        Float
+  measurementUnit String         // kg, pcs, liters
+  qualityGrade    String?        @default("Grade A")
+  destination     String?        // Homestead Pantry, Freezing, Composting, Direct Consume
+  stewardName     String         @default("Vincent")
+  notes           String?
+  stockMovement   StockMovement?
+  createdAt       DateTime       @default(now())
+}
+
+model BatchHistory {
+  id          String   @id @default(uuid())
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  action      String   // "Batch Created", "Status changed to Active", "Harvest Logged"
+  details     String?
+  performedBy String   @default("Vincent")
+  timestamp   DateTime @default(now())
+}
+
+// 1-to-1 Specialized Domain Detail Tables
+model CultivationBatchDetail {
+  id            String   @id @default(uuid())
+  batchId       String   @unique
+  batch         Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  growingMedium String   // NFT_SOLUTION, LIVING_SOIL, SAWDUST_BAGLOG, DWC
+  lightingType  String?  @default("NATURAL_SUNLIGHT")
+  ecTarget      Float?   // mS/cm
+  phTarget      Float?
+  trayCount     Int?
+  bedNumber     String?
+}
+
+model LivestockBatchDetail {
+  id             String   @id @default(uuid())
+  batchId        String   @unique
+  batch          Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  breed          String   // Ayam KUB, Joper, Cornish Cross, Garut Sheep
+  housingSystem  String   // DEEP_LITTER_COOP, MOBILE_TRACTOR, ELEVATED_SLAT
+  mortalityCount Int      @default(0)
+  targetFcr      Float?
+}
+
+model AquacultureBatchDetail {
+  id                 String   @id @default(uuid())
+  batchId            String   @unique
+  batch              Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  species            String   // Oreochromis niloticus (Tilapia), Clarias gariepinus (Catfish)
+  pondVolumeM3       Float    @default(12.0)
+  targetDensityKgM3  Float    @default(25.0)
+  aerationType       String?  @default("VENTURI_AND_DIFFUSER")
+  dissolvedOxygenMin Float    @default(5.0)
+}
+
+model BsfBatchDetail {
+  id                String   @id @default(uuid())
+  batchId           String   @unique
+  batch             Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  substrateType     String   // KITCHEN_SCRAPS, POND_SEDIMENT, BREWER_GRAINS
+  substrateWeightKg Float
+  trayCount         Int      @default(5)
+  frassYieldKg      Float?
+  maggotYieldKg     Float?
+}
+
+model CompostBatchDetail {
+  id                  String   @id @default(uuid())
+  batchId             String   @unique
+  batch               Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  bayNumber           String   // Bay 1, Bay 2, Bay 3
+  carbonNitrogenRatio Float    @default(30.0)
+  biocharPercent      Float    @default(10.0)
+  turnCount           Int      @default(0)
+  peakTempC           Float?
+  curedMaturityScore  Float?
+}
+
+model GrowingRecord {
+  id          String   @id @default(uuid())
+  batchId     String
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  recordDate  DateTime @default(now())
+  recordType  String   // Feeding, Irrigation, Pruning, Health Check, Soil Probe
+  parameter1  String?  // e.g. "Moisture: 38%"
+  parameter2  String?  // e.g. "pH: 7.1"
+  notes       String?
+  stewardName String   @default("Vincent")
+}
+
+// =========================================================================
+// DOMAIN H: INVENTORY TRANSACTION LEDGER
+// =========================================================================
 
 model StorageLocation {
   id           String          @id @default(uuid())
@@ -183,20 +392,53 @@ model StorageLocation {
 }
 
 model InventoryItem {
-  id           String          @id @default(uuid())
-  homesteadId  String
-  homestead    Homestead       @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
-  sku          String          @unique
-  name         String
-  category     String          // Feeds, Seeds, Biologicals, Tools, Pantry
-  locationId   String
-  location     StorageLocation @relation(fields: [locationId], references: [id])
-  inStock      Float           @default(0.0)
-  unit         String          // kg, packs, liters
-  minThreshold Float           @default(5.0)
-  transactions StockTx[]
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id                String             @id @default(uuid())
+  homesteadId       String
+  homestead         Homestead          @relation(fields: [homesteadId], references: [id], onDelete: Cascade)
+  sku               String             @unique
+  name              String
+  category          String             // Feeds, Seeds, Biologicals, Tools, Pantry
+  locationId        String
+  location          StorageLocation    @relation(fields: [locationId], references: [id])
+  productDefId      String?
+  productDef        ProductDefinition? @relation(fields: [productDefId], references: [id])
+  inStock           Float              @default(0.0) // Cached derived balance
+  unit              String             // kg, packs, liters
+  minThreshold      Float              @default(5.0)
+  transactions      StockTx[]          // Legacy transactions
+  movements         StockMovement[]    // Immutable ledger movements
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([locationId, category])
+}
+
+enum StockMovementType {
+  PURCHASE_IN
+  HARVEST_IN
+  BATCH_CONSUME_OUT
+  FEEDING_OUT
+  MORTALITY_LOSS_OUT
+  WASTE_OUT
+  INTERNAL_TRANSFER
+  CYCLE_COUNT_ADJUSTMENT
+}
+
+model StockMovement {
+  id                 String            @id @default(uuid())
+  itemId             String
+  item               InventoryItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  type               StockMovementType
+  quantityDelta      Float             // Signed: Positive for IN, Negative for OUT
+  unit               String
+  referenceBatchCode String?
+  batchOutputId      String?           @unique
+  batchOutput        BatchOutput?      @relation(fields: [batchOutputId], references: [id])
+  stewardName        String            @default("Vincent")
+  notes              String?
+  timestamp          DateTime          @default(now())
+
+  @@index([itemId, timestamp])
 }
 
 model StockTx {
@@ -210,12 +452,97 @@ model StockTx {
   timestamp   DateTime      @default(now())
 }
 
-model TelemetryLog {
-  id          String      @id @default(uuid())
+// =========================================================================
+// DOMAIN I: RESOURCE FLOWS & MICROGRID (Energy & Water)
+// =========================================================================
+
+model EnergyNode {
+  id                String   @id @default(uuid())
+  solarKw           Float    @default(5.2)
+  batterySocPct     Float    @default(88.0)
+  inverterPowerWatt Float    @default(1240.0)
+  gridDrawWatt      Float    @default(0.0)
+  updatedAt         DateTime @updatedAt
+}
+
+model WaterNode {
+  id             String   @id @default(uuid())
+  cisternLevelPct Float   @default(92.0)
+  currentVolumeL Float    @default(11040.0)
+  totalCapacityL Float    @default(12000.0)
+  dailyUsageL    Float    @default(380.0)
+  updatedAt      DateTime @updatedAt
+}
+
+model ResourceFlowLog {
+  id                String   @id @default(uuid())
+  sourceZoneId      String
+  destinationZoneId String
+  resourceType      String   // WATER, SOLAR_KWH, BIOMASS_KG, NITRATE_SOLUTION, COMPOST_KG
+  plannedQuantity   Float
+  actualQuantity    Float
+  measurementUnit   String
+  circularityScore  Float    @default(95.4) // % retained
+  stewardName       String   @default("Vincent")
+  timestamp         DateTime @default(now())
+
+  @@index([resourceType, timestamp])
+}
+
+// =========================================================================
+// DOMAIN J: OPERATIONS, SCHEDULES & WORK ORDERS
+// =========================================================================
+
+model WorkOrder {
+  id          String    @id @default(uuid())
+  title       String    // e.g. "Clean K1 Bio-Filter", "Harvest NFT Bok Choy"
+  domain      String
+  priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  status      String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED
+  assignedTo  String    @default("Vincent")
+  dueDate     DateTime
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// =========================================================================
+// DOMAIN K: SMART SYSTEMS & TELEMETRY
+// =========================================================================
+
+model SensorDevice {
+  id          String             @id @default(uuid())
   zoneId      String
-  zone        Zone        @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-  timestamp   DateTime    @default(now())
-  sensorType  String      // SOLAR_KW, BATTERY_SOC, WATER_PH, WATER_DO, SOIL_MOISTURE
-  value       Float
-  unit        String      // kW, %, pH, mg/L
+  zone        Zone               @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  deviceModel String             // ESP32-S3, RS485-Soil, Atlas-pH
+  status      String             @default("ONLINE")
+  readings    TelemetryReading[]
+  createdAt   DateTime           @default(now())
+}
+
+model TelemetryReading {
+  id        String        @id @default(uuid())
+  zoneId    String
+  zone      Zone          @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  sensorId  String?
+  sensor    SensorDevice? @relation(fields: [sensorId], references: [id])
+  metric    String        // WATER_DO, WATER_PH, SOLAR_KW, BATTERY_SOC, SOIL_MOISTURE
+  value     Float
+  unit      String
+  timestamp DateTime      @default(now())
+
+  @@index([metric, timestamp])
+}
+
+// =========================================================================
+// DOMAIN L: INTELLIGENCE & RECOMMENDATIONS
+// =========================================================================
+
+model AiRecommendation {
+  id         String   @id @default(uuid())
+  category   String   // CIRCULAR_LOOP, FEED_OPTIMIZATION, ENERGY_SAVING, HARVEST_WINDOW
+  severity   String   // INFO, WARNING, ACTION_REQUIRED
+  title      String
+  actionText String
+  isApplied  Boolean  @default(false)
+  createdAt  DateTime @default(now())
 }
