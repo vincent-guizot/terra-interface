@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-warm-white: #FAF9F5;
+  --bg-soft-cream: #F5EFEB;
+  --bg-botanical: #EDF4EE;
+  --forest-900: #0F291E;
+  --forest-800: #1B4332;
+  --forest-700: #2D6A4F;
+  --forest-600: #40916C;
+  --forest-500: #52B788;
+  --forest-100: #D8F3DC;
+  --forest-50: #EBF8EE;
+  
+  --emerald-600: #059669;
+  --emerald-500: #10B981;
+  --emerald-400: #34D399;
+  --emerald-100: #D1FAE5;
+  --emerald-50: #ECFDF5;
+
+  --lime-600: #65A30D;
+  --lime-500: #84CC16;
+  --lime-400: #A3E635;
+  --lime-100: #ECFCCB;
+  --lime-50: #F7FEE7;
+
+  --amber-500: #F59E0B;
+  --amber-100: #FEF3C7;
+  --sky-500: #0284C7;
+  --sky-100: #E0F2FE;
+  --terra-500: #C26747;
+  --terra-100: #FCECE6;
+
+  --text-primary: #14281D;
+  --text-secondary: #486253;
+  --text-muted: #748B7D;
+
+  --card-bg: #FFFFFF;
+  --card-border: rgba(27, 67, 50, 0.09);
+  --card-shadow: 0 12px 32px -10px rgba(27, 67, 50, 0.06), 0 2px 6px rgba(27, 67, 50, 0.02);
+  --card-shadow-hover: 0 20px 40px -12px rgba(27, 67, 50, 0.12), 0 4px 12px rgba(27, 67, 50, 0.04);
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-warm-white);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Custom Nature-Tech Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F0E8;
+}
+::-webkit-scrollbar-thumb {
+  background: #C4D7C8;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9BB8A1;
+}
+
+/* Subtle botanical textured background utility */
+.nature-gradient-bg {
+  background: radial-gradient(circle at 10% 20%, rgba(132, 204, 22, 0.04) 0%, transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+              #FAF9F5;
+}
+
+/* Isometric 3D Container & Elements */
+.isometric-stage {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.isometric-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.isometric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Glassmorphism Nature Pills */
+.nature-glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(27, 67, 50, 0.08);
+}
+
+/* Pulse animation for active ecosystem telemetry */
+@keyframes pulse-emerald {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.pulse-dot {
+  animation: pulse-emerald 2.5s infinite;
+}

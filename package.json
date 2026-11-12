@@ -1,22 +1,21 @@
 {
-  "name": "interface",
-  "version": "0.1.0",
+  "name": "terra-interface",
+  "version": "1.0.0",
   "private": true,
+  "description": "Terra Interface — Personal Self-Sustaining Home Operating System (Home OS)",
+  "workspaces": [
+    "console",
+    "core"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.10.5",
-    "@emotion/server": "^11.10.0",
-    "@emotion/styled": "^11.10.5",
-    "@mui/icons-material": "^5.10.9",
-    "@mui/material": "^5.10.12",
-    "framer-motion": "^7.6.4",
-    "next": "13.0.1",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "dev": "npm run dev --prefix console",
+    "build": "npm run build --prefix console",
+    "start": "npm run start --prefix console",
+    "dev:console": "npm run dev --prefix console",
+    "build:console": "npm run build --prefix console",
+    "start:console": "npm run start --prefix console",
+    "dev:core": "npm run start:dev --prefix core",
+    "build:core": "npm run build --prefix core",
+    "prisma:studio": "npm run prisma:studio --prefix core"
   }
 }

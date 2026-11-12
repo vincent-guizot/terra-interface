@@ -1,34 +1,81 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TERRA INTERFACE — Personal Self-Sustaining Home OS
 
-## Getting Started
+> **"Your Home. Your Resources. Your Ecosystem."**  
+> First Implementation: **Vincent's Farm (300 m² Homestead, West Java, Indonesia)**
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
+## Repository Structure
+
+The project is structured into two main decoupled workspaces:
+
+```
+terra-interface/
+├── console/                 # Frontend Web Console Application
+│   ├── components/          # UI Components & Isometric 3D Visual Models
+│   │   ├── isometric/       # Isometric Homestead 300m² & Resource Flow SVGs
+│   │   ├── MainLayout.js    # Global Layout, Contextual Modals & Toasts
+│   │   └── MenuBar.js       # Top Horizontal Nav, Telemetry Badge, Search
+│   ├── data/                # Master Homestead & Operations Mock Data
+│   ├── pages/               # Next.js Application Routes
+│   │   ├── index.js         # 01. Overview (What is happening?)
+│   │   ├── map.js           # 02. Map (Where is everything?)
+│   │   ├── production.js    # 03. Production (What are we producing?)
+│   │   ├── resources.js     # 04. Resources (What resources are available?)
+│   │   ├── activities.js    # 05. Activities (What needs to be done?)
+│   │   ├── intelligence.js  # 06. Intelligence (Terra AI Assistant)
+│   │   └── operations/      # Embedded Operations & CRUD System
+│   ├── public/              # Static Assets (Favicon, Icons)
+│   ├── styles/              # Global Nature-Tech Styles & Manrope Typography
+│   ├── theme/               # Material UI Light Nature Design System Theme
+│   ├── next.config.js       # Next.js Configuration
+│   └── package.json         # Console Dependencies
+│
+├── core/                    # Backend Modular Monolith & Domain Engine
+│   ├── prisma/
+│   │   └── schema.prisma    # PostgreSQL Relational Database Schema
+│   ├── src/
+│   │   ├── modules/         # Universal Batch, Cultivation, Livestock, etc.
+│   │   │   └── universal-batch/
+│   │   ├── prisma/          # Prisma Client Service Provider
+│   │   ├── app.module.ts    # Root NestJS Module
+│   │   └── main.ts          # Backend Bootstrap Entry Point
+│   ├── tsconfig.json        # TypeScript Compiler Config
+│   └── package.json         # Backend Dependencies
+│
+├── .gitignore
+├── package.json             # Root Workspace Scripts
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+## Quick Start
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+### 1. Run Frontend Console (`console/`)
+```bash
+# From repository root:
+npm run dev:console
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+# Or directly in console/:
+cd console
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) to view the Terra Interface Home OS console.
 
-## Learn More
+### 2. Build Frontend Console
+```bash
+npm run build:console
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run Backend Core Engine (`core/`)
+```bash
+cd core
+npm install
+npm run start:dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### 4. Prisma Database Studio
+```bash
+npm run prisma:studio
+```
