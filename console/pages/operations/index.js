@@ -61,6 +61,7 @@ import {
   initialInventoryData,
   initialEnergyWaterData
 } from '../../data/operationsData';
+import { AddCultivationBatchDrawer, RecordCultivationHarvestDrawer } from '../../features/cultivation';
 
 export default function OperationsHub() {
   const [activeModule, setActiveModule] = useState('cultivation'); // cultivation | livestock | aquaculture | circular | inventory | energy-water | config
@@ -84,6 +85,62 @@ export default function OperationsHub() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [cultivationDrawerOpen, setCultivationDrawerOpen] = useState(false);
+  const [harvestDrawerOpen, setHarvestDrawerOpen] = useState(false);
+  const [harvestBatch, setHarvestBatch] = useState(null);
+
+  const handleCultivationBatchCreated = (newBatch) => {
+    setCultivation((prev) => ({
+      ...prev,
+      batches: [
+        {
+          id: `bat-cult-${Date.now()}`,
+          code: newBatch.batchCode,
+          name: newBatch.name,
+          plantName: newBatch.name,
+          status: 'Active',
+          zone: newBatch.zoneId || 'Zone 1: Micro-Greenhouse',
+          startDate: newBatch.startDate ? newBatch.startDate.split('T')[0] : '2026-11-12',
+          initialQuantity: newBatch.initialQuantity,
+          unit: newBatch.measurementUnit,
+          harvests: [],
+          healthScore: 98,
+          notes: newBatch.notes || '',
+          history: [{ date: 'Just now', action: 'Universal Batch Created', user: 'Vincent' }],
+        },
+        ...prev.batches,
+      ],
+    }));
+    setToastMsg(`Cultivation batch ${newBatch.batchCode} started successfully.`);
+  };
+
+  const handleHarvestLogged = (batchId, harvestData) => {
+    setCultivation((prev) => ({
+      ...prev,
+      batches: prev.batches.map((b) => {
+        if (b.id !== batchId && b.code !== batchId) return b;
+        return {
+          ...b,
+          harvests: [
+            {
+              id: `h-${Date.now()}`,
+              date: new Date().toISOString().split('T')[0],
+              quantity: harvestData.quantity,
+              unit: harvestData.measurementUnit,
+              grade: harvestData.qualityGrade,
+              steward: 'Vincent',
+            },
+            ...(b.harvests || []),
+          ],
+          history: [
+            { date: 'Just now', action: `Harvest Logged: ${harvestData.quantity} ${harvestData.measurementUnit}`, user: 'Vincent' },
+            ...(b.history || []),
+          ],
+        };
+      }),
+    }));
+    setToastMsg(`Harvest of ${harvestData.quantity} ${harvestData.measurementUnit} committed to pantry.`);
+  };
 
   // Universal Batch Form State (Draft -> Planned -> Active -> On Hold -> Completed / Cancelled)
   const [batchForm, setBatchForm] = useState({
@@ -239,7 +296,7 @@ export default function OperationsHub() {
         <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
           <Button
             variant="contained"
-            onClick={() => setAddModalOpen(true)}
+            onClick={() => activeModule === 'cultivation' ? setCultivationDrawerOpen(true) : setAddModalOpen(true)}
             startIcon={<Add />}
             sx={{
               borderRadius: 3,
@@ -952,7 +1009,7 @@ export default function OperationsHub() {
 
             {/* Lifecycle Status Pill */}
             {selectedRecord.status && (
-              <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2.5 }}>
+              <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
                 <Typography variant="caption" sx={{ color: '#748B7D', display: 'block' }}>Universal Batch State</Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1B4332' }}>
                   {selectedRecord.status}
@@ -961,6 +1018,31 @@ export default function OperationsHub() {
                   Timeline: {selectedRecord.startDate} &rarr; {selectedRecord.expectedEndDate}
                 </Typography>
               </Box>
+            )}
+
+            {/* Quick Action: Log Harvest Output */}
+            {selectedRecord.harvests && (
+              <Button
+                fullWidth
+                variant="outlined"
+                size="small"
+                startIcon={<Spa />}
+                onClick={() => {
+                  setHarvestBatch(selectedRecord);
+                  setHarvestDrawerOpen(true);
+                }}
+                sx={{
+                  borderRadius: 2.5,
+                  textTransform: 'none',
+                  fontWeight: 700,
+                  color: '#10B981',
+                  borderColor: '#10B981',
+                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.08)', borderColor: '#059669' },
+                  mb: 2.5,
+                }}
+              >
+                + Log Harvest Output
+              </Button>
             )}
 
             {/* Output / Harvest Records */}
@@ -1186,6 +1268,22 @@ export default function OperationsHub() {
           {toastMsg}
         </Alert>
       </Snackbar>
+
+      {/* CULTIVATION FEATURE DRAWERS */}
+      <AddCultivationBatchDrawer
+        open={cultivationDrawerOpen}
+        onClose={() => setCultivationDrawerOpen(false)}
+        onBatchCreated={handleCultivationBatchCreated}
+      />
+      <RecordCultivationHarvestDrawer
+        open={harvestDrawerOpen}
+        onClose={() => {
+          setHarvestDrawerOpen(false);
+          setHarvestBatch(null);
+        }}
+        batch={harvestBatch}
+        onHarvestLogged={handleHarvestLogged}
+      />
     </>
   );
 }
