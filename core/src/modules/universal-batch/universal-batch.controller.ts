@@ -12,6 +12,14 @@ import { CreateBatchDto } from './dto/create-batch.dto';
 import { TransitionBatchStatusDto } from './dto/transition-status.dto';
 import { RecordBatchOutputDto } from './dto/record-output.dto';
 import { BatchResponseDto } from './dto/batch-response.dto';
+import {
+  AttachCultivationDetailDto,
+  AttachLivestockDetailDto,
+  AttachAquacultureDetailDto,
+  AttachBsfDetailDto,
+  AttachCompostDetailDto,
+} from './dto/attach-detail.dto';
+import { RecordBatchEventDto } from './dto/record-event.dto';
 
 @ApiTags('Universal Batches')
 @Controller('batches')
@@ -34,7 +42,7 @@ export class UniversalBatchController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get batch details by ID', description: 'Includes complete output records and audit trail' })
+  @ApiOperation({ summary: 'Get batch details by ID', description: 'Includes complete output records, events, and audit trail' })
   @ApiParam({ name: 'id', description: 'Batch UUID' })
   @ApiResponse({ status: 200, description: 'Batch details', type: BatchResponseDto })
   @ApiResponse({ status: 404, description: 'Batch not found' })
@@ -85,5 +93,95 @@ export class UniversalBatchController {
     @Body() body: RecordBatchOutputDto
   ) {
     return this.batchService.addOutput(id, body);
+  }
+
+  // 1-to-1 Domain Detail Routes
+  @Post(':id/detail/cultivation')
+  @ApiOperation({ summary: 'Attach or update cultivation detail (NFT, medium, EC/pH targets)' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: AttachCultivationDetailDto })
+  @ApiResponse({ status: 201, description: 'Cultivation detail saved' })
+  async attachCultivation(
+    @Param('id') id: string,
+    @Body() dto: AttachCultivationDetailDto
+  ) {
+    return this.batchService.attachCultivationDetail(id, dto);
+  }
+
+  @Post(':id/detail/livestock')
+  @ApiOperation({ summary: 'Attach or update livestock detail (breed, housing, target FCR)' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: AttachLivestockDetailDto })
+  @ApiResponse({ status: 201, description: 'Livestock detail saved' })
+  async attachLivestock(
+    @Param('id') id: string,
+    @Body() dto: AttachLivestockDetailDto
+  ) {
+    return this.batchService.attachLivestockDetail(id, dto);
+  }
+
+  @Post(':id/detail/aquaculture')
+  @ApiOperation({ summary: 'Attach or update aquaculture detail (species, volume, target density)' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: AttachAquacultureDetailDto })
+  @ApiResponse({ status: 201, description: 'Aquaculture detail saved' })
+  async attachAquaculture(
+    @Param('id') id: string,
+    @Body() dto: AttachAquacultureDetailDto
+  ) {
+    return this.batchService.attachAquacultureDetail(id, dto);
+  }
+
+  @Post(':id/detail/bsf')
+  @ApiOperation({ summary: 'Attach or update BSF detail (substrate, weight, tray count)' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: AttachBsfDetailDto })
+  @ApiResponse({ status: 201, description: 'BSF detail saved' })
+  async attachBsf(
+    @Param('id') id: string,
+    @Body() dto: AttachBsfDetailDto
+  ) {
+    return this.batchService.attachBsfDetail(id, dto);
+  }
+
+  @Post(':id/detail/compost')
+  @ApiOperation({ summary: 'Attach or update compost detail (bay number, C:N ratio, biochar %)' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: AttachCompostDetailDto })
+  @ApiResponse({ status: 201, description: 'Compost detail saved' })
+  async attachCompost(
+    @Param('id') id: string,
+    @Body() dto: AttachCompostDetailDto
+  ) {
+    return this.batchService.attachCompostDetail(id, dto);
+  }
+
+  // Typed Batch Events & History Routes
+  @Post(':id/events')
+  @ApiOperation({ summary: 'Record a typed observation, feeding, or calibration event' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiBody({ type: RecordBatchEventDto })
+  @ApiResponse({ status: 201, description: 'Event recorded' })
+  async recordEvent(
+    @Param('id') id: string,
+    @Body() dto: RecordBatchEventDto
+  ) {
+    return this.batchService.recordEvent(id, dto);
+  }
+
+  @Get(':id/events')
+  @ApiOperation({ summary: 'List chronological events for batch' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiResponse({ status: 200, description: 'List of events' })
+  async getEvents(@Param('id') id: string) {
+    return this.batchService.getEvents(id);
+  }
+
+  @Get(':id/history')
+  @ApiOperation({ summary: 'Get lifecycle status transition audit trail' })
+  @ApiParam({ name: 'id', description: 'Batch UUID' })
+  @ApiResponse({ status: 200, description: 'List of status changes' })
+  async getStatusHistory(@Param('id') id: string) {
+    return this.batchService.getStatusHistory(id);
   }
 }
