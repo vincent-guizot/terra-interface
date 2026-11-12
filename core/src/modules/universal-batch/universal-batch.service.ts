@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { BatchStatus } from '@prisma/client';
+import { BatchStatus, StockMovementType } from '@prisma/client';
 import {
   AttachCultivationDetailDto,
   AttachLivestockDetailDto,
@@ -11,6 +11,16 @@ import {
 import { RecordBatchEventDto } from './dto/record-event.dto';
 
 export { BatchStatus };
+
+// Deterministic State Machine Transition Matrix
+const VALID_TRANSITIONS: Record<BatchStatus, BatchStatus[]> = {
+  [BatchStatus.DRAFT]: [BatchStatus.PLANNED, BatchStatus.CANCELLED],
+  [BatchStatus.PLANNED]: [BatchStatus.ACTIVE, BatchStatus.CANCELLED],
+  [BatchStatus.ACTIVE]: [BatchStatus.ON_HOLD, BatchStatus.COMPLETED, BatchStatus.CANCELLED],
+  [BatchStatus.ON_HOLD]: [BatchStatus.ACTIVE, BatchStatus.CANCELLED],
+  [BatchStatus.COMPLETED]: [],
+  [BatchStatus.CANCELLED]: [],
+};
 
 @Injectable()
 export class UniversalBatchService {
@@ -114,15 +124,47 @@ export class UniversalBatchService {
   async transitionStatus(id: string, newStatus: BatchStatus, reason?: string) {
     const batch = await this.findOne(id);
 
-    // Enforce lifecycle state machine invariants
-    if (batch.status === BatchStatus.COMPLETED) {
-      throw new BadRequestException('A completed batch is immutable and cannot be transitioned.');
+    // Validate against State Machine Matrix
+    const legalTargets = VALID_TRANSITIONS[batch.status] || [];
+    if (!legalTargets.includes(newStatus)) {
+      throw new BadRequestException(
+        `Illegal lifecycle state transition from '${batch.status}' to '${newStatus}'. Allowed: [${legalTargets.join(', ')}]`
+      );
     }
-    if (batch.status === BatchStatus.CANCELLED) {
-      throw new BadRequestException('A cancelled batch cannot be transitioned.');
+
+    if ((newStatus === BatchStatus.ON_HOLD || newStatus === BatchStatus.CANCELLED) && !reason) {
+      throw new BadRequestException(
+        `Transition to ${newStatus} requires a mandatory explanation reason.`
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
+      // Automatic inventory consumption check if transitioning from PLANNED to ACTIVE
+      if (batch.status === BatchStatus.PLANNED && newStatus === BatchStatus.ACTIVE && batch.productDefinitionId) {
+        const inventoryItem = await tx.inventoryItem.findFirst({
+          where: { productDefId: batch.productDefinitionId },
+        });
+
+        if (inventoryItem) {
+          await tx.stockMovement.create({
+            data: {
+              itemId: inventoryItem.id,
+              type: StockMovementType.BATCH_CONSUME_OUT,
+              quantityDelta: -Math.abs(batch.initialQuantity),
+              unit: batch.measurementUnit,
+              referenceBatchCode: batch.batchCode,
+              stewardName: 'Vincent',
+              notes: `Automated deduction upon batch activation: ${batch.batchCode}`,
+            },
+          });
+
+          await tx.inventoryItem.update({
+            where: { id: inventoryItem.id },
+            data: { inStock: { decrement: Math.abs(batch.initialQuantity) } },
+          });
+        }
+      }
+
       const updated = await tx.batch.update({
         where: { id },
         data: {
@@ -161,7 +203,7 @@ export class UniversalBatchService {
     qualityGrade?: string;
     destination?: string;
   }) {
-    await this.findOne(batchId);
+    const batch = await this.findOne(batchId);
 
     return this.prisma.$transaction(async (tx) => {
       const output = await tx.batchOutput.create({
@@ -180,6 +222,37 @@ export class UniversalBatchService {
           performedBy: 'Vincent',
         },
       });
+
+      // Automated Inventory Intake Link
+      // If a matching InventoryItem exists for the product, append StockMovement(HARVEST_IN)
+      const matchingItem = await tx.inventoryItem.findFirst({
+        where: {
+          OR: [
+            { name: { contains: outputData.productName, mode: 'insensitive' } },
+            ...(batch.productDefinitionId ? [{ productDefId: batch.productDefinitionId }] : []),
+          ],
+        },
+      });
+
+      if (matchingItem) {
+        await tx.stockMovement.create({
+          data: {
+            itemId: matchingItem.id,
+            type: StockMovementType.HARVEST_IN,
+            quantityDelta: Math.abs(outputData.quantity),
+            unit: outputData.measurementUnit,
+            referenceBatchCode: batch.batchCode,
+            batchOutputId: output.id,
+            stewardName: 'Vincent',
+            notes: `Auto intake from harvest output of ${batch.batchCode} (${outputData.qualityGrade || 'Grade A'})`,
+          },
+        });
+
+        await tx.inventoryItem.update({
+          where: { id: matchingItem.id },
+          data: { inStock: { increment: Math.abs(outputData.quantity) } },
+        });
+      }
 
       return output;
     });
