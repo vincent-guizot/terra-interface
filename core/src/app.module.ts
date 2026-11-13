@@ -5,6 +5,8 @@ import { CatalogModule } from './modules/catalog/catalog.module';
 import { CultivationModule } from './modules/cultivation/cultivation.module';
 import { LivestockModule } from './modules/livestock/livestock.module';
 import { AquacultureModule } from './modules/aquaculture/aquaculture.module';
+import { CircularModule } from './modules/circular/circular.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -15,6 +17,8 @@ import { PrismaService } from './prisma/prisma.service';
     CultivationModule,
     LivestockModule,
     AquacultureModule,
+    CircularModule,
+    InventoryModule,
   ],
   controllers: [],
   providers: [PrismaService],

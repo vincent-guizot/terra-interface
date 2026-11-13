@@ -11,3 +11,6 @@ export const STOCK_MOVEMENT_TYPES = {
   INTERNAL_TRANSFER: 'INTERNAL_TRANSFER',
   CYCLE_COUNT_ADJUSTMENT: 'CYCLE_COUNT_ADJUSTMENT',
 };
+
+export { default as RecordStockMovementDrawer } from './drawers/RecordStockMovementDrawer';
+export { default as InventoryLedgerHistoryDrawer } from './drawers/InventoryLedgerHistoryDrawer';
