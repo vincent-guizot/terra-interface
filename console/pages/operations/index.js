@@ -50,7 +50,8 @@ import {
   Opacity,
   Tune,
   ArrowForward,
-  MoreVert
+  MoreVert,
+  RestaurantMenu,
 } from '@mui/icons-material';
 import {
   initialProductionConfig,
@@ -62,6 +63,8 @@ import {
   initialEnergyWaterData
 } from '../../data/operationsData';
 import { AddCultivationBatchDrawer, RecordCultivationHarvestDrawer } from '../../features/cultivation';
+import { RecordEggHarvestDrawer, LogLivestockFeedDrawer } from '../../features/livestock';
+import { RecordWaterTestDrawer, LogFishFeedingDrawer } from '../../features/aquaculture';
 
 export default function OperationsHub() {
   const [activeModule, setActiveModule] = useState('cultivation'); // cultivation | livestock | aquaculture | circular | inventory | energy-water | config
@@ -88,6 +91,14 @@ export default function OperationsHub() {
   const [cultivationDrawerOpen, setCultivationDrawerOpen] = useState(false);
   const [harvestDrawerOpen, setHarvestDrawerOpen] = useState(false);
   const [harvestBatch, setHarvestBatch] = useState(null);
+
+  // Livestock & Aquaculture Drawer States
+  const [eggHarvestDrawerOpen, setEggHarvestDrawerOpen] = useState(false);
+  const [livestockFeedDrawerOpen, setLivestockFeedDrawerOpen] = useState(false);
+  const [activeLivestockBatch, setActiveLivestockBatch] = useState(null);
+  const [waterTestDrawerOpen, setWaterTestDrawerOpen] = useState(false);
+  const [fishFeedDrawerOpen, setFishFeedDrawerOpen] = useState(false);
+  const [activeAquaPond, setActiveAquaPond] = useState(null);
 
   const handleCultivationBatchCreated = (newBatch) => {
     setCultivation((prev) => ({
@@ -140,6 +151,72 @@ export default function OperationsHub() {
       }),
     }));
     setToastMsg(`Harvest of ${harvestData.quantity} ${harvestData.measurementUnit} committed to pantry.`);
+  };
+
+  const handleEggHarvestLogged = (batchId, harvestData) => {
+    setLivestock((prev) => ({
+      ...prev,
+      batches: prev.batches.map((b) => {
+        if (b.id !== batchId && b.code !== batchId) return b;
+        return {
+          ...b,
+          history: [
+            {
+              date: 'Just now',
+              action: `Egg Harvest: ${harvestData.eggsCollected} eggs (${harvestData.henDayProductionPercent}% HDP)`,
+              user: 'Vincent',
+            },
+            ...(b.history || []),
+          ],
+        };
+      }),
+    }));
+    setToastMsg(`Logged ${harvestData.eggsCollected} pastured eggs (${harvestData.henDayProductionPercent}% HDP) committed to pantry.`);
+  };
+
+  const handleLivestockFeedLogged = (batchId, feedData) => {
+    setLivestock((prev) => ({
+      ...prev,
+      batches: prev.batches.map((b) => {
+        if (b.id !== batchId && b.code !== batchId) return b;
+        return {
+          ...b,
+          history: [
+            {
+              date: 'Just now',
+              action: `Feed Ration: ${feedData.quantityKg} kg ${feedData.feedType} (${feedData.circularPortionPercent}% circular)`,
+              user: 'Vincent',
+            },
+            ...(b.history || []),
+          ],
+        };
+      }),
+    }));
+    setToastMsg(`Recorded ${feedData.quantityKg} kg feed ration for flock.`);
+  };
+
+  const handleWaterTestLogged = (pondId, testData) => {
+    setAquaculture((prev) => ({
+      ...prev,
+      ponds: (prev.ponds || []).map((p) => {
+        if (p.id !== pondId && p.pondCode !== pondId) return p;
+        return {
+          ...p,
+          waterQuality: {
+            ...p.waterQuality,
+            dissolvedOxygenMgL: testData.dissolvedOxygenMgL,
+            pH: testData.pH,
+            waterTempC: testData.waterTempC,
+            ammoniaPpm: testData.ammoniaPpm,
+          },
+        };
+      }),
+    }));
+    setToastMsg(`Water test recorded for ${pondId}. Status: ${testData.result?.evaluation?.status || 'OPTIMAL'}`);
+  };
+
+  const handleFishFeedLogged = (pondId, feedData) => {
+    setToastMsg(`Fish feeding recorded for ${pondId}: ${feedData.amountGrams}g of ${feedData.feedType}`);
   };
 
   // Universal Batch Form State (Draft -> Planned -> Active -> On Hold -> Completed / Cancelled)
@@ -293,7 +370,97 @@ export default function OperationsHub() {
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap' }}>
+          {activeModule === 'livestock' && (
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Egg />}
+                onClick={() => {
+                  setActiveLivestockBatch(livestock.batches[0] || null);
+                  setEggHarvestDrawerOpen(true);
+                }}
+                sx={{
+                  borderRadius: 3,
+                  color: '#D97706',
+                  borderColor: '#D97706',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: 'rgba(217, 119, 6, 0.08)', borderColor: '#B45309' },
+                }}
+              >
+                Log Eggs
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<RestaurantMenu />}
+                onClick={() => {
+                  setActiveLivestockBatch(livestock.batches[0] || null);
+                  setLivestockFeedDrawerOpen(true);
+                }}
+                sx={{
+                  borderRadius: 3,
+                  color: '#10B981',
+                  borderColor: '#10B981',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.08)', borderColor: '#059669' },
+                }}
+              >
+                Log Feed
+              </Button>
+            </>
+          )}
+
+          {activeModule === 'aquaculture' && (
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<Opacity />}
+                onClick={() => {
+                  setActiveAquaPond((aquaculture.ponds && aquaculture.ponds[0]) || null);
+                  setWaterTestDrawerOpen(true);
+                }}
+                sx={{
+                  borderRadius: 3,
+                  color: '#2563EB',
+                  borderColor: '#2563EB',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: 'rgba(37, 99, 235, 0.08)', borderColor: '#1D4ED8' },
+                }}
+              >
+                Water Test
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<SetMeal />}
+                onClick={() => {
+                  setActiveAquaPond((aquaculture.ponds && aquaculture.ponds[0]) || null);
+                  setFishFeedDrawerOpen(true);
+                }}
+                sx={{
+                  borderRadius: 3,
+                  color: '#10B981',
+                  borderColor: '#10B981',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.08)', borderColor: '#059669' },
+                }}
+              >
+                Fish Feed
+              </Button>
+            </>
+          )}
+
           <Button
             variant="contained"
             onClick={() => activeModule === 'cultivation' ? setCultivationDrawerOpen(true) : setAddModalOpen(true)}
@@ -1020,8 +1187,8 @@ export default function OperationsHub() {
               </Box>
             )}
 
-            {/* Quick Action: Log Harvest Output */}
-            {selectedRecord.harvests && (
+            {/* Quick Action: Log Harvest Output (Cultivation) */}
+            {selectedRecord.harvests && activeModule === 'cultivation' && (
               <Button
                 fullWidth
                 variant="outlined"
@@ -1043,6 +1210,98 @@ export default function OperationsHub() {
               >
                 + Log Harvest Output
               </Button>
+            )}
+
+            {/* Quick Actions: Livestock (Egg Harvest & Feed) */}
+            {activeModule === 'livestock' && (
+              <Box sx={{ display: 'flex', gap: 1, mb: 2.5 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Egg />}
+                  onClick={() => {
+                    setActiveLivestockBatch(selectedRecord);
+                    setEggHarvestDrawerOpen(true);
+                  }}
+                  sx={{
+                    borderRadius: 2.5,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    color: '#D97706',
+                    borderColor: '#D97706',
+                    '&:hover': { bgcolor: 'rgba(217, 119, 6, 0.08)', borderColor: '#B45309' },
+                  }}
+                >
+                  Record Eggs
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  startIcon={<RestaurantMenu />}
+                  onClick={() => {
+                    setActiveLivestockBatch(selectedRecord);
+                    setLivestockFeedDrawerOpen(true);
+                  }}
+                  sx={{
+                    borderRadius: 2.5,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    color: '#10B981',
+                    borderColor: '#10B981',
+                    '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.08)', borderColor: '#059669' },
+                  }}
+                >
+                  Log Feed
+                </Button>
+              </Box>
+            )}
+
+            {/* Quick Actions: Aquaculture (Water Test & Fish Feed) */}
+            {activeModule === 'aquaculture' && (
+              <Box sx={{ display: 'flex', gap: 1, mb: 2.5 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  startIcon={<Opacity />}
+                  onClick={() => {
+                    setActiveAquaPond(selectedRecord);
+                    setWaterTestDrawerOpen(true);
+                  }}
+                  sx={{
+                    borderRadius: 2.5,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    color: '#2563EB',
+                    borderColor: '#2563EB',
+                    '&:hover': { bgcolor: 'rgba(37, 99, 235, 0.08)', borderColor: '#1D4ED8' },
+                  }}
+                >
+                  Water Test
+                </Button>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  size="small"
+                  startIcon={<SetMeal />}
+                  onClick={() => {
+                    setActiveAquaPond(selectedRecord);
+                    setFishFeedDrawerOpen(true);
+                  }}
+                  sx={{
+                    borderRadius: 2.5,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    color: '#10B981',
+                    borderColor: '#10B981',
+                    '&:hover': { bgcolor: 'rgba(16, 185, 129, 0.08)', borderColor: '#059669' },
+                  }}
+                >
+                  Fish Feed
+                </Button>
+              </Box>
             )}
 
             {/* Output / Harvest Records */}
@@ -1283,6 +1542,46 @@ export default function OperationsHub() {
         }}
         batch={harvestBatch}
         onHarvestLogged={handleHarvestLogged}
+      />
+
+      {/* LIVESTOCK FEATURE DRAWERS */}
+      <RecordEggHarvestDrawer
+        open={eggHarvestDrawerOpen}
+        onClose={() => {
+          setEggHarvestDrawerOpen(false);
+          setActiveLivestockBatch(null);
+        }}
+        batch={activeLivestockBatch || livestock.batches[0]}
+        onEggHarvestLogged={handleEggHarvestLogged}
+      />
+      <LogLivestockFeedDrawer
+        open={livestockFeedDrawerOpen}
+        onClose={() => {
+          setLivestockFeedDrawerOpen(false);
+          setActiveLivestockBatch(null);
+        }}
+        batch={activeLivestockBatch || livestock.batches[0]}
+        onFeedLogged={handleLivestockFeedLogged}
+      />
+
+      {/* AQUACULTURE FEATURE DRAWERS */}
+      <RecordWaterTestDrawer
+        open={waterTestDrawerOpen}
+        onClose={() => {
+          setWaterTestDrawerOpen(false);
+          setActiveAquaPond(null);
+        }}
+        pond={activeAquaPond || (aquaculture.ponds && aquaculture.ponds[0])}
+        onWaterTestLogged={handleWaterTestLogged}
+      />
+      <LogFishFeedingDrawer
+        open={fishFeedDrawerOpen}
+        onClose={() => {
+          setFishFeedDrawerOpen(false);
+          setActiveAquaPond(null);
+        }}
+        pond={activeAquaPond || (aquaculture.ponds && aquaculture.ponds[0])}
+        onFeedingLogged={handleFishFeedLogged}
       />
     </>
   );
