@@ -6,3 +6,6 @@ export const AQUACULTURE_SPECIES = [
   'Clarias gariepinus (African Catfish)',
   'Lemna minor (Duckweed)',
 ];
+
+export { default as RecordWaterTestDrawer } from './drawers/RecordWaterTestDrawer';
+export { default as LogFishFeedingDrawer } from './drawers/LogFishFeedingDrawer';
