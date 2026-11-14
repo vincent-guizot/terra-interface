@@ -20,7 +20,7 @@ try {
   execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
 
   console.log('\n[3/3] Running canonical homestead seeders...');
-  execSync('npx ts-node prisma/seeders/seed.ts', { stdio: 'inherit' });
+  execSync('node prisma/seeders/seed.js', { stdio: 'inherit' });
 
   console.log('\n✅ Database initialization completed successfully!');
 } catch (error) {
