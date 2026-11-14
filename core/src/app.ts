@@ -10,6 +10,7 @@ import { circularRouter } from './modules/circular/circular.router';
 import { inventoryRouter } from './modules/inventory/inventory.router';
 import { energyWaterRouter } from './modules/energy-water/energy-water.router';
 import { intelligenceRouter } from './modules/intelligence/intelligence.router';
+import { eventsRouter } from './common/events/events.router';
 import { HttpException } from './common/errors/http-exceptions';
 import { registerInventoryEventListener } from './common/events/listeners/inventory-event.listener';
 import { registerTelemetryAlertListener } from './common/events/listeners/telemetry-alert.listener';
@@ -58,6 +59,7 @@ apiRouter.use('/circular', circularRouter);
 apiRouter.use('/inventory', inventoryRouter);
 apiRouter.use('/energy-water', energyWaterRouter);
 apiRouter.use('/intelligence', intelligenceRouter);
+apiRouter.use('/events', eventsRouter);
 
 app.use('/api/v1', apiRouter);
 
