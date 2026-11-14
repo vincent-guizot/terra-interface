@@ -18,6 +18,7 @@ import { registerTelemetryAlertListener } from './common/events/listeners/teleme
 // Initialize domain event bus listeners
 registerInventoryEventListener();
 registerTelemetryAlertListener();
+import { checkDatabaseHealth } from './common/health/db-health';
 
 export const app = express();
 
@@ -45,6 +46,12 @@ app.get('/api/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
   });
+});
+
+app.get('/api/health/db', async (req: Request, res: Response) => {
+  const report = await checkDatabaseHealth();
+  const statusCode = report.status === 'UP' ? 200 : 503;
+  res.status(statusCode).json(report);
 });
 
 // Mount Domain Routers under /api/v1/
