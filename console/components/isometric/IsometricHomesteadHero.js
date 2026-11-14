@@ -300,6 +300,20 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
                 <feDropShadow dx="0" dy="12" stdDeviation="10" floodColor="#1B4332" floodOpacity="0.12" />
               </filter>
+
+              <filter id="isometricGlow3D" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+
+              <filter id="terrainDepthShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="18" stdDeviation="14" floodColor="#0F291E" floodOpacity="0.18" />
+              </filter>
+
+              <radialGradient id="sunAtmosphere" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FEF3C7" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#FAF9F5" stopOpacity="0" />
+              </radialGradient>
             </defs>
 
             {/* BASE ISOMETRIC FOUNDATION PLATFORM (300 m² plot) */}
@@ -330,6 +344,18 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
                 stroke="#C6DEBF"
                 strokeWidth="1.5"
                 strokeDasharray="6,6"
+              />
+
+              {/* 3D Isometric Elevation Terracing (Z-Elevation steps) */}
+              <polygon
+                points="-350,220 -20,380 0,390 -330,230"
+                fill="#B8D7B2"
+                opacity="0.6"
+              />
+              <polygon
+                points="20,380 350,220 330,230 0,390"
+                fill="#A6C9A0"
+                opacity="0.5"
               />
 
               {/* Main Garden Pathway */}
