@@ -16,6 +16,7 @@
     "start:console": "npm run start --prefix console",
     "dev:core": "npm run start:dev --prefix core",
     "build:core": "npm run build --prefix core",
-    "prisma:studio": "npm run prisma:studio --prefix core"
+    "prisma:studio": "npm run prisma:studio --prefix core",
+    "db:setup": "npm run db:setup --prefix core"
   }
 }
