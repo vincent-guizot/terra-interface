@@ -13,6 +13,8 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "start:dev": "ts-node src/main.ts",
+    "test": "ts-node test/runner.ts",
+    "test:invariants": "ts-node test/runner.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seeders/seed.ts",

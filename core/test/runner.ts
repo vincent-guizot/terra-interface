@@ -16,6 +16,8 @@ const TEST_SUITES = [
   'intelligence-autonomy-invariants.test.ts',
   'livestock-aquaculture-invariants.test.ts',
   'microgrid-telemetry-invariants.test.ts',
+  'domain-event-bus-invariants.test.ts',
+  'iot-gateway-invariants.test.ts',
 ];
 
 async function runAllTests() {
