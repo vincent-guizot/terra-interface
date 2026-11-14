@@ -8,6 +8,10 @@
     "core"
   ],
   "scripts": {
+    "test": "npm run test --prefix core",
+    "test:core": "npm run test --prefix core",
+    "test:invariants": "npm run test:invariants --prefix core",
+    "lint": "npm run lint --prefix console",
     "dev": "npm run dev --prefix console",
     "build": "npm run build --prefix console",
     "start": "npm run preview --prefix console",

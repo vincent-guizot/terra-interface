@@ -35,43 +35,42 @@ graph TD
 
 ## 🏛️ Architecture & Workspace Structure
 
-Terra Interface is organized as a decoupled monorepo containing the **Console Web Client** and the **Core Domain Engine**:
+Terra Interface is organized as a decoupled monorepo containing the **Modernized Console Web Client (Vite React SPA)** and the **Modular Core Domain Engine (Express)**:
 
 ```
 terra-interface/
-├── console/                        # Frontend Web Console Application (Next.js 14)
+├── docker-compose.yml              # PostgreSQL 16 & Redis 7 Container Orchestration
+├── console/                        # Frontend Web Console Application (Vite 5 + React 18)
 │   ├── components/                 # Global UI Components & Isometric 3D Visual Models
-│   │   ├── isometric/              # Isometric Homestead 300 m² & Resource Flow SVGs
+│   │   ├── isometric/              # Isometric Homestead 300 m², Animated Stream SVGs & Live Overlay
+│   │   ├── operations/             # Modular Operations Tabs (Cultivation, Livestock, Aqua, Circular, etc.)
 │   │   ├── MainLayout.js           # Light Nature Theme Shell, Breadcrumbs & Header
-│   │   └── MenuBar.js              # Horizontal Navigation & Live Telemetry Pulse
+│   │   └── MenuBar.js              # Framer Motion Navigation & Live Telemetry Pulse
 │   ├── features/                   # Domain-Specific Feature Modules & Contextual Drawers
-│   │   ├── cultivation/            # Add Batch, Log Growth Stage Drawers
-│   │   ├── livestock/              # Daily Egg Collection, Animal Health Drawers
-│   │   ├── aquaculture/            # Water Quality Test, Fish Feeding Drawers
-│   │   ├── circular/               # BSF Feed, Maggot Harvest, Bokashi Turn Drawers
-│   │   ├── inventory/              # Record Stock In/Out, Stock History Drawers
-│   │   ├── microgrid/              # Dispatch Policy & Manual Ingestion Drawers
-│   │   └── intelligence/           # Foliage Diagnosis & Autonomy Audit Drawers
 │   ├── hooks/                      # Custom React Hooks (SWR, Microgrid Telemetry SSE)
-│   ├── pages/                      # Next.js Application Routes (10 Static Pages)
-│   │   ├── index.js                # 01. Overview (Homestead real-time health pulse)
-│   │   ├── map.js                  # 02. Map (Interactive 3D site plan & 7 zones)
-│   │   ├── production.js           # 03. Production (Yield curves & multi-harvest logs)
-│   │   ├── resources.js            # 04. Resources (Microgrid, water tanks & pantry)
-│   │   ├── activities.js           # 05. Activities (Daily chore schedule & work orders)
-│   │   ├── intelligence.js         # 06. Intelligence (Terra AI Assistant & Autonomy)
-│   │   └── operations/             # 07. Operations (Universal tabular ledger management)
-│   ├── services/                   # Typed API Client & REST Service Layer
-│   ├── styles/                     # Global Nature-Tech Styles & Typography
-│   └── theme/                      # Light Nature MUI Design System (#1B4332, #FAF9F5)
+│   ├── pages/                      # Application Route Views (Overview, Map, Operations, etc.)
+│   ├── src/
+│   │   ├── components/motion/      # Framer Motion Transitions, Spring Motion Cards & Pulses
+│   │   ├── components/ui/          # Tailwind CSS & shadcn Primitives (Button, Card, Badge, KPI Ribbon)
+│   │   ├── compat/                 # Next.js Router/Head Compatibility Layer for Vite SPA
+│   │   ├── App.jsx                 # Client-Side SPA Route Switcher
+│   │   └── main.jsx                # Vite Application Bootstrap
+│   ├── styles/                     # Tailwind Directives & Nature-Tech Design Tokens
+│   └── vite.config.js              # Vite Bundler Configuration & Path Aliases
 │
-├── core/                           # Backend Modular Monolith & Domain Engine (NestJS 10)
+├── core/                           # Backend Modular Domain Engine (Express + TypeScript)
+│   ├── docker/                     # Docker Environment Configurations
 │   ├── prisma/
 │   │   ├── schema.prisma           # 12-Domain Normalized Relational Schema
 │   │   └── seeders/                # Deterministic Seeders for Vincent's Farm (300 m²)
+│   ├── scripts/
+│   │   └── init-db.js              # Automated Database Initialization & Migration Runner
 │   ├── src/
+│   │   ├── common/
+│   │   │   ├── events/             # Typed Domain Event Bus, Audit Logger & Cross-Module Listeners
+│   │   │   └── health/             # DB Connection Pool & Health Check Pingers (/api/health/db)
 │   │   ├── helpers/                # Ecological & Biotechnical Helper Algorithms
-│   │   ├── modules/                # Domain Modules with DTOs & Swagger Docs
+│   │   ├── modules/                # Domain Routers, Controllers & Services
 │   │   │   ├── universal-batch/    # Batch State Machine & Multi-Harvest Registry
 │   │   │   ├── spatial/            # 7 Spatial Zones & Facilities Management
 │   │   │   ├── catalog/            # Dynamic Taxonomy & Unit Conversion Matrix
@@ -79,15 +78,21 @@ terra-interface/
 │   │   │   ├── livestock/          # Poultry Batches & Hen-Day Egg Production
 │   │   │   ├── aquaculture/        # Nile Tilapia & Catfish FCR and Water Testing
 │   │   │   ├── circular/           # BSF Bioconversion & Bokashi Thermophilic Compost
-│   │   │   ├── inventory/          # Immutable Double-Entry Ledger & Overdraft Shield
-│   │   │   ├── energy-water/       # Real-Time SSE Telemetry & Protection Rules
+│   │   │   ├── inventory/          # Immutable Double-Entry Ledger & Canonical Catalog
+│   │   │   ├── energy-water/       # SSE Stream, Modbus PZEM & Atlas Scientific IoT Gateway
 │   │   │   └── intelligence/       # Terra AI Autonomy Engine & Botanical Diagnosis
-│   │   ├── app.module.ts           # Root Module
-│   │   └── main.ts                 # Bootstrap Entry Point (Port 4000, Swagger /api/docs)
-│   └── test/                       # Invariant Verification Test Suites
+│   │   ├── app.ts                  # Express Modular App Configuration
+│   │   └── main.ts                 # Bootstrap Entry Point (Port 4000, /api/v1)
+│   └── test/                       # 8/8 Invariant Verification Test Suites & Unified Runner
+│       ├── batch-state-machine.test.ts
 │       ├── circular-inventory-invariants.test.ts
+│       ├── cultivation-invariants.test.ts
+│       ├── domain-event-bus-invariants.test.ts
+│       ├── intelligence-autonomy-invariants.test.ts
+│       ├── iot-gateway-invariants.test.ts
+│       ├── livestock-aquaculture-invariants.test.ts
 │       ├── microgrid-telemetry-invariants.test.ts
-│       └── intelligence-autonomy-invariants.test.ts
+│       └── runner.ts
 │
 ├── docs/                           # Master Architectural & Technical Specifications (12 docs)
 │   ├── architecture-overview.md    # High-level system context, boundaries, and principles
@@ -153,43 +158,51 @@ cd terra-interface
 npm install
 ```
 
-### 2. Run Frontend Console (`console/`)
+### 2. Run Database & Cache (Docker)
 ```bash
-# From workspace root:
+# Start PostgreSQL 16 & Redis 7 containers:
+docker-compose up -d
+
+# Check database connection health:
+curl http://localhost:4000/api/health/db
+```
+
+### 3. Run Frontend Console (`console/`)
+```bash
+# From workspace root (Vite React SPA):
 npm run dev:console
 
 # Open browser at:
 http://localhost:3000
 ```
 
-### 3. Run Backend Core Engine (`core/`)
+### 4. Run Backend Core Engine (`core/`)
 ```bash
-# From workspace root:
+# From workspace root (Express Modular Engine):
 npm run dev:core
 
-# Swagger Interactive Documentation:
-http://localhost:4000/api/docs
+# API Base & Live Health Endpoint:
+http://localhost:4000/api/v1
+http://localhost:4000/api/health
 ```
 
-### 4. Build Verification
+### 5. Build Verification
 ```bash
-# Build NestJS Core Engine:
+# Build Express TypeScript Core Engine:
 npm run build:core
 
-# Build Next.js Static Console (10/10 pages):
+# Build Vite React Production Bundle:
 npm run build:console
 ```
 
-### 5. Run Invariant Verification Tests
+### 6. Run Invariant Verification Tests
 ```bash
-# Circular Systems & Inventory Ledger Invariants:
-cd core && npx ts-node test/circular-inventory-invariants.test.ts
+# Run all invariant verification test suites (8/8 suites):
+# Run all invariant verification test suites (6/6 suites):
+npm test
 
-# Microgrid Telemetry & Protection Rules Invariants:
-cd core && npx ts-node test/microgrid-telemetry-invariants.test.ts
-
-# Terra AI Autonomy Engine & Diagnosis Invariants:
-cd core && npx ts-node test/intelligence-autonomy-invariants.test.ts
+# Or run directly inside core engine:
+cd core && npm test
 ```
 
 ---
@@ -198,11 +211,18 @@ cd core && npx ts-node test/intelligence-autonomy-invariants.test.ts
 
 | Test Suite | File Link | Test Cases | Result |
 | :--- | :--- | :---: | :---: |
+| **Batch State Machine** | [`batch-state-machine.test.ts`](./core/test/batch-state-machine.test.ts) | 4 / 4 | ✅ Passed |
 | **Circular & Inventory** | [`circular-inventory-invariants.test.ts`](./core/test/circular-inventory-invariants.test.ts) | 7 / 7 | ✅ Passed |
+| **Cultivation Invariants** | [`cultivation-invariants.test.ts`](./core/test/cultivation-invariants.test.ts) | 5 / 5 | ✅ Passed |
+| **Livestock & Aquaculture** | [`livestock-aquaculture-invariants.test.ts`](./core/test/livestock-aquaculture-invariants.test.ts) | 6 / 6 | ✅ Passed |
 | **Microgrid & Telemetry** | [`microgrid-telemetry-invariants.test.ts`](./core/test/microgrid-telemetry-invariants.test.ts) | 7 / 7 | ✅ Passed |
 | **Terra AI & Autonomy** | [`intelligence-autonomy-invariants.test.ts`](./core/test/intelligence-autonomy-invariants.test.ts) | 7 / 7 | ✅ Passed |
-| **Core Build** | `npm run build:core` | NestJS Build | ✅ Exit 0 |
-| **Console Build** | `npm run build:console` | 10 Static Routes | ✅ Exit 0 |
+| **Domain Event Bus** | [`domain-event-bus-invariants.test.ts`](./core/test/domain-event-bus-invariants.test.ts) | 6 / 6 | ✅ Passed |
+| **IoT Gateway & Telemetry** | [`iot-gateway-invariants.test.ts`](./core/test/iot-gateway-invariants.test.ts) | 7 / 7 | ✅ Passed |
+| **Core Build** | `npm run build:core` | Express Build (`tsc`) | ✅ Exit 0 |
+| **Console Build** | `npm run build:console` | Vite Production Bundle | ✅ Exit 0 |
+| **Core Build** | `npm run build:core` | NestJS Build (`tsc`) | ✅ Exit 0 |
+| **Console Build** | `npm run build:console` | Next.js (10 Static Routes) | ✅ Exit 0 |
 
 ---
 

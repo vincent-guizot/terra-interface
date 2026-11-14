@@ -12,6 +12,7 @@ import { energyWaterRouter } from './modules/energy-water/energy-water.router';
 import { intelligenceRouter } from './modules/intelligence/intelligence.router';
 import { eventsRouter } from './common/events/events.router';
 import { HttpException } from './common/errors/http-exceptions';
+import { checkDatabaseHealth } from './common/health/db-health';
 import { registerInventoryEventListener } from './common/events/listeners/inventory-event.listener';
 import { registerTelemetryAlertListener } from './common/events/listeners/telemetry-alert.listener';
 
