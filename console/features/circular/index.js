@@ -6,3 +6,7 @@ export const CIRCULAR_TARGETS = {
   COMPOST_CN_RATIO_TARGET: 30.0,
   COMPOST_PEAK_TEMP_C: 60.0,
 };
+
+export { default as RecordBsfFeedDrawer } from './drawers/RecordBsfFeedDrawer';
+export { default as RecordMaggotHarvestDrawer } from './drawers/RecordMaggotHarvestDrawer';
+export { default as RecordCompostTurnDrawer } from './drawers/RecordCompostTurnDrawer';

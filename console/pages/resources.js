@@ -8,15 +8,9 @@ import {
   Button,
   Grid,
   LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
   Snackbar,
   Alert,
-  Divider
+  Divider,
 } from '@mui/material';
 import {
   Bolt,
@@ -27,24 +21,40 @@ import {
   BatteryChargingFull,
   Tune,
   CheckCircle,
-  Spa
+  Spa,
+  Sensors,
+  WarningAmber,
+  ErrorOutline,
 } from '@mui/icons-material';
 import { resourcesData } from '../data/homesteadData';
+import { useMicrogridTelemetry } from '../hooks/useMicrogridTelemetry';
+import { ConfigureDispatchPolicyDrawer, ManualTelemetryIngestDrawer } from '../features/microgrid';
 
 export default function ResourcesPage() {
-  const [adjustOpen, setAdjustOpen] = useState(false);
+  const { telemetry, alerts, connectionStatus, ingest, updatePolicy } = useMicrogridTelemetry();
+  const [dispatchDrawerOpen, setDispatchDrawerOpen] = useState(false);
+  const [manualIngestOpen, setManualIngestOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
-  const [allocationSetting, setAllocationSetting] = useState({
-    solarDumpMode: 'Auto Aeration & Storage',
-    rainwaterPrio: 'Aquaponics & Living Soil',
-    compostBatch: 'High Nitrogen Blend',
-  });
 
-  const handleAdjustSubmit = (e) => {
-    e.preventDefault();
-    setAdjustOpen(false);
-    setToastMsg(`Homestead resource dispatch policy updated!`);
+  const handlePolicyUpdated = (newPolicy) => {
+    setToastMsg(`Dispatch policy updated: mode=${newPolicy.solarDumpMode}, floor=${newPolicy.batteryFloorReservePercent}%`);
   };
+
+  const handleTelemetryIngested = (snapshot) => {
+    setToastMsg(`Telemetry ingested: Solar ${snapshot.solarGenerationKw} kW, Battery ${snapshot.batterySoC}%, Cistern ${snapshot.cisternTotalLiters} L`);
+  };
+
+  const getStatusChipProps = () => {
+    if (connectionStatus === 'STREAMING') {
+      return { label: '● SSE Stream: LIVE', bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46' };
+    }
+    if (connectionStatus === 'POLLING') {
+      return { label: '● REST Polling: 5s', bgcolor: 'rgba(2,132,199,0.15)', color: '#0369A1' };
+    }
+    return { label: '● Diurnal Generator Active', bgcolor: 'rgba(245,158,11,0.15)', color: '#B45309' };
+  };
+
+  const statusChip = getStatusChipProps();
 
   return (
     <>
@@ -52,7 +62,7 @@ export default function ResourcesPage() {
         <title>Terra Interface — Resources (What resources are available?)</title>
       </Head>
 
-      {/* HEADER: Answers "What resources are available?" */}
+      {/* HEADER */}
       <Box sx={{ mb: 3.5, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
@@ -60,10 +70,24 @@ export default function ResourcesPage() {
               04. Resource Autonomy • What resources are available?
             </Typography>
             <Chip
-              label="100% Off-Grid Ready"
+              label={statusChip.label}
               size="small"
-              sx={{ bgcolor: 'rgba(217, 119, 6, 0.12)', color: '#B45309', fontWeight: 700, fontSize: '0.72rem' }}
+              sx={{ bgcolor: statusChip.bgcolor, color: statusChip.color, fontWeight: 800, fontSize: '0.72rem' }}
             />
+            {telemetry?.dumpLoad?.isActive && (
+              <Chip
+                label={`⚡ Dump Load: ${telemetry.dumpLoad.targetAppliance}`}
+                size="small"
+                sx={{ bgcolor: 'rgba(245,158,11,0.15)', color: '#D97706', fontWeight: 800, fontSize: '0.72rem' }}
+              />
+            )}
+            {telemetry?.loadSheddingActive && (
+              <Chip
+                label="⚠ Load Shedding Active"
+                size="small"
+                sx={{ bgcolor: 'rgba(239,68,68,0.15)', color: '#DC2626', fontWeight: 800, fontSize: '0.72rem' }}
+              />
+            )}
           </Box>
           <Typography variant="h4" sx={{ fontWeight: 800, color: '#0F291E', letterSpacing: '-0.02em' }}>
             Homestead Resource Reserves & Flows
@@ -73,23 +97,90 @@ export default function ResourcesPage() {
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          onClick={() => setAdjustOpen(true)}
-          startIcon={<Tune />}
-          sx={{
-            borderRadius: 3,
-            bgcolor: '#1B4332',
-            color: '#FFFFFF',
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
-            '&:hover': { bgcolor: '#123124' }
-          }}
-        >
-          Adjust Allocations
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setManualIngestOpen(true)}
+            startIcon={<Sensors />}
+            sx={{
+              borderRadius: 3,
+              borderColor: 'rgba(27,67,50,0.3)',
+              color: '#1B4332',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              '&:hover': { bgcolor: 'rgba(27,67,50,0.04)', borderColor: '#1B4332' },
+            }}
+          >
+            Ingest Probe Telemetry
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={() => setDispatchDrawerOpen(true)}
+            startIcon={<Tune />}
+            sx={{
+              borderRadius: 3,
+              bgcolor: '#1B4332',
+              color: '#FFFFFF',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
+              '&:hover': { bgcolor: '#123124' },
+            }}
+          >
+            Configure Dispatch Policy
+          </Button>
+        </Box>
       </Box>
+
+      {/* ACTIVE PROTECTION ALERTS BANNER */}
+      {alerts && alerts.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          {alerts.map((alt) => (
+            <Paper
+              key={alt.id}
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 1.5,
+                borderRadius: 3,
+                bgcolor: alt.severity === 'CRITICAL' ? 'rgba(239,68,68,0.08)' : alt.severity === 'WARNING' ? 'rgba(245,158,11,0.08)' : 'rgba(2,132,199,0.08)',
+                border: alt.severity === 'CRITICAL' ? '1px solid rgba(239,68,68,0.3)' : alt.severity === 'WARNING' ? '1px solid rgba(245,158,11,0.3)' : '1px solid rgba(2,132,199,0.3)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                {alt.severity === 'CRITICAL' ? (
+                  <ErrorOutline sx={{ color: '#DC2626' }} />
+                ) : (
+                  <WarningAmber sx={{ color: '#D97706' }} />
+                )}
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: alt.severity === 'CRITICAL' ? '#991B1B' : '#92400E' }}>
+                    {alt.title}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#4B5563' }}>
+                    {alt.message}
+                  </Typography>
+                </Box>
+              </Box>
+              <Chip
+                label={alt.parameterValue}
+                size="small"
+                sx={{
+                  bgcolor: alt.severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
+                  color: alt.severity === 'CRITICAL' ? '#DC2626' : '#D97706',
+                  fontWeight: 800,
+                }}
+              />
+            </Paper>
+          ))}
+        </Box>
+      )}
 
       {/* 4 CORE RESOURCE PILLARS */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -122,7 +213,11 @@ export default function ResourcesPage() {
                   </Typography>
                 </Box>
               </Box>
-              <Chip label="Grid-Isolated Stable" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700 }} />
+              <Chip
+                label={telemetry.batteryVoltage ? `${telemetry.batteryVoltage}V • ${telemetry.batteryHealthStatus}` : 'Grid-Isolated Stable'}
+                size="small"
+                sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700 }}
+              />
             </Box>
 
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
@@ -130,23 +225,29 @@ export default function ResourcesPage() {
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Solar Output</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#D97706' }}>
-                    {resourcesData.energy.generationCurrentKw} kW
+                    {telemetry.solarGenerationKw} kW
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
-                  <Typography variant="caption" sx={{ color: '#748B7D' }}>Today's Yield</Typography>
+                  <Typography variant="caption" sx={{ color: '#748B7D' }}>AC Load</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    {resourcesData.energy.dailyTotalKwh} kWh
+                    {telemetry.inverterLoadWatts} W
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Battery SoC</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#10B981' }}>
-                    {resourcesData.energy.batterySoC}%
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 800,
+                      color: telemetry.batterySoC < 20 ? '#EF4444' : '#10B981',
+                    }}
+                  >
+                    {telemetry.batterySoC}%
                   </Typography>
                 </Box>
               </Grid>
@@ -154,17 +255,41 @@ export default function ResourcesPage() {
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Autonomy Left</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0284C7' }}>
-                    {resourcesData.energy.autonomyHoursRemaining}h
+                    {telemetry.autonomyHours}h
                   </Typography>
                 </Box>
               </Grid>
             </Grid>
 
+            {/* Battery SoC Progress Gauge */}
+            <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>
+                  15.3 kWh LiFePO4 Storage Bank
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: telemetry.batterySoC < 20 ? '#EF4444' : '#10B981' }}>
+                  {telemetry.batterySoC}% SoC ({telemetry.batteryCurrentAmps > 0 ? `+${telemetry.batteryCurrentAmps}A Charging` : `${telemetry.batteryCurrentAmps}A Draw`})
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={telemetry.batterySoC}
+                sx={{
+                  height: 8,
+                  borderRadius: 4,
+                  bgcolor: 'rgba(27,67,50,0.1)',
+                  '& .MuiLinearProgress-bar': {
+                    bgcolor: telemetry.batterySoC < 20 ? '#EF4444' : telemetry.batterySoC >= 95 ? '#D97706' : '#10B981',
+                  },
+                }}
+              />
+            </Box>
+
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332', mb: 1.5 }}>
               Homestead Power Consumer Breakdown
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mt: 'auto' }}>
-              {resourcesData.energy.loads.map((load, idx) => (
+              {(resourcesData.energy?.loads || []).map((load, idx) => (
                 <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#1B4332' }}>{load.name}</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
@@ -214,7 +339,7 @@ export default function ResourcesPage() {
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Stored Water</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0284C7' }}>
-                    {resourcesData.water.cisternCurrentLiters} L
+                    {telemetry.cisternTotalLiters} L
                   </Typography>
                 </Box>
               </Grid>
@@ -222,15 +347,15 @@ export default function ResourcesPage() {
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Cistern Level</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    {resourcesData.water.percentFull}%
+                    {telemetry.cisternPercentFull}%
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
-                  <Typography variant="caption" sx={{ color: '#748B7D' }}>Recirculation</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#10B981' }}>
-                    {resourcesData.water.recirculationEfficiency}%
+                  <Typography variant="caption" sx={{ color: '#748B7D' }}>Bio-Pond DO</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: telemetry.dissolvedOxygenMgL < 5 ? '#EF4444' : '#10B981' }}>
+                    {telemetry.dissolvedOxygenMgL} mg/L
                   </Typography>
                 </Box>
               </Grid>
@@ -238,17 +363,39 @@ export default function ResourcesPage() {
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Water Buffer</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#059669' }}>
-                    {resourcesData.water.daysOfAutonomyLeft}d
+                    {telemetry.waterAutonomyDays}d
                   </Typography>
                 </Box>
               </Grid>
             </Grid>
 
+            {/* Cistern Storage Level Progress */}
+            <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>
+                  3-Bay Cistern Array (12,000 L)
+                </Typography>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#0284C7' }}>
+                  {telemetry.cisternTotalLiters} L / 12,000 L ({telemetry.cisternPercentFull}%)
+                </Typography>
+              </Box>
+              <LinearProgress
+                variant="determinate"
+                value={telemetry.cisternPercentFull}
+                sx={{
+                  height: 8,
+                  borderRadius: 4,
+                  bgcolor: 'rgba(2,132,199,0.1)',
+                  '& .MuiLinearProgress-bar': { bgcolor: '#0284C7' },
+                }}
+              />
+            </Box>
+
             <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332', mb: 1.5 }}>
               Hydrological Storage Streams
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mt: 'auto' }}>
-              {resourcesData.water.streams.map((stream, idx) => (
+              {(resourcesData.water?.streams || []).map((stream, idx) => (
                 <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#1B4332' }}>{stream.name}</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
@@ -294,7 +441,7 @@ export default function ResourcesPage() {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {resourcesData.foodReserves.categories.map((cat, idx) => (
+              {(resourcesData.foodReserves?.categories || []).map((cat, idx) => (
                 <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
                     <Spa sx={{ color: '#10B981', fontSize: 18 }} />
@@ -343,19 +490,19 @@ export default function ResourcesPage() {
               <Grid item xs={6}>
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Mature Bokashi Compost</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>{resourcesData.circularEcosystem.compostMaturedKg} kg</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>{resourcesData.circularEcosystem?.compostMaturedKg || 480} kg</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
                 <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>BSF Live Feed Output</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#65A30D' }}>{resourcesData.circularEcosystem.bsfLarvaeYieldKgDay} kg/day</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#65A30D' }}>{resourcesData.circularEcosystem?.bsfLarvaeYieldKgDay || 1.8} kg/day</Typography>
                 </Box>
               </Grid>
             </Grid>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {resourcesData.circularEcosystem.cycles.map((cyc, idx) => (
+              {(resourcesData.circularEcosystem?.cycles || []).map((cyc, idx) => (
                 <Box key={idx} sx={{ p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>
                     {cyc.source} &rarr; {cyc.destination}
@@ -368,71 +515,17 @@ export default function ResourcesPage() {
         </Grid>
       </Grid>
 
-      {/* MODAL: ADJUST RESOURCE ALLOCATIONS (Embedded CRUD) */}
-      <Dialog
-        open={adjustOpen}
-        onClose={() => setAdjustOpen(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 1.5, bgcolor: '#FFFFFF' } }}
-      >
-        <DialogTitle>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-            Resource Dispatch Policies
-          </Typography>
-          <Typography variant="caption" sx={{ color: '#5A7565' }}>
-            Tune automated thresholds for solar surplus and irrigation allocation.
-          </Typography>
-        </DialogTitle>
-        <form onSubmit={handleAdjustSubmit}>
-          <DialogContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Solar Surplus Dump Target"
-                  value={allocationSetting.solarDumpMode}
-                  onChange={(e) => setAllocationSetting({ ...allocationSetting, solarDumpMode: e.target.value })}
-                  size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
-                >
-                  <MenuItem value="Auto Aeration & Storage">Auto Aeration & Deep Well Pump</MenuItem>
-                  <MenuItem value="Mushroom Dehydrator">Mushroom & Herb Dehydrators</MenuItem>
-                  <MenuItem value="EV Tool Charging">Homestead Tool Charging Station</MenuItem>
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  select
-                  label="Water Distribution Priority"
-                  value={allocationSetting.rainwaterPrio}
-                  onChange={(e) => setAllocationSetting({ ...allocationSetting, rainwaterPrio: e.target.value })}
-                  size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
-                >
-                  <MenuItem value="Aquaponics & Living Soil">Aquaponics Pond & Permaculture Beds (Standard)</MenuItem>
-                  <MenuItem value="Conservation Mode">Conservation Mode (-20% Drip Runtime)</MenuItem>
-                  <MenuItem value="Intensive Nursery">Greenhouse Nursery Mist Top-Priority</MenuItem>
-                </TextField>
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2.5 }}>
-            <Button onClick={() => setAdjustOpen(false)} sx={{ color: '#5A7565', textTransform: 'none', fontWeight: 600 }}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              sx={{ bgcolor: '#1B4332', color: '#FFFFFF', borderRadius: 2.5, px: 3, textTransform: 'none', fontWeight: 700 }}
-            >
-              Apply Allocation Policy
-            </Button>
-          </DialogActions>
-        </form>
-      </Dialog>
+      {/* DRAWERS: CONFIGURE DISPATCH POLICY & MANUAL INGEST */}
+      <ConfigureDispatchPolicyDrawer
+        open={dispatchDrawerOpen}
+        onClose={() => setDispatchDrawerOpen(false)}
+        onPolicyUpdated={handlePolicyUpdated}
+      />
+      <ManualTelemetryIngestDrawer
+        open={manualIngestOpen}
+        onClose={() => setManualIngestOpen(false)}
+        onTelemetryIngested={handleTelemetryIngested}
+      />
 
       {/* SNACKBAR */}
       <Snackbar

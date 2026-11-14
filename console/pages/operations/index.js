@@ -52,6 +52,7 @@ import {
   ArrowForward,
   MoreVert,
   RestaurantMenu,
+  Sensors,
 } from '@mui/icons-material';
 import {
   initialProductionConfig,
@@ -65,6 +66,9 @@ import {
 import { AddCultivationBatchDrawer, RecordCultivationHarvestDrawer } from '../../features/cultivation';
 import { RecordEggHarvestDrawer, LogLivestockFeedDrawer } from '../../features/livestock';
 import { RecordWaterTestDrawer, LogFishFeedingDrawer } from '../../features/aquaculture';
+import { RecordBsfFeedDrawer, RecordMaggotHarvestDrawer, RecordCompostTurnDrawer } from '../../features/circular';
+import { RecordStockMovementDrawer, InventoryLedgerHistoryDrawer } from '../../features/inventory';
+import { ConfigureDispatchPolicyDrawer, ManualTelemetryIngestDrawer } from '../../features/microgrid';
 
 export default function OperationsHub() {
   const [activeModule, setActiveModule] = useState('cultivation'); // cultivation | livestock | aquaculture | circular | inventory | energy-water | config
@@ -99,6 +103,20 @@ export default function OperationsHub() {
   const [waterTestDrawerOpen, setWaterTestDrawerOpen] = useState(false);
   const [fishFeedDrawerOpen, setFishFeedDrawerOpen] = useState(false);
   const [activeAquaPond, setActiveAquaPond] = useState(null);
+
+  // Circular & Inventory Drawer States
+  const [bsfFeedDrawerOpen, setBsfFeedDrawerOpen] = useState(false);
+  const [maggotHarvestDrawerOpen, setMaggotHarvestDrawerOpen] = useState(false);
+  const [activeBsfBatch, setActiveBsfBatch] = useState(null);
+  const [compostTurnDrawerOpen, setCompostTurnDrawerOpen] = useState(false);
+  const [activeCompostBatch, setActiveCompostBatch] = useState(null);
+  const [stockMovementDrawerOpen, setStockMovementDrawerOpen] = useState(false);
+  const [ledgerHistoryDrawerOpen, setLedgerHistoryDrawerOpen] = useState(false);
+  const [activeInventoryItem, setActiveInventoryItem] = useState(null);
+
+  // Microgrid Feature Drawer States
+  const [dispatchDrawerOpen, setDispatchDrawerOpen] = useState(false);
+  const [manualIngestDrawerOpen, setManualIngestDrawerOpen] = useState(false);
 
   const handleCultivationBatchCreated = (newBatch) => {
     setCultivation((prev) => ({
@@ -217,6 +235,140 @@ export default function OperationsHub() {
 
   const handleFishFeedLogged = (pondId, feedData) => {
     setToastMsg(`Fish feeding recorded for ${pondId}: ${feedData.amountGrams}g of ${feedData.feedType}`);
+  };
+
+  const handleBsfFeedLogged = (batchId, payload) => {
+    setCircular((prev) => ({
+      ...prev,
+      bsfBatches: prev.bsfBatches.map((b) =>
+        b.id === batchId || b.code === payload.batchCode
+          ? {
+              ...b,
+              initialQuantity: Math.round((Number(b.initialQuantity) + Number(payload.feedWeightKg)) * 10) / 10,
+              organicScrapType: payload.organicScrapType,
+            }
+          : b
+      ),
+    }));
+    setToastMsg(`Fed ${payload.feedWeightKg} kg scraps into BSF unit (${payload.trayId}).`);
+  };
+
+  const handleMaggotHarvestLogged = (batchId, payload) => {
+    setCircular((prev) => ({
+      ...prev,
+      bsfBatches: prev.bsfBatches.map((b) =>
+        b.id === batchId || b.code === payload.batchCode
+          ? {
+              ...b,
+              larvaeYieldKg: Math.round((Number(b.larvaeYieldKg || 0) + Number(payload.prepupaeYieldKg)) * 10) / 10,
+              frassYieldKg: Math.round((Number(b.frassYieldKg || 0) + Number(payload.frassYieldKg)) * 10) / 10,
+              status: 'Harvest Ready',
+            }
+          : b
+      ),
+    }));
+
+    // Auto update inventory for BSF prepupae (SKU-BSF-01)
+    setInventory((prev) => {
+      const existing = prev.items.find((i) => i.code === 'SKU-BSF-01' || i.sku === 'SKU-BSF-01');
+      const updatedItems = existing
+        ? prev.items.map((i) =>
+            i.code === 'SKU-BSF-01' || i.sku === 'SKU-BSF-01'
+              ? { ...i, inStock: Math.round((Number(i.inStock) + Number(payload.prepupaeYieldKg)) * 10) / 10 }
+              : i
+          )
+        : [
+            ...prev.items,
+            {
+              id: 'inv-bsf-live',
+              code: 'SKU-BSF-01',
+              sku: 'SKU-BSF-01',
+              name: 'Fresh Harvested BSF Prepupae (42% Protein)',
+              category: 'Biologicals',
+              location: 'Homestead Tool & Feed Shed A',
+              inStock: Number(payload.prepupaeYieldKg),
+              unit: 'kg',
+              minThreshold: 2.0,
+            },
+          ];
+
+      return {
+        ...prev,
+        items: updatedItems,
+        transactions: [
+          {
+            id: `tx-bsf-${Date.now()}`,
+            date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            sku: 'SKU-BSF-01',
+            itemName: 'Fresh Harvested BSF Prepupae',
+            type: 'HARVEST_IN',
+            quantity: payload.prepupaeYieldKg,
+            unit: 'kg',
+            destination: `Poultry (${payload.allocatedToPoultryKg}kg) / Tilapia (${payload.allocatedToTilapiaKg}kg)`,
+            steward: 'Vincent',
+          },
+          ...prev.transactions,
+        ],
+      };
+    });
+
+    setToastMsg(`Harvested ${payload.prepupaeYieldKg} kg live prepupae & ${payload.frassYieldKg} kg frass credited to inventory!`);
+  };
+
+  const handleCompostTurnLogged = (batchId, payload) => {
+    setCircular((prev) => ({
+      ...prev,
+      compostBatches: prev.compostBatches.map((b) =>
+        b.id === batchId || b.code === payload.batchCode || b.bayNumber === payload.bayNumber
+          ? {
+              ...b,
+              temperatureC: payload.coreTempC,
+              edgeTempC: payload.edgeTempC,
+              moisturePercent: payload.moisturePercent,
+              maturityIndex: Math.min(100, (b.maturityIndex || 70) + 5),
+              maturityStage: `${payload.coreTempC >= 55 ? 'Thermophilic Pasteurization' : 'Cooling & Humus'} (Turn #${payload.turnCount})`,
+            }
+          : b
+      ),
+    }));
+    setToastMsg(`Compost turn #${payload.turnCount} logged (${payload.coreTempC}°C) in ${payload.bayNumber}.`);
+  };
+
+  const handleStockMovementLogged = (itemId, payload) => {
+    setInventory((prev) => {
+      const updatedItems = prev.items.map((i) => {
+        if (i.id === itemId || i.code === payload.sku || i.sku === payload.sku) {
+          const newStock = Math.round((Number(i.inStock) + Number(payload.quantityDelta)) * 10) / 10;
+          return {
+            ...i,
+            inStock: newStock,
+          };
+        }
+        return i;
+      });
+
+      const matchedItem = prev.items.find((i) => i.id === itemId || i.code === payload.sku || i.sku === payload.sku);
+
+      return {
+        ...prev,
+        items: updatedItems,
+        transactions: [
+          {
+            id: `tx-${Date.now()}`,
+            date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+            sku: payload.sku || matchedItem?.code,
+            itemName: matchedItem?.name || payload.sku,
+            type: payload.type,
+            quantity: Math.abs(payload.quantityDelta),
+            unit: payload.unit,
+            destination: payload.referenceBatchCode || 'Storage Movement',
+            steward: payload.stewardName || 'Vincent',
+          },
+          ...prev.transactions,
+        ],
+      };
+    });
+    setToastMsg(`Ledger movement committed: ${payload.type} (${payload.quantityDelta > 0 ? '+' : ''}${payload.quantityDelta} ${payload.unit})`);
   };
 
   // Universal Batch Form State (Draft -> Planned -> Active -> On Hold -> Completed / Cancelled)
@@ -872,10 +1024,38 @@ export default function OperationsHub() {
           <Grid item xs={12} lg={6}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                  BSF Bioconversion Batches (Maggot Harvest)
-                </Typography>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+                    BSF Bioconversion Batches (Maggot Harvest)
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
+                    Stacked insect trays converting kitchen waste into 42% protein
+                  </Typography>
+                </Box>
+                <Button
+                  size="small"
+                  variant="contained"
+                  startIcon={<RestaurantMenu />}
+                  onClick={() => {
+                    setActiveBsfBatch(circular.bsfBatches[0] || null);
+                    setBsfFeedDrawerOpen(true);
+                  }}
+                  sx={{
+                    bgcolor: '#10B981',
+                    color: '#FFFFFF',
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    '&:hover': { bgcolor: '#059669' },
+                  }}
+                >
+                  + Feed Tray
+                </Button>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
                 <Chip label="1.8 kg/day Live Protein" size="small" sx={{ bgcolor: 'rgba(245,158,11,0.15)', color: '#D97706', fontWeight: 800 }} />
+                <Chip label="96.6% Closed Loop" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
               </Box>
 
               {circular.bsfBatches.map((bsf) => (
@@ -884,12 +1064,53 @@ export default function OperationsHub() {
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>{bsf.name}</Typography>
                     <Chip label={bsf.status} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
                   </Box>
-                  <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 1 }}>
+                  <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 0.5 }}>
                     Input: {bsf.initialQuantity} {bsf.unit} &rarr; Output: {bsf.larvaeYieldKg} kg high-protein prepupae
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', mb: 1.5 }}>
                     Efficiency: {bsf.feedConversionEfficiency}
                   </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      startIcon={<CheckCircle />}
+                      onClick={() => {
+                        setActiveBsfBatch(bsf);
+                        setMaggotHarvestDrawerOpen(true);
+                      }}
+                      sx={{
+                        bgcolor: '#10B981',
+                        color: '#FFFFFF',
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 700,
+                        fontSize: '0.75rem',
+                        '&:hover': { bgcolor: '#059669' },
+                      }}
+                    >
+                      Harvest Prepupae
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<RestaurantMenu />}
+                      onClick={() => {
+                        setActiveBsfBatch(bsf);
+                        setBsfFeedDrawerOpen(true);
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        color: '#1B4332',
+                        borderColor: 'rgba(27,67,50,0.3)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Feed Scraps
+                    </Button>
+                  </Box>
                 </Box>
               ))}
             </Paper>
@@ -899,9 +1120,14 @@ export default function OperationsHub() {
           <Grid item xs={12} lg={6}>
             <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                  Bokashi & Hot Compost Maturity Index
-                </Typography>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+                    Bokashi & Hot Compost Maturity Index
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
+                    Aerobic windrows reaching 55–65°C pasteurization
+                  </Typography>
+                </Box>
                 <Chip label="480 kg Mature Humus" size="small" sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 800 }} />
               </Box>
 
@@ -909,15 +1135,37 @@ export default function OperationsHub() {
                 <Box key={cmp.id} sx={{ p: 2, borderRadius: 3, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)', mb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>{cmp.name}</Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#10B981' }}>{cmp.temperatureC}°C</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: cmp.temperatureC >= 55 ? '#EF4444' : '#10B981' }}>
+                      {cmp.temperatureC}°C
+                    </Typography>
                   </Box>
                   <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 1 }}>
                     Stage: {cmp.maturityStage} • Moisture {cmp.moisturePercent}%
                   </Typography>
                   <LinearProgress variant="determinate" value={cmp.maturityIndex} sx={{ height: 6, borderRadius: 3, mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
-                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block' }}>
+                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', mb: 1.5 }}>
                     Recipe: {cmp.recipe}
                   </Typography>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => {
+                        setActiveCompostBatch(cmp);
+                        setCompostTurnDrawerOpen(true);
+                      }}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        color: '#1B4332',
+                        borderColor: 'rgba(27,67,50,0.3)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                      }}
+                    >
+                      Log Turn & Temp
+                    </Button>
+                  </Box>
                 </Box>
               ))}
             </Paper>
@@ -930,16 +1178,37 @@ export default function OperationsHub() {
       {/* ========================================================================= */}
       {activeModule === 'inventory' && (
         <Paper elevation={0} sx={{ borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)', overflow: 'hidden' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
                 Homestead Inventory & Storage Stock
               </Typography>
               <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                Stock in/out, reorder thresholds, and storage locations
+                Double-entry transaction ledger, safety reorder thresholds, and physical storage bins
               </Typography>
             </Box>
-            <Chip label="4 Storage Locations" size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800 }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <Chip label="4 Storage Locations" size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800 }} />
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => {
+                  setActiveInventoryItem(null);
+                  setStockMovementDrawerOpen(true);
+                }}
+                sx={{
+                  bgcolor: '#10B981',
+                  color: '#FFFFFF',
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: '#059669' },
+                }}
+              >
+                + Record Movement
+              </Button>
+            </Box>
           </Box>
           <Table>
             <TableHead sx={{ bgcolor: '#FAF9F5' }}>
@@ -954,22 +1223,44 @@ export default function OperationsHub() {
             </TableHead>
             <TableBody>
               {inventory.items
-                .filter(i => i.name.toLowerCase().includes(searchQuery.toLowerCase()) || i.code.toLowerCase().includes(searchQuery.toLowerCase()))
+                .filter(i => (i.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (i.code || i.sku || '').toLowerCase().includes(searchQuery.toLowerCase()))
                 .map((item) => (
                   <TableRow key={item.id} hover>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>{item.code}</TableCell>
+                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>{item.code || item.sku}</TableCell>
                     <TableCell sx={{ fontWeight: 700, color: '#1B4332' }}>{item.name}</TableCell>
                     <TableCell><Chip label={item.category} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }} /></TableCell>
-                    <TableCell sx={{ color: '#5A7565', fontSize: '0.82rem' }}>{item.location}</TableCell>
+                    <TableCell sx={{ color: '#5A7565', fontSize: '0.82rem' }}>{item.location || item.locationName}</TableCell>
                     <TableCell>
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, color: item.inStock <= item.minThreshold ? '#EF4444' : '#10B981' }}>
                         {item.inStock} {item.unit}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Button size="small" variant="outlined" onClick={() => handleOpenDetail(item)} sx={{ borderRadius: 2, textTransform: 'none' }}>
-                        Stock Card
-                      </Button>
+                      <Box sx={{ display: 'inline-flex', gap: 1 }}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          startIcon={<History />}
+                          onClick={() => {
+                            setActiveInventoryItem(item);
+                            setLedgerHistoryDrawerOpen(true);
+                          }}
+                          sx={{ borderRadius: 2, textTransform: 'none', color: '#1B4332', borderColor: 'rgba(27,67,50,0.3)', fontSize: '0.75rem', fontWeight: 700 }}
+                        >
+                          Audit Ledger
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setActiveInventoryItem(item);
+                            setStockMovementDrawerOpen(true);
+                          }}
+                          sx={{ borderRadius: 2, textTransform: 'none', color: '#10B981', borderColor: 'rgba(16,185,129,0.5)', fontSize: '0.75rem', fontWeight: 700 }}
+                        >
+                          + Movement
+                        </Button>
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -982,48 +1273,102 @@ export default function OperationsHub() {
       {/* MODULE 06: ENERGY & WATER MANAGEMENT                                      */}
       {/* ========================================================================= */}
       {activeModule === 'energy-water' && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={6}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(217, 119, 6, 0.2)' }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332', mb: 1 }}>
-                Solar Array & LiFePO4 Battery Diagnostics
+        <Box>
+          <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+                Microgrid & Hydrological Resource Management
               </Typography>
-              <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
-                10x Tier 1 520W Bifacial Panels • 53.2V 16S Pack at 91% SoC
+              <Typography variant="caption" sx={{ color: '#5A7565' }}>
+                Automated surplus solar dump dispatch, LiFePO4 BMS protection, and 12,000 L rainwater buffer
               </Typography>
-              <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>Battery Capacity</Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: '#10B981' }}>15.3 kWh (91% SoC)</Typography>
-                </Box>
-                <LinearProgress variant="determinate" value={91} sx={{ height: 8, borderRadius: 4, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
-              </Box>
-              <Typography variant="caption" sx={{ color: '#748B7D' }}>
-                Cycle Count: 184 • Cell Delta: 0.008V • Temperature: 28.5°C
-              </Typography>
-            </Paper>
-          </Grid>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1.5 }}>
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<Sensors />}
+                onClick={() => setManualIngestDrawerOpen(true)}
+                sx={{
+                  borderRadius: 2,
+                  borderColor: 'rgba(27,67,50,0.3)',
+                  color: '#1B4332',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  textTransform: 'none',
+                }}
+              >
+                + Ingest Probe
+              </Button>
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<Tune />}
+                onClick={() => setDispatchDrawerOpen(true)}
+                sx={{
+                  bgcolor: '#10B981',
+                  color: '#FFFFFF',
+                  borderRadius: 2,
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  textTransform: 'none',
+                  '&:hover': { bgcolor: '#059669' },
+                }}
+              >
+                Configure Policy
+              </Button>
+            </Box>
+          </Box>
 
-          <Grid item xs={12} lg={6}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(2, 132, 199, 0.2)' }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332', mb: 1 }}>
-                Rainwater Storage Tanks & Well Consumption
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
-                Total Storage: 10,400 L / 12,000 L Capacity across 3 Cisterns
-              </Typography>
-              {energyWater.water.storageTanks.map((tnk) => (
-                <Box key={tnk.id} sx={{ p: 1.5, borderRadius: 2, bgcolor: '#FAF9F5', mb: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>{tnk.name}</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#0284C7' }}>{tnk.currentL} L ({tnk.pct}%)</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={tnk.pct} sx={{ height: 6, borderRadius: 3, '& .MuiLinearProgress-bar': { bgcolor: '#0284C7' } }} />
+          <Grid container spacing={3}>
+            <Grid item xs={12} lg={6}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(217, 119, 6, 0.2)' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+                    Solar Array & LiFePO4 Battery Diagnostics
+                  </Typography>
+                  <Chip label="100% Off-Grid Isolated" size="small" sx={{ bgcolor: 'rgba(217,119,6,0.12)', color: '#B45309', fontWeight: 800 }} />
                 </Box>
-              ))}
-            </Paper>
+                <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
+                  10x Tier 1 520W Bifacial Panels • 53.2V 16S Pack at 91% SoC
+                </Typography>
+                <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>Battery Capacity</Typography>
+                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#10B981' }}>15.3 kWh (91% SoC)</Typography>
+                  </Box>
+                  <LinearProgress variant="determinate" value={91} sx={{ height: 8, borderRadius: 4, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
+                </Box>
+                <Typography variant="caption" sx={{ color: '#748B7D' }}>
+                  Cycle Count: 184 • Cell Delta: 0.008V • Temperature: 28.5°C
+                </Typography>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} lg={6}>
+              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(2, 132, 199, 0.2)' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+                    Rainwater Storage Tanks & Well Consumption
+                  </Typography>
+                  <Chip label="10,400 L / 12,000 L" size="small" sx={{ bgcolor: 'rgba(2,132,199,0.12)', color: '#0369A1', fontWeight: 800 }} />
+                </Box>
+                <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
+                  Total Storage: 10,400 L / 12,000 L Capacity across 3 Cisterns
+                </Typography>
+                {energyWater.water.storageTanks.map((tnk) => (
+                  <Box key={tnk.id} sx={{ p: 1.5, borderRadius: 2, bgcolor: '#FAF9F5', mb: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>{tnk.name}</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: '#0284C7' }}>{tnk.currentL} L ({tnk.pct}%)</Typography>
+                    </Box>
+                    <LinearProgress variant="determinate" value={tnk.pct} sx={{ height: 6, borderRadius: 3, '& .MuiLinearProgress-bar': { bgcolor: '#0284C7' } }} />
+                  </Box>
+                ))}
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       )}
 
       {/* ========================================================================= */}
@@ -1582,6 +1927,67 @@ export default function OperationsHub() {
         }}
         pond={activeAquaPond || (aquaculture.ponds && aquaculture.ponds[0])}
         onFeedingLogged={handleFishFeedLogged}
+      />
+
+      {/* CIRCULAR SYSTEMS FEATURE DRAWERS */}
+      <RecordBsfFeedDrawer
+        open={bsfFeedDrawerOpen}
+        onClose={() => {
+          setBsfFeedDrawerOpen(false);
+          setActiveBsfBatch(null);
+        }}
+        batch={activeBsfBatch || circular.bsfBatches[0]}
+        onFeedLogged={handleBsfFeedLogged}
+      />
+      <RecordMaggotHarvestDrawer
+        open={maggotHarvestDrawerOpen}
+        onClose={() => {
+          setMaggotHarvestDrawerOpen(false);
+          setActiveBsfBatch(null);
+        }}
+        batch={activeBsfBatch || circular.bsfBatches[0]}
+        onHarvestLogged={handleMaggotHarvestLogged}
+      />
+      <RecordCompostTurnDrawer
+        open={compostTurnDrawerOpen}
+        onClose={() => {
+          setCompostTurnDrawerOpen(false);
+          setActiveCompostBatch(null);
+        }}
+        batch={activeCompostBatch || circular.compostBatches[0]}
+        onTurnLogged={handleCompostTurnLogged}
+      />
+
+      {/* INVENTORY LEDGER FEATURE DRAWERS */}
+      <RecordStockMovementDrawer
+        open={stockMovementDrawerOpen}
+        onClose={() => {
+          setStockMovementDrawerOpen(false);
+          setActiveInventoryItem(null);
+        }}
+        item={activeInventoryItem || inventory.items[0]}
+        items={inventory.items}
+        onMovementLogged={handleStockMovementLogged}
+      />
+      <InventoryLedgerHistoryDrawer
+        open={ledgerHistoryDrawerOpen}
+        onClose={() => {
+          setLedgerHistoryDrawerOpen(false);
+          setActiveInventoryItem(null);
+        }}
+        item={activeInventoryItem}
+      />
+
+      {/* MICROGRID FEATURE DRAWERS */}
+      <ConfigureDispatchPolicyDrawer
+        open={dispatchDrawerOpen}
+        onClose={() => setDispatchDrawerOpen(false)}
+        onPolicyUpdated={(pol) => setToastMsg(`Dispatch policy updated: ${pol.solarDumpMode}`)}
+      />
+      <ManualTelemetryIngestDrawer
+        open={manualIngestDrawerOpen}
+        onClose={() => setManualIngestDrawerOpen(false)}
+        onTelemetryIngested={(snap) => setToastMsg(`Probe telemetry ingested: ${snap.solarGenerationKw} kW solar, ${snap.batterySoC}% SoC`)}
       />
     </>
   );
