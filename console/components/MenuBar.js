@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
+import { AnimatedPulse } from '../src/components/motion/AnimatedPulse';
 import {
   AppBar,
   Toolbar,
@@ -256,6 +258,7 @@ export default function MenuBar({ onOpenQuickLog }) {
                   boxShadow: '0 2px 6px rgba(27, 67, 50, 0.03)',
                 }}
               >
+                <AnimatedPulse color="#10B981" size={7} />
                 <WbSunny sx={{ color: '#F59E0B', fontSize: 18 }} />
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332', fontSize: '0.78rem' }}>
                   28°C
@@ -356,25 +359,27 @@ export default function MenuBar({ onOpenQuickLog }) {
 
             {/* Quick Log Action Button */}
             {onOpenQuickLog && (
-              <Button
-                variant="contained"
-                onClick={onOpenQuickLog}
-                startIcon={<Add />}
-                sx={{
-                  display: { xs: 'none', sm: 'flex' },
-                  bgcolor: '#1B4332',
-                  color: '#FFFFFF',
-                  borderRadius: 3,
-                  px: 2,
-                  py: 0.8,
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  boxShadow: '0 4px 14px rgba(27, 67, 50, 0.18)',
-                  '&:hover': { bgcolor: '#133326' },
-                }}
-              >
-                Quick Log
-              </Button>
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}>
+                <Button
+                  variant="contained"
+                  onClick={onOpenQuickLog}
+                  startIcon={<Add />}
+                  sx={{
+                    display: { xs: 'none', sm: 'flex' },
+                    bgcolor: '#1B4332',
+                    color: '#FFFFFF',
+                    borderRadius: 3,
+                    px: 2,
+                    py: 0.8,
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    boxShadow: '0 4px 14px rgba(27, 67, 50, 0.18)',
+                    '&:hover': { bgcolor: '#133326' },
+                  }}
+                >
+                  Quick Log
+                </Button>
+              </motion.div>
             )}
           </Box>
         </Toolbar>
