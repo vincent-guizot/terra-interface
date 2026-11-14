@@ -3,6 +3,8 @@
  * Standard Modbus Function Code 0x04 (Read Input Registers)
  */
 
+import { Crc16Validator } from './crc16.validator';
+
 export interface ModbusPzemReading {
   voltageVolts: number;
   currentAmperes: number;
@@ -17,20 +19,8 @@ export class ModbusPzemParser {
   /**
    * Parse a Modbus RTU Response Buffer
    * [SlaveAddr(1B)] [FuncCode(1B)] [ByteCount(1B)] [Data(NB)] [CRC_Low(1B)] [CRC_High(1B)]
-   *
-   * PZEM-016 Input Registers:
-   * 0x0000: Voltage (0.1V) - 2 bytes
-   * 0x0001: Current low (0.001A) - 2 bytes
-   * 0x0002: Current high - 2 bytes
-   * 0x0003: Power low (0.1W) - 2 bytes
-   * 0x0004: Power high - 2 bytes
-   * 0x0005: Energy low (1Wh) - 2 bytes
-   * 0x0006: Energy high - 2 bytes
-   * 0x0007: Frequency (0.1Hz) - 2 bytes
-   * 0x0008: Power Factor (0.01) - 2 bytes
-   * 0x0009: Alarm status - 2 bytes
    */
-  static parseRtuResponse(buffer: Buffer): ModbusPzemReading {
+  static parseRtuResponse(buffer: Buffer, validateCrc: boolean = true): ModbusPzemReading {
     if (buffer.length < 7) {
       throw new Error(`Modbus RTU frame too short: ${buffer.length} bytes received`);
     }
@@ -43,6 +33,13 @@ export class ModbusPzemParser {
     const byteCount = buffer.readUInt8(2);
     if (buffer.length < 3 + byteCount + 2) {
       throw new Error(`Incomplete Modbus payload: expected ${byteCount} data bytes`);
+    }
+
+    if (validateCrc) {
+      const frameSlice = buffer.subarray(0, 3 + byteCount + 2);
+      if (!Crc16Validator.validate(frameSlice)) {
+        throw new Error('CRC-16 Modbus checksum verification failed for frame');
+      }
     }
 
     // Offset 3 starts data registers
