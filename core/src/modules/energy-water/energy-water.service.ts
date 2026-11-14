@@ -7,7 +7,7 @@ import { BatteryBmsService } from './battery-bms.service';
 import { AutonomyForecastService } from './autonomy-forecast.service';
 import { activeDumpLoadPolicy } from './dump-load-controller';
 import { homesteadCisternConfig, CisternLevelReading } from './cistern-levels.model';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService, prisma } from '../../prisma/prisma.service';
 
 export interface MicrogridAlert {
   id: string;
@@ -408,3 +408,9 @@ export class EnergyWaterService implements OnModuleInit {
     }
   }
 }
+
+export const energyWaterService = new EnergyWaterService(
+  prisma,
+  new BatteryBmsService(),
+  new AutonomyForecastService(),
+);

@@ -1,13 +1,29 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { EnergyWaterService } from './energy-water.service';
+import { EnergyWaterService, energyWaterService } from './energy-water.service';
 import { BatteryBmsService } from './battery-bms.service';
 import { AutonomyForecastService } from './autonomy-forecast.service';
+import { iotGatewayService } from './gateway/iot-gateway.service';
 import { prisma } from '../../prisma/prisma.service';
 
 export const energyWaterRouter = Router();
-const bmsService = new BatteryBmsService();
-const autonomyService = new AutonomyForecastService();
-const service = new EnergyWaterService(prisma, bmsService, autonomyService);
+const service = energyWaterService;
+
+energyWaterRouter.get('/gateway/status', (req: Request, res: Response) => {
+  res.json(iotGatewayService.getStats());
+});
+
+energyWaterRouter.post('/gateway/ingest', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { topic, payload } = req.body;
+    if (!topic || payload === undefined) {
+      return res.status(400).json({ error: "Missing required fields 'topic' or 'payload'" });
+    }
+    const snapshot = await iotGatewayService.handleEdgeMessage(topic, payload);
+    res.status(201).json(snapshot);
+  } catch (err) {
+    next(err);
+  }
+});
 
 energyWaterRouter.get('/telemetry/live', async (req: Request, res: Response, next: NextFunction) => {
   try {
