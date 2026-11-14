@@ -8,6 +8,7 @@ import { AquacultureModule } from './modules/aquaculture/aquaculture.module';
 import { CircularModule } from './modules/circular/circular.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { EnergyWaterModule } from './modules/energy-water/energy-water.module';
+import { IntelligenceModule } from './modules/intelligence/intelligence.module';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
@@ -21,6 +22,7 @@ import { PrismaService } from './prisma/prisma.service';
     CircularModule,
     InventoryModule,
     EnergyWaterModule,
+    IntelligenceModule,
   ],
   controllers: [],
   providers: [PrismaService],
