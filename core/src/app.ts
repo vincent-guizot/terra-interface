@@ -19,6 +19,7 @@ import { registerTelemetryAlertListener } from './common/events/listeners/teleme
 // Initialize domain event bus listeners
 registerInventoryEventListener();
 registerTelemetryAlertListener();
+import { checkDatabaseHealth } from './common/health/db-health';
 
 export const app = express();
 

@@ -198,6 +198,7 @@ npm run build:console
 ### 6. Run Invariant Verification Tests
 ```bash
 # Run all invariant verification test suites (8/8 suites):
+# Run all invariant verification test suites (6/6 suites):
 npm test
 
 # Or run directly inside core engine:
@@ -220,6 +221,8 @@ cd core && npm test
 | **IoT Gateway & Telemetry** | [`iot-gateway-invariants.test.ts`](./core/test/iot-gateway-invariants.test.ts) | 7 / 7 | ✅ Passed |
 | **Core Build** | `npm run build:core` | Express Build (`tsc`) | ✅ Exit 0 |
 | **Console Build** | `npm run build:console` | Vite Production Bundle | ✅ Exit 0 |
+| **Core Build** | `npm run build:core` | NestJS Build (`tsc`) | ✅ Exit 0 |
+| **Console Build** | `npm run build:console` | Next.js (10 Static Routes) | ✅ Exit 0 |
 
 ---
 
