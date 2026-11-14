@@ -182,14 +182,11 @@ npm run build:console
 
 ### 5. Run Invariant Verification Tests
 ```bash
-# Circular Systems & Inventory Ledger Invariants:
-cd core && npx ts-node test/circular-inventory-invariants.test.ts
+# Run all invariant verification test suites (6/6 suites):
+npm test
 
-# Microgrid Telemetry & Protection Rules Invariants:
-cd core && npx ts-node test/microgrid-telemetry-invariants.test.ts
-
-# Terra AI Autonomy Engine & Diagnosis Invariants:
-cd core && npx ts-node test/intelligence-autonomy-invariants.test.ts
+# Or run directly inside core engine:
+cd core && npm test
 ```
 
 ---
@@ -198,11 +195,14 @@ cd core && npx ts-node test/intelligence-autonomy-invariants.test.ts
 
 | Test Suite | File Link | Test Cases | Result |
 | :--- | :--- | :---: | :---: |
+| **Batch State Machine** | [`batch-state-machine.test.ts`](./core/test/batch-state-machine.test.ts) | 4 / 4 | ✅ Passed |
 | **Circular & Inventory** | [`circular-inventory-invariants.test.ts`](./core/test/circular-inventory-invariants.test.ts) | 7 / 7 | ✅ Passed |
+| **Cultivation Invariants** | [`cultivation-invariants.test.ts`](./core/test/cultivation-invariants.test.ts) | 5 / 5 | ✅ Passed |
+| **Livestock & Aquaculture** | [`livestock-aquaculture-invariants.test.ts`](./core/test/livestock-aquaculture-invariants.test.ts) | 6 / 6 | ✅ Passed |
 | **Microgrid & Telemetry** | [`microgrid-telemetry-invariants.test.ts`](./core/test/microgrid-telemetry-invariants.test.ts) | 7 / 7 | ✅ Passed |
 | **Terra AI & Autonomy** | [`intelligence-autonomy-invariants.test.ts`](./core/test/intelligence-autonomy-invariants.test.ts) | 7 / 7 | ✅ Passed |
-| **Core Build** | `npm run build:core` | NestJS Build | ✅ Exit 0 |
-| **Console Build** | `npm run build:console` | 10 Static Routes | ✅ Exit 0 |
+| **Core Build** | `npm run build:core` | NestJS Build (`tsc`) | ✅ Exit 0 |
+| **Console Build** | `npm run build:console` | Next.js (10 Static Routes) | ✅ Exit 0 |
 
 ---
 

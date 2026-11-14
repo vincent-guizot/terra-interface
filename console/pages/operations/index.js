@@ -17,16 +17,8 @@ import {
   DialogContent,
   DialogActions,
   MenuItem,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TablePagination,
   Snackbar,
-  Alert,
-  Tooltip,
-  LinearProgress
+  Alert
 } from '@mui/material';
 import {
   Grass,
@@ -39,20 +31,11 @@ import {
   Search,
   Add,
   FilterList,
-  Edit,
-  DeleteOutline,
   Close,
-  CheckCircle,
-  History,
   Spa,
-  Yard,
   Egg,
   Opacity,
-  Tune,
-  ArrowForward,
-  MoreVert,
   RestaurantMenu,
-  Sensors,
 } from '@mui/icons-material';
 import {
   initialProductionConfig,
@@ -69,10 +52,18 @@ import { RecordWaterTestDrawer, LogFishFeedingDrawer } from '../../features/aqua
 import { RecordBsfFeedDrawer, RecordMaggotHarvestDrawer, RecordCompostTurnDrawer } from '../../features/circular';
 import { RecordStockMovementDrawer, InventoryLedgerHistoryDrawer } from '../../features/inventory';
 import { ConfigureDispatchPolicyDrawer, ManualTelemetryIngestDrawer } from '../../features/microgrid';
+import {
+  CultivationTab,
+  LivestockTab,
+  AquacultureTab,
+  CircularTab,
+  InventoryTab,
+  EnergyWaterTab,
+  ConfigTab
+} from '../../components/operations';
 
 export default function OperationsHub() {
   const [activeModule, setActiveModule] = useState('cultivation'); // cultivation | livestock | aquaculture | circular | inventory | energy-water | config
-  const [activeSubTab, setActiveSubTab] = useState('batches'); // batches | catalog | records | health | history
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -90,7 +81,6 @@ export default function OperationsHub() {
   const [detailDrawerOpen, setDetailDrawerOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [cultivationDrawerOpen, setCultivationDrawerOpen] = useState(false);
   const [harvestDrawerOpen, setHarvestDrawerOpen] = useState(false);
@@ -118,6 +108,7 @@ export default function OperationsHub() {
   const [dispatchDrawerOpen, setDispatchDrawerOpen] = useState(false);
   const [manualIngestDrawerOpen, setManualIngestDrawerOpen] = useState(false);
 
+  // Handlers
   const handleCultivationBatchCreated = (newBatch) => {
     setCultivation((prev) => ({
       ...prev,
@@ -260,88 +251,39 @@ export default function OperationsHub() {
         b.id === batchId || b.code === payload.batchCode
           ? {
               ...b,
-              larvaeYieldKg: Math.round((Number(b.larvaeYieldKg || 0) + Number(payload.prepupaeYieldKg)) * 10) / 10,
-              frassYieldKg: Math.round((Number(b.frassYieldKg || 0) + Number(payload.frassYieldKg)) * 10) / 10,
-              status: 'Harvest Ready',
+              larvaeYieldKg: Math.round((Number(b.larvaeYieldKg || 0) + Number(payload.freshPrepupaeYieldKg)) * 10) / 10,
             }
           : b
       ),
     }));
-
-    // Auto update inventory for BSF prepupae (SKU-BSF-01)
-    setInventory((prev) => {
-      const existing = prev.items.find((i) => i.code === 'SKU-BSF-01' || i.sku === 'SKU-BSF-01');
-      const updatedItems = existing
-        ? prev.items.map((i) =>
-            i.code === 'SKU-BSF-01' || i.sku === 'SKU-BSF-01'
-              ? { ...i, inStock: Math.round((Number(i.inStock) + Number(payload.prepupaeYieldKg)) * 10) / 10 }
-              : i
-          )
-        : [
-            ...prev.items,
-            {
-              id: 'inv-bsf-live',
-              code: 'SKU-BSF-01',
-              sku: 'SKU-BSF-01',
-              name: 'Fresh Harvested BSF Prepupae (42% Protein)',
-              category: 'Biologicals',
-              location: 'Homestead Tool & Feed Shed A',
-              inStock: Number(payload.prepupaeYieldKg),
-              unit: 'kg',
-              minThreshold: 2.0,
-            },
-          ];
-
-      return {
-        ...prev,
-        items: updatedItems,
-        transactions: [
-          {
-            id: `tx-bsf-${Date.now()}`,
-            date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-            sku: 'SKU-BSF-01',
-            itemName: 'Fresh Harvested BSF Prepupae',
-            type: 'HARVEST_IN',
-            quantity: payload.prepupaeYieldKg,
-            unit: 'kg',
-            destination: `Poultry (${payload.allocatedToPoultryKg}kg) / Tilapia (${payload.allocatedToTilapiaKg}kg)`,
-            steward: 'Vincent',
-          },
-          ...prev.transactions,
-        ],
-      };
-    });
-
-    setToastMsg(`Harvested ${payload.prepupaeYieldKg} kg live prepupae & ${payload.frassYieldKg} kg frass credited to inventory!`);
+    setToastMsg(`Harvested ${payload.freshPrepupaeYieldKg} kg live maggots (${payload.crudeProteinPercent}% CP).`);
   };
 
   const handleCompostTurnLogged = (batchId, payload) => {
     setCircular((prev) => ({
       ...prev,
       compostBatches: prev.compostBatches.map((b) =>
-        b.id === batchId || b.code === payload.batchCode || b.bayNumber === payload.bayNumber
+        b.id === batchId || b.code === payload.pileId
           ? {
               ...b,
-              temperatureC: payload.coreTempC,
-              edgeTempC: payload.edgeTempC,
-              moisturePercent: payload.moisturePercent,
-              maturityIndex: Math.min(100, (b.maturityIndex || 70) + 5),
-              maturityStage: `${payload.coreTempC >= 55 ? 'Thermophilic Pasteurization' : 'Cooling & Humus'} (Turn #${payload.turnCount})`,
+              temperatureC: payload.coreTemperatureC,
+              moisturePercent: payload.moisturePercent || b.moisturePercent,
+              maturityIndex: Math.min(100, (b.maturityIndex || 40) + 10),
             }
           : b
       ),
     }));
-    setToastMsg(`Compost turn #${payload.turnCount} logged (${payload.coreTempC}°C) in ${payload.bayNumber}.`);
+    setToastMsg(`Compost pile turned. Temp: ${payload.coreTemperatureC}°C (Target: ${payload.inactivationTargetStatus || 'Active'})`);
   };
 
   const handleStockMovementLogged = (itemId, payload) => {
     setInventory((prev) => {
       const updatedItems = prev.items.map((i) => {
         if (i.id === itemId || i.code === payload.sku || i.sku === payload.sku) {
-          const newStock = Math.round((Number(i.inStock) + Number(payload.quantityDelta)) * 10) / 10;
+          const newQty = Math.max(0, Math.round((Number(i.inStock) + Number(payload.quantityDelta)) * 100) / 100);
           return {
             ...i,
-            inStock: newStock,
+            inStock: newQty,
           };
         }
         return i;
@@ -371,7 +313,7 @@ export default function OperationsHub() {
     setToastMsg(`Ledger movement committed: ${payload.type} (${payload.quantityDelta > 0 ? '+' : ''}${payload.quantityDelta} ${payload.unit})`);
   };
 
-  // Universal Batch Form State (Draft -> Planned -> Active -> On Hold -> Completed / Cancelled)
+  // Form States
   const [batchForm, setBatchForm] = useState({
     code: '',
     name: '',
@@ -386,7 +328,6 @@ export default function OperationsHub() {
     notes: ''
   });
 
-  // Custom Configuration Form State
   const [newTypeForm, setNewTypeForm] = useState({
     name: '',
     domain: 'Cultivation',
@@ -481,7 +422,7 @@ export default function OperationsHub() {
     };
     setConfig({ ...config, types: [...config.types, newEntry] });
     setNewTypeForm({ name: '', domain: 'Cultivation', defaultUnit: 'kg' });
-    setToastMsg(`Created custom production type: "${newEntry.name}" under ${newEntry.domain}!`);
+    setToastMsg(`Custom type "${newEntry.name}" added to Taxonomy.`);
   };
 
   const getStatusColor = (st) => {
@@ -721,769 +662,74 @@ export default function OperationsHub() {
         </Box>
       </Paper>
 
-      {/* ========================================================================= */}
-      {/* MODULE 01: CULTIVATION MANAGEMENT                                         */}
-      {/* ========================================================================= */}
+      {/* TAB VIEWS */}
       {activeModule === 'cultivation' && (
-        <Paper
-          elevation={0}
-          sx={{
-            borderRadius: 4,
-            bgcolor: '#FFFFFF',
-            border: '1px solid rgba(27, 67, 50, 0.08)',
-            boxShadow: '0 8px 24px -6px rgba(27, 67, 50, 0.04)',
-            overflow: 'hidden',
-          }}
-        >
-          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                Growing Batches & Plant Catalog
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                Universal batch lifecycle management with multiple harvest records
-              </Typography>
-            </Box>
-            <Chip label={`${cultivation.batches.length} Active Batches`} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
-          </Box>
-
-          <Table>
-            <TableHead sx={{ bgcolor: '#FAF9F5' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>BATCH CODE</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>CROP / PLANT</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>ZONE / LOCATION</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>TIMELINE</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>STATUS</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>HARVESTS</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {cultivation.batches
-                .filter(b => b.name.toLowerCase().includes(searchQuery.toLowerCase()) || b.code.toLowerCase().includes(searchQuery.toLowerCase()))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((batch) => {
-                  const sc = getStatusColor(batch.status);
-                  const totalYield = batch.harvests.reduce((acc, h) => acc + h.quantity, 0);
-
-                  return (
-                    <TableRow key={batch.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                          {batch.code}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#748B7D' }}>
-                          Init: {batch.initialQuantity} {batch.unit}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>
-                          {batch.name}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                          {batch.plantName}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2" sx={{ color: '#486253', fontWeight: 600 }}>
-                          {batch.zone}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="caption" sx={{ color: '#14281D', fontWeight: 700, display: 'block' }}>
-                          Start: {batch.startDate}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                          Est. End: {batch.expectedEndDate}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={batch.status}
-                          size="small"
-                          sx={{ bgcolor: sc.bg, color: sc.text, fontWeight: 800, fontSize: '0.7rem', height: 22 }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#10B981' }}>
-                          {totalYield} kg
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: '#748B7D' }}>
-                          {batch.harvests.length} Picks
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleOpenDetail(batch)}
-                            sx={{ borderRadius: 2, fontSize: '0.75rem', py: 0.3, px: 1, textTransform: 'none', borderColor: 'rgba(27,67,50,0.18)', color: '#1B4332' }}
-                          >
-                            Details
-                          </Button>
-                          <IconButton size="small" onClick={() => handleDeleteRecord(batch.id, 'cultivation')}>
-                            <DeleteOutline fontSize="small" sx={{ color: '#EF4444' }} />
-                          </IconButton>
-                        </Box>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-            </TableBody>
-          </Table>
-
-          <TablePagination
-            component="div"
-            count={cultivation.batches.length}
-            page={page}
-            onPageChange={(e, p) => setPage(p)}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-            rowsPerPageOptions={[5, 10, 25]}
-          />
-        </Paper>
+        <CultivationTab
+          cultivation={cultivation}
+          searchQuery={searchQuery}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          setPage={setPage}
+          setRowsPerPage={setRowsPerPage}
+          handleOpenDetail={handleOpenDetail}
+          handleDeleteRecord={handleDeleteRecord}
+          getStatusColor={getStatusColor}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 02: LIVESTOCK MANAGEMENT                                           */}
-      {/* ========================================================================= */}
       {activeModule === 'livestock' && (
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Paper elevation={0} sx={{ p: 2.5, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)', mb: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    Homestock Flocks & Herds (Chickens, Goats & Sheep)
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                    Ayam KUB, Cornish Cross, Joper, Kambing Boer, and Domba Garut tracking
-                  </Typography>
-                </Box>
-                <Chip label="Zero Mortality" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
-              </Box>
-
-              <Grid container spacing={2}>
-                {livestock.animals.map((ani) => (
-                  <Grid item xs={12} sm={6} md={2.4} key={ani.id}>
-                    <Box
-                      sx={{
-                        p: 2,
-                        borderRadius: 3,
-                        bgcolor: '#FAF9F5',
-                        border: '1px solid rgba(27,67,50,0.08)',
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                        <Chip label={ani.species} size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, fontSize: '0.68rem' }} />
-                        <Typography variant="caption" sx={{ fontWeight: 800, color: '#10B981' }}>{ani.health}</Typography>
-                      </Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', mb: 0.5, lineHeight: 1.2 }}>
-                        {ani.breed}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 1 }}>
-                        {ani.type}
-                      </Typography>
-                      <Box sx={{ pt: 1, borderTop: '1px solid rgba(27,67,50,0.06)' }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>
-                          Pop: {ani.population} head
-                        </Typography>
-                        {ani.eggDaily > 0 && (
-                          <Typography variant="caption" sx={{ color: '#D97706', display: 'block', fontWeight: 700 }}>
-                            Yield: {ani.eggDaily} eggs/day
-                          </Typography>
-                        )}
-                      </Box>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-          </Grid>
-
-          {/* Livestock Batches Table */}
-          <Grid item xs={12}>
-            <Paper elevation={0} sx={{ borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)', overflow: 'hidden' }}>
-              <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)' }}>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                  Livestock Production Batches
-                </Typography>
-              </Box>
-              <Table>
-                <TableHead sx={{ bgcolor: '#FAF9F5' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>CODE</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>BATCH NAME / BREED</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>COUNT</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>FEEDING RATIO</TableCell>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>STATUS</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 800, color: '#1B4332' }}>ACTIONS</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {livestock.batches.map((b) => (
-                    <TableRow key={b.id} hover>
-                      <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>{b.code}</TableCell>
-                      <TableCell>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>{b.name}</Typography>
-                        <Typography variant="caption" sx={{ color: '#5A7565' }}>{b.breed} • {b.species}</Typography>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>{b.currentCount} birds</TableCell>
-                      <TableCell sx={{ fontSize: '0.8rem', color: '#486253' }}>{b.feedingRatio}</TableCell>
-                      <TableCell>
-                        <Chip label={b.status} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
-                      </TableCell>
-                      <TableCell align="right">
-                        <Button size="small" variant="outlined" onClick={() => handleOpenDetail(b)} sx={{ borderRadius: 2, textTransform: 'none' }}>
-                          Inspect
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
-          </Grid>
-        </Grid>
+        <LivestockTab
+          livestock={livestock}
+          handleOpenDetail={handleOpenDetail}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 03: AQUACULTURE MANAGEMENT                                         */}
-      {/* ========================================================================= */}
       {activeModule === 'aquaculture' && (
-        <Paper elevation={0} sx={{ borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)', overflow: 'hidden' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)' }}>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-              Aquaculture Ponds & Tilapia / Catfish Batches
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#5A7565' }}>
-              Water quality sampling, population biomass, and FCR optimization
-            </Typography>
-          </Box>
-          <Table>
-            <TableHead sx={{ bgcolor: '#FAF9F5' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>POND</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>SPECIES / BATCH</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>WATER QUALITY</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>POPULATION</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>FEEDING</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 800, color: '#1B4332' }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {aquaculture.batches.map((b) => (
-                <TableRow key={b.id} hover>
-                  <TableCell>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0284C7' }}>{b.pondName}</Typography>
-                    <Typography variant="caption" sx={{ color: '#748B7D' }}>{b.code}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>{b.name}</Typography>
-                    <Typography variant="caption" sx={{ color: '#5A7565' }}>{b.species}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#0284C7', display: 'block' }}>
-                      pH {b.waterQualityLog.ph} • DO {b.waterQualityLog.do} mg/L
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                      Temp {b.waterQualityLog.temp}°C • NO3 {b.waterQualityLog.nitrate} ppm
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#1B4332' }}>
-                      {b.currentCount} fish ({b.avgWeightG}g avg)
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 700 }}>
-                      Survival: {b.survivalRate}%
-                    </Typography>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: '0.8rem', color: '#486253' }}>
-                    {b.feedingSchedule}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Button size="small" variant="outlined" onClick={() => handleOpenDetail(b)} sx={{ borderRadius: 2, textTransform: 'none' }}>
-                      Pond Log
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
+        <AquacultureTab
+          aquaculture={aquaculture}
+          handleOpenDetail={handleOpenDetail}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 04: CIRCULAR SYSTEM (BSF & COMPOST BATCHES)                        */}
-      {/* ========================================================================= */}
       {activeModule === 'circular' && (
-        <Grid container spacing={3}>
-          {/* BSF Batches */}
-          <Grid item xs={12} lg={6}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    BSF Bioconversion Batches (Maggot Harvest)
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                    Stacked insect trays converting kitchen waste into 42% protein
-                  </Typography>
-                </Box>
-                <Button
-                  size="small"
-                  variant="contained"
-                  startIcon={<RestaurantMenu />}
-                  onClick={() => {
-                    setActiveBsfBatch(circular.bsfBatches[0] || null);
-                    setBsfFeedDrawerOpen(true);
-                  }}
-                  sx={{
-                    bgcolor: '#10B981',
-                    color: '#FFFFFF',
-                    borderRadius: 2,
-                    fontWeight: 700,
-                    textTransform: 'none',
-                    '&:hover': { bgcolor: '#059669' },
-                  }}
-                >
-                  + Feed Tray
-                </Button>
-              </Box>
-
-              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                <Chip label="1.8 kg/day Live Protein" size="small" sx={{ bgcolor: 'rgba(245,158,11,0.15)', color: '#D97706', fontWeight: 800 }} />
-                <Chip label="96.6% Closed Loop" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
-              </Box>
-
-              {circular.bsfBatches.map((bsf) => (
-                <Box key={bsf.id} sx={{ p: 2, borderRadius: 3, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)', mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>{bsf.name}</Typography>
-                    <Chip label={bsf.status} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }} />
-                  </Box>
-                  <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 0.5 }}>
-                    Input: {bsf.initialQuantity} {bsf.unit} &rarr; Output: {bsf.larvaeYieldKg} kg high-protein prepupae
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', mb: 1.5 }}>
-                    Efficiency: {bsf.feedConversionEfficiency}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      startIcon={<CheckCircle />}
-                      onClick={() => {
-                        setActiveBsfBatch(bsf);
-                        setMaggotHarvestDrawerOpen(true);
-                      }}
-                      sx={{
-                        bgcolor: '#10B981',
-                        color: '#FFFFFF',
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 700,
-                        fontSize: '0.75rem',
-                        '&:hover': { bgcolor: '#059669' },
-                      }}
-                    >
-                      Harvest Prepupae
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      startIcon={<RestaurantMenu />}
-                      onClick={() => {
-                        setActiveBsfBatch(bsf);
-                        setBsfFeedDrawerOpen(true);
-                      }}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        color: '#1B4332',
-                        borderColor: 'rgba(27,67,50,0.3)',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                      }}
-                    >
-                      Feed Scraps
-                    </Button>
-                  </Box>
-                </Box>
-              ))}
-            </Paper>
-          </Grid>
-
-          {/* Compost Batches & Maturity */}
-          <Grid item xs={12} lg={6}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    Bokashi & Hot Compost Maturity Index
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                    Aerobic windrows reaching 55–65°C pasteurization
-                  </Typography>
-                </Box>
-                <Chip label="480 kg Mature Humus" size="small" sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 800 }} />
-              </Box>
-
-              {circular.compostBatches.map((cmp) => (
-                <Box key={cmp.id} sx={{ p: 2, borderRadius: 3, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)', mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>{cmp.name}</Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: cmp.temperatureC >= 55 ? '#EF4444' : '#10B981' }}>
-                      {cmp.temperatureC}°C
-                    </Typography>
-                  </Box>
-                  <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 1 }}>
-                    Stage: {cmp.maturityStage} • Moisture {cmp.moisturePercent}%
-                  </Typography>
-                  <LinearProgress variant="determinate" value={cmp.maturityIndex} sx={{ height: 6, borderRadius: 3, mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
-                  <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', mb: 1.5 }}>
-                    Recipe: {cmp.recipe}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => {
-                        setActiveCompostBatch(cmp);
-                        setCompostTurnDrawerOpen(true);
-                      }}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        color: '#1B4332',
-                        borderColor: 'rgba(27,67,50,0.3)',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                      }}
-                    >
-                      Log Turn & Temp
-                    </Button>
-                  </Box>
-                </Box>
-              ))}
-            </Paper>
-          </Grid>
-        </Grid>
+        <CircularTab
+          circular={circular}
+          setActiveBsfBatch={setActiveBsfBatch}
+          setBsfFeedDrawerOpen={setBsfFeedDrawerOpen}
+          setMaggotHarvestDrawerOpen={setMaggotHarvestDrawerOpen}
+          setActiveCompostBatch={setActiveCompostBatch}
+          setCompostTurnDrawerOpen={setCompostTurnDrawerOpen}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 05: INVENTORY MANAGEMENT                                           */}
-      {/* ========================================================================= */}
       {activeModule === 'inventory' && (
-        <Paper elevation={0} sx={{ borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)', overflow: 'hidden' }}>
-          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                Homestead Inventory & Storage Stock
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                Double-entry transaction ledger, safety reorder thresholds, and physical storage bins
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Chip label="4 Storage Locations" size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800 }} />
-              <Button
-                size="small"
-                variant="contained"
-                startIcon={<Add />}
-                onClick={() => {
-                  setActiveInventoryItem(null);
-                  setStockMovementDrawerOpen(true);
-                }}
-                sx={{
-                  bgcolor: '#10B981',
-                  color: '#FFFFFF',
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#059669' },
-                }}
-              >
-                + Record Movement
-              </Button>
-            </Box>
-          </Box>
-          <Table>
-            <TableHead sx={{ bgcolor: '#FAF9F5' }}>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>SKU</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>ITEM NAME</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>CATEGORY</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>STORAGE LOCATION</TableCell>
-                <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>IN STOCK</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 800, color: '#1B4332' }}>ACTIONS</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {inventory.items
-                .filter(i => (i.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (i.code || i.sku || '').toLowerCase().includes(searchQuery.toLowerCase()))
-                .map((item) => (
-                  <TableRow key={item.id} hover>
-                    <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>{item.code || item.sku}</TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: '#1B4332' }}>{item.name}</TableCell>
-                    <TableCell><Chip label={item.category} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }} /></TableCell>
-                    <TableCell sx={{ color: '#5A7565', fontSize: '0.82rem' }}>{item.location || item.locationName}</TableCell>
-                    <TableCell>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: item.inStock <= item.minThreshold ? '#EF4444' : '#10B981' }}>
-                        {item.inStock} {item.unit}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="right">
-                      <Box sx={{ display: 'inline-flex', gap: 1 }}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          startIcon={<History />}
-                          onClick={() => {
-                            setActiveInventoryItem(item);
-                            setLedgerHistoryDrawerOpen(true);
-                          }}
-                          sx={{ borderRadius: 2, textTransform: 'none', color: '#1B4332', borderColor: 'rgba(27,67,50,0.3)', fontSize: '0.75rem', fontWeight: 700 }}
-                        >
-                          Audit Ledger
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => {
-                            setActiveInventoryItem(item);
-                            setStockMovementDrawerOpen(true);
-                          }}
-                          sx={{ borderRadius: 2, textTransform: 'none', color: '#10B981', borderColor: 'rgba(16,185,129,0.5)', fontSize: '0.75rem', fontWeight: 700 }}
-                        >
-                          + Movement
-                        </Button>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </Paper>
+        <InventoryTab
+          inventory={inventory}
+          searchQuery={searchQuery}
+          setActiveInventoryItem={setActiveInventoryItem}
+          setStockMovementDrawerOpen={setStockMovementDrawerOpen}
+          setLedgerHistoryDrawerOpen={setLedgerHistoryDrawerOpen}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 06: ENERGY & WATER MANAGEMENT                                      */}
-      {/* ========================================================================= */}
       {activeModule === 'energy-water' && (
-        <Box>
-          <Box sx={{ mb: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                Microgrid & Hydrological Resource Management
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                Automated surplus solar dump dispatch, LiFePO4 BMS protection, and 12,000 L rainwater buffer
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1.5 }}>
-              <Button
-                size="small"
-                variant="outlined"
-                startIcon={<Sensors />}
-                onClick={() => setManualIngestDrawerOpen(true)}
-                sx={{
-                  borderRadius: 2,
-                  borderColor: 'rgba(27,67,50,0.3)',
-                  color: '#1B4332',
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  textTransform: 'none',
-                }}
-              >
-                + Ingest Probe
-              </Button>
-              <Button
-                size="small"
-                variant="contained"
-                startIcon={<Tune />}
-                onClick={() => setDispatchDrawerOpen(true)}
-                sx={{
-                  bgcolor: '#10B981',
-                  color: '#FFFFFF',
-                  borderRadius: 2,
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#059669' },
-                }}
-              >
-                Configure Policy
-              </Button>
-            </Box>
-          </Box>
-
-          <Grid container spacing={3}>
-            <Grid item xs={12} lg={6}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(217, 119, 6, 0.2)' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    Solar Array & LiFePO4 Battery Diagnostics
-                  </Typography>
-                  <Chip label="100% Off-Grid Isolated" size="small" sx={{ bgcolor: 'rgba(217,119,6,0.12)', color: '#B45309', fontWeight: 800 }} />
-                </Box>
-                <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
-                  10x Tier 1 520W Bifacial Panels • 53.2V 16S Pack at 91% SoC
-                </Typography>
-                <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>Battery Capacity</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 800, color: '#10B981' }}>15.3 kWh (91% SoC)</Typography>
-                  </Box>
-                  <LinearProgress variant="determinate" value={91} sx={{ height: 8, borderRadius: 4, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
-                </Box>
-                <Typography variant="caption" sx={{ color: '#748B7D' }}>
-                  Cycle Count: 184 • Cell Delta: 0.008V • Temperature: 28.5°C
-                </Typography>
-              </Paper>
-            </Grid>
-
-            <Grid item xs={12} lg={6}>
-              <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1.5px solid rgba(2, 132, 199, 0.2)' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    Rainwater Storage Tanks & Well Consumption
-                  </Typography>
-                  <Chip label="10,400 L / 12,000 L" size="small" sx={{ bgcolor: 'rgba(2,132,199,0.12)', color: '#0369A1', fontWeight: 800 }} />
-                </Box>
-                <Typography variant="body2" sx={{ color: '#5A7565', mb: 2 }}>
-                  Total Storage: 10,400 L / 12,000 L Capacity across 3 Cisterns
-                </Typography>
-                {energyWater.water.storageTanks.map((tnk) => (
-                  <Box key={tnk.id} sx={{ p: 1.5, borderRadius: 2, bgcolor: '#FAF9F5', mb: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>{tnk.name}</Typography>
-                      <Typography variant="caption" sx={{ fontWeight: 800, color: '#0284C7' }}>{tnk.currentL} L ({tnk.pct}%)</Typography>
-                    </Box>
-                    <LinearProgress variant="determinate" value={tnk.pct} sx={{ height: 6, borderRadius: 3, '& .MuiLinearProgress-bar': { bgcolor: '#0284C7' } }} />
-                  </Box>
-                ))}
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
+        <EnergyWaterTab
+          energyWater={energyWater}
+          setManualIngestDrawerOpen={setManualIngestDrawerOpen}
+          setDispatchDrawerOpen={setDispatchDrawerOpen}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* MODULE 07: CUSTOM PRODUCTION CONFIGURATION (Never hardcoded)              */}
-      {/* ========================================================================= */}
       {activeModule === 'config' && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} lg={7}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
-                    Configurable Production Types & Taxonomy
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#5A7565' }}>
-                    Users define their own production domains, product names, and measurement units.
-                  </Typography>
-                </Box>
-              </Box>
-
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-                {config.types.map((t) => (
-                  <Box key={t.id} sx={{ p: 1.8, borderRadius: 2.5, bgcolor: '#FAF9F5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Spa sx={{ color: '#10B981', fontSize: 20 }} />
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332' }}>{t.name}</Typography>
-                        <Typography variant="caption" sx={{ color: '#5A7565' }}>Domain: {t.domain}</Typography>
-                      </Box>
-                    </Box>
-                    <Chip label={`Unit: ${t.defaultUnit}`} size="small" sx={{ fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332' }} />
-                  </Box>
-                ))}
-              </Box>
-
-              {/* Add New Custom Type Form */}
-              <Box component="form" onSubmit={handleAddCustomType} sx={{ p: 2, borderRadius: 3, bgcolor: '#F3F8F4', border: '1px dashed #10B981' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', mb: 1.5 }}>
-                  + Add Custom Production Type
-                </Typography>
-                <Grid container spacing={1.5}>
-                  <Grid item xs={12} sm={5}>
-                    <TextField
-                      fullWidth
-                      required
-                      placeholder="e.g. Heirloom Duck Eggs, Microalgae"
-                      value={newTypeForm.name}
-                      onChange={(e) => setNewTypeForm({ ...newTypeForm, name: e.target.value })}
-                      size="small"
-                      sx={{ '& fieldset': { borderRadius: 2 } }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      fullWidth
-                      select
-                      value={newTypeForm.domain}
-                      onChange={(e) => setNewTypeForm({ ...newTypeForm, domain: e.target.value })}
-                      size="small"
-                      sx={{ '& fieldset': { borderRadius: 2 } }}
-                    >
-                      <MenuItem value="Cultivation">Cultivation</MenuItem>
-                      <MenuItem value="Livestock">Livestock</MenuItem>
-                      <MenuItem value="Aquaculture">Aquaculture</MenuItem>
-                      <MenuItem value="Circular">Circular</MenuItem>
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Button
-                      fullWidth
-                      type="submit"
-                      variant="contained"
-                      sx={{ bgcolor: '#1B4332', color: '#FFFFFF', borderRadius: 2, height: 40, fontWeight: 700, textTransform: 'none' }}
-                    >
-                      Add Type
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Paper>
-          </Grid>
-
-          <Grid item xs={12} lg={5}>
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332', mb: 1 }}>
-                Measurement Units & Custom Fields
-              </Typography>
-              <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 2 }}>
-                Configurable units available across all modules
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 3 }}>
-                {config.measurementUnits.map((u) => (
-                  <Chip key={u} label={u} sx={{ fontWeight: 700, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.1)' }} />
-                ))}
-              </Box>
-
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', mb: 1 }}>
-                Dynamic Custom Fields Schema
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {config.customFields.map((cf) => (
-                  <Box key={cf.id} sx={{ p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>{cf.name}</Typography>
-                    <Chip label={cf.appliesTo.join(', ')} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
-                  </Box>
-                ))}
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+        <ConfigTab
+          config={config}
+          newTypeForm={newTypeForm}
+          setNewTypeForm={setNewTypeForm}
+          handleAddCustomType={handleAddCustomType}
+        />
       )}
 
-      {/* ========================================================================= */}
-      {/* CONTEXTUAL DETAIL DRAWER (Read, Audit History & Output Log)               */}
-      {/* ========================================================================= */}
+      {/* CONTEXTUAL DETAIL DRAWER */}
       <Drawer
         anchor="right"
         open={detailDrawerOpen}
@@ -1514,7 +760,7 @@ export default function OperationsHub() {
               {selectedRecord.name || selectedRecord.breed}
             </Typography>
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600, display: 'block', mb: 2 }}>
-              Location: {selectedRecord.zone || selectedRecord.location || 'Vincent\'s Farm'}
+              Location: {selectedRecord.zone || selectedRecord.location || "Vincent's Farm"}
             </Typography>
 
             <Divider sx={{ mb: 2 }} />
@@ -1698,9 +944,7 @@ export default function OperationsHub() {
         )}
       </Drawer>
 
-      {/* ========================================================================= */}
-      {/* CONTEXTUAL ADD UNIVERSAL BATCH MODAL                                      */}
-      {/* ========================================================================= */}
+      {/* CONTEXTUAL ADD UNIVERSAL BATCH MODAL */}
       <Dialog
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
