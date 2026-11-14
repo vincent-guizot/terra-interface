@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService, prisma } from '../../prisma/prisma.service';
 import { RecordStockMovementDto } from './dto/record-stock-movement.dto';
 import { CreateInventoryItemDto } from './dto/create-inventory-item.dto';
 import { StockMovementType } from '@prisma/client';
@@ -487,3 +487,5 @@ export class InventoryService {
     return newItem;
   }
 }
+
+export const inventoryService = new InventoryService(prisma);
