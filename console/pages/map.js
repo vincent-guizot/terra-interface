@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import IsometricHomesteadHero from '../components/isometric/IsometricHomesteadHero';
 import IsometricResourceFlow from '../components/isometric/IsometricResourceFlow';
+import AnimatedResourceStream from '../components/isometric/AnimatedResourceStream';
 import { homesteadZones, homesteadProfile } from '../data/homesteadData';
 
 export default function MapPage() {
@@ -310,7 +311,10 @@ export default function MapPage() {
 
       {/* MODE 3: RESOURCE FLOW */}
       {viewMode === 'flow' && (
-        <IsometricResourceFlow />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <AnimatedResourceStream />
+          <IsometricResourceFlow />
+        </Box>
       )}
 
       {/* ZONE INSPECTION DRAWER */}

@@ -10,12 +10,13 @@
   "scripts": {
     "dev": "npm run dev --prefix console",
     "build": "npm run build --prefix console",
-    "start": "npm run start --prefix console",
+    "start": "npm run preview --prefix console",
     "dev:console": "npm run dev --prefix console",
     "build:console": "npm run build --prefix console",
-    "start:console": "npm run start --prefix console",
+    "start:console": "npm run preview --prefix console",
     "dev:core": "npm run start:dev --prefix core",
     "build:core": "npm run build --prefix core",
-    "prisma:studio": "npm run prisma:studio --prefix core"
+    "prisma:studio": "npm run prisma:studio --prefix core",
+    "db:setup": "npm run db:setup --prefix core"
   }
 }
