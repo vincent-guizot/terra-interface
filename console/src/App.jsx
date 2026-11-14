@@ -1,10 +1,12 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, Typography, Button, Paper } from '@mui/material';
 import terraTheme from '../theme/terraTheme';
 import MainLayout from '../components/MainLayout';
+import PageTransition from './components/motion/PageTransition';
 import OverviewPage from '../pages/index';
 import MapPage from '../pages/map';
 import ProductionPage from '../pages/production';
@@ -33,21 +35,25 @@ function NotFoundPage() {
 }
 
 export default function App() {
+  const location = useLocation();
+
   return (
     <ThemeProvider theme={terraTheme}>
       <CssBaseline />
       <MainLayout>
-        <Routes>
-          <Route path="/" element={<OverviewPage />} />
-          <Route path="/overview" element={<Navigate to="/" replace />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/production" element={<ProductionPage />} />
-          <Route path="/resources" element={<ResourcesPage />} />
-          <Route path="/activities" element={<ActivitiesPage />} />
-          <Route path="/intelligence" element={<IntelligencePage />} />
-          <Route path="/operations" element={<OperationsPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
+            <Route path="/" element={<PageTransition><OverviewPage /></PageTransition>} />
+            <Route path="/overview" element={<Navigate to="/" replace />} />
+            <Route path="/map" element={<PageTransition><MapPage /></PageTransition>} />
+            <Route path="/production" element={<PageTransition><ProductionPage /></PageTransition>} />
+            <Route path="/resources" element={<PageTransition><ResourcesPage /></PageTransition>} />
+            <Route path="/activities" element={<PageTransition><ActivitiesPage /></PageTransition>} />
+            <Route path="/intelligence" element={<PageTransition><IntelligencePage /></PageTransition>} />
+            <Route path="/operations" element={<PageTransition><OperationsPage /></PageTransition>} />
+            <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
+          </Routes>
+        </AnimatePresence>
       </MainLayout>
     </ThemeProvider>
   );
