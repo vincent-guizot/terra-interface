@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Chip, Paper, Tooltip, IconButton, Button } from '@mui/material';
+import ZoneLiveTelemetryOverlay from './ZoneLiveTelemetryOverlay';
 import {
   WbSunny,
   Opacity,
@@ -713,6 +714,9 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
             </Box>
           </Paper>
         )}
+
+        {/* 3D Floating Live Telemetry Overlay */}
+        <ZoneLiveTelemetryOverlay onSelectZone={onSelectZone} visible={showLabels} />
       </Box>
 
       {/* Quick Footnote Bar */}
