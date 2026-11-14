@@ -9,8 +9,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var EnergyWaterService_1;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnergyWaterService = void 0;
+exports.energyWaterService = exports.EnergyWaterService = void 0;
 const common_1 = require("@nestjs/common");
 const rxjs_1 = require("rxjs");
 const battery_bms_service_1 = require("./battery-bms.service");
@@ -76,7 +77,8 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
             cycleCount: 214,
         });
         const autonomyHrs = this.autonomyService.calculatePowerAutonomyHours(15.3, dto.batterySoC, Math.max(0.4, dto.inverterLoadWatts / 1000));
-        const waterDays = this.autonomyService.calculateWaterAutonomyDays(dto.cisternLevelLiters, 450, 0);
+        const waterDays = this.autonomyService.calculateWaterAutonomyDays(dto.cisternLevelLiters, 450, // 450 L/day homestead consumption
+        0);
         const totalCisternCapacity = 12000;
         const cisternPercent = Math.min(100, Math.round((dto.cisternLevelLiters / totalCisternCapacity) * 1000) / 10);
         const tanks = [
@@ -134,8 +136,10 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
             },
             alerts: [],
         };
+        // Evaluate protection rules & automated control
         this.evaluateRulesAndAlerts(snapshot);
         this.currentSnapshot = snapshot;
+        // Persist to Prisma TelemetryReading if DB is connected
         try {
             const zone5 = await this.prisma.zone.findFirst({ where: { code: 'Z-05' } });
             if (zone5) {
@@ -150,12 +154,15 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
             }
         }
         catch (err) {
+            // Graceful fallback for demo/offline
         }
+        // Push live snapshot through SSE Stream
         this.telemetrySubject.next({ data: snapshot });
         return snapshot;
     }
     evaluateRulesAndAlerts(snapshot) {
         const alerts = [];
+        // Rule 1: Battery Protection & Load Shedding
         if (snapshot.batterySoC < this.currentPolicy.batteryFloorReservePercent) {
             snapshot.loadSheddingActive = true;
             alerts.push({
@@ -172,6 +179,7 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
         else {
             snapshot.loadSheddingActive = false;
         }
+        // Rule 2: Dump Load Trigger (Excess Solar & Full Battery)
         const excessSolar = Math.max(0, snapshot.solarGenerationKw - snapshot.inverterLoadWatts / 1000);
         if (snapshot.batterySoC >= 95.0 && excessSolar >= 2.0) {
             snapshot.dumpLoad = {
@@ -201,6 +209,7 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
                 reason: 'Normal balance',
             };
         }
+        // Rule 3: Low Rainwater Cistern Buffer
         if (snapshot.cisternTotalLiters < 2000) {
             alerts.push({
                 id: `alert-water-low-${Date.now()}`,
@@ -213,6 +222,7 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
                 actionRequired: true,
             });
         }
+        // Rule 4: Critical Dissolved Oxygen in Aquaponics Bio-Ponds
         if (snapshot.dissolvedOxygenMgL < 5.0) {
             alerts.push({
                 id: `alert-do-critical-${Date.now()}`,
@@ -229,11 +239,13 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
     }
     generateDiurnalReading(now = new Date()) {
         const hour = now.getHours() + now.getMinutes() / 60;
+        // Diurnal solar curve (Sunrise ~06:00, Peak ~12:00 at ~4.8 kW, Sunset ~18:00)
         let solarKw = 0;
         if (hour >= 6.0 && hour <= 18.0) {
             const sunAngle = ((hour - 6.0) / 12.0) * Math.PI;
             solarKw = Math.round(Math.sin(sunAngle) * 4.9 * 100) / 100;
         }
+        // Base homestead load: 450W base nighttime, 850W daytime, 1200W evening dinner
         let loadW = 550;
         if (hour >= 7.0 && hour <= 16.0) {
             loadW = 850;
@@ -241,6 +253,7 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
         else if (hour > 16.0 && hour <= 21.0) {
             loadW = 1150;
         }
+        // Battery SoC cycle: charges daytime up to 98%, discharges nighttime to ~65%
         let batterySoC = 88.0;
         if (hour < 6.0) {
             batterySoC = Math.max(62.0, 75.0 - hour * 2.2);
@@ -316,7 +329,6 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
 exports.EnergyWaterService = EnergyWaterService;
 exports.EnergyWaterService = EnergyWaterService = EnergyWaterService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        battery_bms_service_1.BatteryBmsService,
-        autonomy_forecast_service_1.AutonomyForecastService])
+    __metadata("design:paramtypes", [typeof (_a = typeof prisma_service_1.PrismaService !== "undefined" && prisma_service_1.PrismaService) === "function" ? _a : Object, typeof (_b = typeof battery_bms_service_1.BatteryBmsService !== "undefined" && battery_bms_service_1.BatteryBmsService) === "function" ? _b : Object, typeof (_c = typeof autonomy_forecast_service_1.AutonomyForecastService !== "undefined" && autonomy_forecast_service_1.AutonomyForecastService) === "function" ? _c : Object])
 ], EnergyWaterService);
+exports.energyWaterService = new EnergyWaterService(prisma_service_1.prisma, new battery_bms_service_1.BatteryBmsService(), new autonomy_forecast_service_1.AutonomyForecastService());

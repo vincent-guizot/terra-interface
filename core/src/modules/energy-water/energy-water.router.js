@@ -3,13 +3,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.energyWaterRouter = void 0;
 const express_1 = require("express");
 const energy_water_service_1 = require("./energy-water.service");
-const battery_bms_service_1 = require("./battery-bms.service");
-const autonomy_forecast_service_1 = require("./autonomy-forecast.service");
-const prisma_service_1 = require("../../prisma/prisma.service");
+const iot_gateway_service_1 = require("./gateway/iot-gateway.service");
 exports.energyWaterRouter = (0, express_1.Router)();
-const bmsService = new battery_bms_service_1.BatteryBmsService();
-const autonomyService = new autonomy_forecast_service_1.AutonomyForecastService();
-const service = new energy_water_service_1.EnergyWaterService(prisma_service_1.prisma, bmsService, autonomyService);
+const service = energy_water_service_1.energyWaterService;
+exports.energyWaterRouter.get('/gateway/status', (req, res) => {
+    res.json(iot_gateway_service_1.iotGatewayService.getStats());
+});
+exports.energyWaterRouter.post('/gateway/ingest', async (req, res, next) => {
+    try {
+        const { topic, payload } = req.body;
+        if (!topic || payload === undefined) {
+            return res.status(400).json({ error: "Missing required fields 'topic' or 'payload'" });
+        }
+        const snapshot = await iot_gateway_service_1.iotGatewayService.handleEdgeMessage(topic, payload);
+        res.status(201).json(snapshot);
+    }
+    catch (err) {
+        next(err);
+    }
+});
 exports.energyWaterRouter.get('/telemetry/live', async (req, res, next) => {
     try {
         const snapshot = service.getLiveSnapshot();
@@ -50,10 +62,12 @@ exports.energyWaterRouter.get('/dump-load/status', (req, res) => {
     const status = service.getDumpLoadStatus();
     res.json(status);
 });
+// Server-Sent Events (SSE) Stream
 exports.energyWaterRouter.get('/telemetry/stream', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
+    // Send initial snapshot immediately
     const initial = service.getLiveSnapshot();
     res.write(`data: ${JSON.stringify(initial)}\n\n`);
     const subscription = service.getTelemetryStream().subscribe({
