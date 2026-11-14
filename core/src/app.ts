@@ -11,6 +11,7 @@ import { inventoryRouter } from './modules/inventory/inventory.router';
 import { energyWaterRouter } from './modules/energy-water/energy-water.router';
 import { intelligenceRouter } from './modules/intelligence/intelligence.router';
 import { HttpException } from './common/errors/http-exceptions';
+import { checkDatabaseHealth } from './common/health/db-health';
 
 export const app = express();
 
@@ -38,6 +39,12 @@ app.get('/api/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     uptimeSeconds: Math.floor(process.uptime()),
   });
+});
+
+app.get('/api/health/db', async (req: Request, res: Response) => {
+  const report = await checkDatabaseHealth();
+  const statusCode = report.status === 'UP' ? 200 : 503;
+  res.status(statusCode).json(report);
 });
 
 // Mount Domain Routers under /api/v1/
