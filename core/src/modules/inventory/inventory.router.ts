@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
-import { InventoryService } from './inventory.service';
+import { InventoryService, inventoryService } from './inventory.service';
 import { prisma } from '../../prisma/prisma.service';
 
 export const inventoryRouter = Router();
-const service = new InventoryService(prisma);
+const service = inventoryService;
 
 inventoryRouter.get('/items', async (req: Request, res: Response, next: NextFunction) => {
   try {
