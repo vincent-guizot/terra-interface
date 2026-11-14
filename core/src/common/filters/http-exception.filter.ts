@@ -4,45 +4,41 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-    let error = 'Internal Server Error';
-    let details: any = null;
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const res = exception.getResponse();
-      if (typeof res === 'string') {
-        message = res;
-      } else if (typeof res === 'object' && res !== null) {
-        const body = res as Record<string, any>;
-        message = body.message || message;
-        error = body.error || error;
-        details = body.details || (Array.isArray(body.message) ? body.message : null);
-      }
-    } else if (exception instanceof Error) {
-      message = exception.message;
-      error = exception.name;
-    }
+    const message =
+      exception instanceof HttpException
+        ? exception.getResponse()
+        : (exception as Error)?.message || 'Internal server error';
 
-    response.status(status).json({
+    const errorPayload = {
       success: false,
       statusCode: status,
-      error,
-      message,
-      details,
-      path: request.url,
       timestamp: new Date().toISOString(),
-    });
+      path: request?.url || '',
+      error: typeof message === 'object' ? message : { message },
+    };
+
+    this.logger.error(
+      `HTTP Error [${status}] on ${request?.method} ${request?.url}: ${JSON.stringify(errorPayload.error)}`
+    );
+
+    response.status(status).json(errorPayload);
   }
 }
