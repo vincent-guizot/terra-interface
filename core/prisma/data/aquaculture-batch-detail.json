@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-pond-detail",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-AQU-01"
+        }
+      },
+      "species": "Oreochromis niloticus",
+      "pondVolumeM3": 4,
+      "targetDensityKgM3": 25
+    }
+  }
+]

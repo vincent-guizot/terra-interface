@@ -1,0 +1,12 @@
+[
+  {
+    "key": "demo-energy",
+    "demo": true,
+    "data": {
+      "solarKw": 5.2,
+      "batterySocPct": 88,
+      "inverterPowerWatt": 1240,
+      "gridDrawWatt": 0
+    }
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "key": "demo-nft",
+    "demo": true,
+    "data": {
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      },
+      "buildingId": {
+        "$ref": {
+          "table": "building",
+          "key": "demo-greenhouse"
+        }
+      },
+      "name": "Demo NFT Rack",
+      "type": "NFT_RACK"
+    }
+  }
+]

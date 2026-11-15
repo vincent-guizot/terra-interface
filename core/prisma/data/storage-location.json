@@ -1,0 +1,98 @@
+[
+  {
+    "key": "loc-0",
+    "demo": true,
+    "match": {
+      "name": "Homestead Tool & Feed Shed A",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Homestead Tool & Feed Shed A",
+      "type": "Dry Ambient (26°C)",
+      "capacityInfo": "Dry goods, feeds, tools",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "loc-1",
+    "demo": true,
+    "match": {
+      "name": "Eco-Living Cold Cellar",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Eco-Living Cold Cellar",
+      "type": "Refrigerated Cold Store (4°C)",
+      "capacityInfo": "800 L storage",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "loc-2",
+    "demo": true,
+    "match": {
+      "name": "Seed Preservation Vault",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Seed Preservation Vault",
+      "type": "Airtight Desiccated (16°C)",
+      "capacityInfo": "120 Glass heirloom jars",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "loc-3",
+    "demo": true,
+    "match": {
+      "name": "Biological Inoculant Rack",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Biological Inoculant Rack",
+      "type": "Shaded Ambient (22°C)",
+      "capacityInfo": "Microbial cultures",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  }
+]

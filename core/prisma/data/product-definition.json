@@ -1,0 +1,25 @@
+[
+  {
+    "key": "demo-bok-choy",
+    "demo": true,
+    "match": {
+      "sku": "DEMO-BOK-CHOY"
+    },
+    "data": {
+      "categoryId": {
+        "$ref": {
+          "table": "productCategory",
+          "key": "demo-leafy"
+        }
+      },
+      "name": "Demo Bok Choy",
+      "sku": "DEMO-BOK-CHOY",
+      "defaultUnitId": {
+        "$ref": {
+          "table": "measurementUnit",
+          "key": "kg"
+        }
+      }
+    }
+  }
+]

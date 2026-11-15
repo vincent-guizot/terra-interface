@@ -1,0 +1,21 @@
+[
+  {
+    "key": "kg-to-g",
+    "demo": true,
+    "data": {
+      "sourceUnitId": {
+        "$ref": {
+          "table": "measurementUnit",
+          "key": "kg"
+        }
+      },
+      "targetUnitId": {
+        "$ref": {
+          "table": "measurementUnit",
+          "key": "g"
+        }
+      },
+      "multiplier": 1000
+    }
+  }
+]

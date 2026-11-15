@@ -1,83 +1,80 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.app = void 0;
-const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
-const universal_batch_router_1 = require("./modules/universal-batch/universal-batch.router");
-const spatial_router_1 = require("./modules/spatial/spatial.router");
-const catalog_router_1 = require("./modules/catalog/catalog.router");
-const cultivation_router_1 = require("./modules/cultivation/cultivation.router");
-const livestock_router_1 = require("./modules/livestock/livestock.router");
-const aquaculture_router_1 = require("./modules/aquaculture/aquaculture.router");
-const circular_router_1 = require("./modules/circular/circular.router");
-const inventory_router_1 = require("./modules/inventory/inventory.router");
-const energy_water_router_1 = require("./modules/energy-water/energy-water.router");
-const intelligence_router_1 = require("./modules/intelligence/intelligence.router");
-const events_router_1 = require("./common/events/events.router");
-const db_health_1 = require("./common/health/db-health");
-const inventory_event_listener_1 = require("./common/events/listeners/inventory-event.listener");
-const telemetry_alert_listener_1 = require("./common/events/listeners/telemetry-alert.listener");
-// Initialize domain event bus listeners
-(0, inventory_event_listener_1.registerInventoryEventListener)();
-(0, telemetry_alert_listener_1.registerTelemetryAlertListener)();
-exports.app = (0, express_1.default)();
-// Middlewares
-exports.app.use((0, cors_1.default)({ origin: '*' }));
-exports.app.use(express_1.default.json());
-// Request logger
-exports.app.use((req, res, next) => {
-    const start = Date.now();
-    res.on('finish', () => {
-        const duration = Date.now() - start;
-        if (req.path !== '/api/v1/energy-water/telemetry/stream') {
-            console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`);
-        }
-    });
-    next();
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import morgan from 'morgan';
+import env from './config/env.js';
+import corsOptions from './config/cors.js';
+import apiRateLimiter from './middlewares/rateLimiter.js';
+import notFoundHandler from './middlewares/notFoundHandler.js';
+import errorHandler from './middlewares/errorHandler.js';
+import healthController from './controllers/healthController.js';
+import apiRoutes from './routes/index.js';
+import { registerInventoryEventListener } from './common/events/listeners/inventory-event.listener.js';
+import { registerTelemetryAlertListener } from './common/events/listeners/telemetry-alert.listener.js';
+import { sendSuccess } from './utils/response.js';
+
+registerInventoryEventListener();
+registerTelemetryAlertListener();
+
+// 1. Initialize Express application
+export const app = express();
+
+// 2. Trust reverse proxies (important for rate limiter & client IP accuracy)
+app.set('trust proxy', 1);
+
+// 3. Security headers with Helmet
+app.use(helmet({
+  contentSecurityPolicy: false,
+  // Permit frontend dev tools and SSE streams
+  crossOriginEmbedderPolicy: false
+}));
+
+// 4. CORS configuration
+app.use(cors(corsOptions));
+
+// 5. Body parsers
+app.use(express.json({
+  limit: '10mb'
+}));
+app.use(express.urlencoded({
+  extended: true,
+  limit: '10mb'
+}));
+
+// 6. Request Logging with Morgan
+if (env.isDevelopment) {
+  app.use(morgan('dev'));
+} else {
+  app.use(morgan('combined'));
+}
+
+// 7. Rate Limiting Middleware
+app.use('/api', apiRateLimiter);
+
+// 8. Canonical Health Check endpoint (GET /api/health)
+app.get('/api/health', healthController.getHealth);
+app.get('/health', healthController.getHealth);
+
+// 9. API Routes (/api/v1/*)
+app.use('/api', apiRoutes);
+
+// Root informational endpoint
+app.get('/', (req, res) => {
+  sendSuccess(res, {
+    application: 'Terra Interface Core API Engine',
+    version: '1.0.0',
+    homestead: "Vincent's Farm (300 m² Master Plan)",
+    docs: '/api/v1',
+    health: '/api/health',
+    timestamp: new Date().toISOString()
+  });
 });
-// Health check endpoint
-exports.app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'healthy',
-        homestead: "Vincent's Farm (300 m²)",
-        timestamp: new Date().toISOString(),
-        uptimeSeconds: Math.floor(process.uptime()),
-    });
-});
-exports.app.get('/api/health/db', async (req, res) => {
-    const report = await (0, db_health_1.checkDatabaseHealth)();
-    const statusCode = report.status === 'UP' ? 200 : 503;
-    res.status(statusCode).json(report);
-});
-// Mount Domain Routers under /api/v1/
-const apiRouter = express_1.default.Router();
-apiRouter.use('/universal-batches', universal_batch_router_1.universalBatchRouter);
-apiRouter.use('/spatial', spatial_router_1.spatialRouter);
-apiRouter.use('/catalog', catalog_router_1.catalogRouter);
-apiRouter.use('/cultivation', cultivation_router_1.cultivationRouter);
-apiRouter.use('/livestock', livestock_router_1.livestockRouter);
-apiRouter.use('/aquaculture', aquaculture_router_1.aquacultureRouter);
-apiRouter.use('/circular', circular_router_1.circularRouter);
-apiRouter.use('/inventory', inventory_router_1.inventoryRouter);
-apiRouter.use('/energy-water', energy_water_router_1.energyWaterRouter);
-apiRouter.use('/intelligence', intelligence_router_1.intelligenceRouter);
-apiRouter.use('/events', events_router_1.eventsRouter);
-exports.app.use('/api/v1', apiRouter);
-// Standardized Error Handling Middleware
-exports.app.use((err, req, res, next) => {
-    const statusCode = err.status || err.statusCode || 500;
-    const errorName = err.name || 'InternalServerError';
-    const message = err.message || 'An unexpected error occurred';
-    console.error(`[Error] ${req.method} ${req.url} [${statusCode}]:`, message);
-    res.status(statusCode).json({
-        success: false,
-        statusCode,
-        error: errorName,
-        message,
-        timestamp: new Date().toISOString(),
-    });
-});
-exports.default = exports.app;
+
+// 10. 404 Route Not Found Handler
+app.use(notFoundHandler);
+
+// 11. Centralized Error Handler (must be registered last)
+app.use(errorHandler);
+
+// app.js exports the configured Express app and NEVER calls app.listen()
+export default app;

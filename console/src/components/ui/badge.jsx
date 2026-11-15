@@ -1,27 +1,42 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import * as React from 'react';
+import { cva } from 'class-variance-authority';
+import { cn } from '../../lib/utils.js';
 
-export const badgeVariants = {
-  default: 'border-transparent bg-[#1B4332] text-white',
-  success: 'border-transparent bg-emerald-100 text-emerald-800 font-bold',
-  warning: 'border-transparent bg-amber-100 text-amber-800 font-bold',
-  sky: 'border-transparent bg-sky-100 text-sky-800 font-bold',
-  destructive: 'border-transparent bg-red-100 text-red-800 font-bold',
-  outline: 'border border-[#1B4332]/20 text-[#1B4332]',
-};
+const badgeVariants = cva(
+  'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2',
+  {
+    variants: {
+      variant: {
+        default:
+          'border-transparent bg-[#1B4332] text-white hover:bg-[#2D6A4F]',
+        secondary:
+          'border-transparent bg-[#EDF4EE] text-[#1B4332] hover:bg-[#D8F3DC]',
+        destructive:
+          'border-transparent bg-red-500 text-white hover:bg-red-600',
+        outline:
+          'border-[rgba(27,67,50,0.18)] text-[#1B4332] bg-white',
+        live:
+          'border-emerald-300 bg-emerald-50 text-emerald-800 font-bold',
+        manual:
+          'border-sky-300 bg-sky-50 text-sky-800 font-bold',
+        estimated:
+          'border-amber-300 bg-amber-50 text-amber-800 font-bold',
+        demo:
+          'border-purple-300 bg-purple-50 text-purple-800 font-bold',
+        lime:
+          'border-lime-300 bg-lime-50 text-lime-800 font-bold',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
 
-export function Badge({ className, variant = 'default', ...props }) {
-  const variantClass = badgeVariants[variant] || badgeVariants.default;
+function Badge({ className, variant, ...props }) {
   return (
-    <div
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors',
-        variantClass,
-        className
-      )}
-      {...props}
-    />
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
   );
 }
 
-export default Badge;
+export { Badge, badgeVariants };

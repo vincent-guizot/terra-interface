@@ -1,0 +1,26 @@
+[
+  {
+    "key": "kg",
+    "demo": true,
+    "match": {
+      "symbol": "kg"
+    },
+    "data": {
+      "symbol": "kg",
+      "name": "Kilogram",
+      "dimension": "MASS"
+    }
+  },
+  {
+    "key": "g",
+    "demo": true,
+    "match": {
+      "symbol": "g"
+    },
+    "data": {
+      "symbol": "g",
+      "name": "Gram",
+      "dimension": "MASS"
+    }
+  }
+]

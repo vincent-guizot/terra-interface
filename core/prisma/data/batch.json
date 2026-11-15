@@ -1,0 +1,125 @@
+[
+  {
+    "key": "BAT-2026-CUL-01",
+    "demo": true,
+    "match": {
+      "batchCode": "BAT-2026-CUL-01"
+    },
+    "data": {
+      "batchCode": "BAT-2026-CUL-01",
+      "name": "Spring Greenhouse Bok Choy NFT",
+      "domain": "CULTIVATION",
+      "status": "ACTIVE",
+      "startDate": "2026-10-22T00:00:00.000Z",
+      "expectedEndDate": "2026-11-20T00:00:00.000Z",
+      "initialQuantity": 120,
+      "currentQuantity": 95,
+      "measurementUnit": "heads",
+      "notes": "Automated 15-minute NFT nutrient film stream. Zero pest pressure detected under insect screen.",
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      }
+    }
+  },
+  {
+    "key": "BAT-2026-AQU-01",
+    "demo": true,
+    "match": {
+      "batchCode": "BAT-2026-AQU-01"
+    },
+    "data": {
+      "batchCode": "BAT-2026-AQU-01",
+      "name": "Monosex Nile Tilapia Finishing Cohort",
+      "domain": "AQUACULTURE",
+      "status": "ACTIVE",
+      "startDate": "2026-08-15T00:00:00.000Z",
+      "expectedEndDate": "2026-11-28T00:00:00.000Z",
+      "initialQuantity": 450,
+      "currentQuantity": 442,
+      "measurementUnit": "fingerlings",
+      "notes": "450g average target size. Fed 32% CP pellets and duckweed from nitrifying gravel bed.",
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-02"
+        }
+      }
+    }
+  },
+  {
+    "key": "BAT-2026-LIV-01",
+    "demo": true,
+    "match": {
+      "batchCode": "BAT-2026-LIV-01"
+    },
+    "data": {
+      "batchCode": "BAT-2026-LIV-01",
+      "name": "Ayam KUB Layer Flock Season 2",
+      "domain": "LIVESTOCK",
+      "status": "ACTIVE",
+      "startDate": "2026-05-10T00:00:00.000Z",
+      "expectedEndDate": "2027-05-10T00:00:00.000Z",
+      "initialQuantity": 24,
+      "currentQuantity": 24,
+      "measurementUnit": "birds",
+      "notes": "Deep litter bedding coop supplemented with live BSF larvae daily.",
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-03"
+        }
+      }
+    }
+  },
+  {
+    "key": "BAT-2026-CMP-12",
+    "demo": true,
+    "match": {
+      "batchCode": "BAT-2026-CMP-12"
+    },
+    "data": {
+      "batchCode": "BAT-2026-CMP-12",
+      "name": "High-Nitrogen Bokashi Composting #12",
+      "domain": "CIRCULAR",
+      "status": "ACTIVE",
+      "startDate": "2026-10-15T00:00:00.000Z",
+      "expectedEndDate": "2026-11-25T00:00:00.000Z",
+      "initialQuantity": 250,
+      "currentQuantity": 190,
+      "measurementUnit": "kg biomass",
+      "notes": "40% poultry litter, 30% bamboo foliage, 20% biochar, 10% EM4 Bokashi bran.",
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-04"
+        }
+      }
+    }
+  },
+  {
+    "key": "demo-bsf",
+    "demo": true,
+    "match": {
+      "batchCode": "DEMO-BSF-01"
+    },
+    "data": {
+      "batchCode": "DEMO-BSF-01",
+      "name": "Demo BSF Batch",
+      "domain": "CIRCULAR",
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-03"
+        }
+      },
+      "startDate": "2026-11-14T00:00:00.000Z",
+      "measurementUnit": "kg",
+      "initialQuantity": 10,
+      "currentQuantity": 10,
+      "notes": "Demo seed batch."
+    }
+  }
+]
