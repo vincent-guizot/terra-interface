@@ -1,0 +1,25 @@
+[
+  {
+    "key": "demo-water-flow",
+    "demo": true,
+    "data": {
+      "sourceZoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-06"
+        }
+      },
+      "destinationZoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      },
+      "resourceType": "WATER",
+      "plannedQuantity": 20,
+      "actualQuantity": 18,
+      "measurementUnit": "L",
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  }
+]

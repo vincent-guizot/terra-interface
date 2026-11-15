@@ -1,0 +1,18 @@
+[
+  {
+    "key": "demo-transition",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "fromStatus": "PLANNED",
+      "toStatus": "ACTIVE",
+      "reason": "Demo seed transition",
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  }
+]

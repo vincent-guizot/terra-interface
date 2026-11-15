@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:terra:api:v1:response",
+  "title": "Terra API v1 JSON response",
+  "description": "REST JSON response envelope. Health, SSE and the serialized audit export have separate documented formats.",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["success", "message", "data", "timestamp"],
+      "properties": {
+        "success": { "const": true },
+        "message": { "type": "string" },
+        "data": {},
+        "meta": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "required": ["success", "error", "timestamp"],
+      "properties": {
+        "success": { "const": false },
+        "error": {
+          "type": "object",
+          "required": ["code", "message", "statusCode", "details"],
+          "properties": {
+            "code": { "type": "string", "minLength": 1 },
+            "message": { "type": "string" },
+            "statusCode": { "type": "integer", "minimum": 400, "maximum": 599 },
+            "details": { "type": ["object", "array", "null"] }
+          },
+          "additionalProperties": false
+        },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  ]
+}

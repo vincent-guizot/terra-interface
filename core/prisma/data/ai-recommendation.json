@@ -1,0 +1,12 @@
+[
+  {
+    "key": "demo-recommendation",
+    "demo": true,
+    "data": {
+      "category": "ENERGY_SAVING",
+      "severity": "INFO",
+      "title": "Demo: inspect solar surplus",
+      "actionText": "Synthetic demo recommendation; no physical action has been triggered."
+    }
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-plan",
+    "demo": true,
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "versionName": "Demo Master Plan",
+      "isCurrent": true,
+      "svgLayout": null
+    }
+  }
+]

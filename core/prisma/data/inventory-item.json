@@ -1,0 +1,137 @@
+[
+  {
+    "key": "SKU-FEE-01",
+    "demo": true,
+    "match": {
+      "sku": "SKU-FEE-01"
+    },
+    "data": {
+      "sku": "SKU-FEE-01",
+      "name": "High-Protein Aquaculture Pellets (32% CP)",
+      "category": "Feed & Nutrition",
+      "inStock": 75,
+      "unit": "kg",
+      "minThreshold": 25,
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "locationId": {
+        "$ref": {
+          "table": "storageLocation",
+          "key": "loc-0"
+        }
+      }
+    }
+  },
+  {
+    "key": "SKU-SEE-01",
+    "demo": true,
+    "match": {
+      "sku": "SKU-SEE-01"
+    },
+    "data": {
+      "sku": "SKU-SEE-01",
+      "name": "Heirloom Lacinato Kale Seeds",
+      "category": "Seed Bank",
+      "inStock": 12,
+      "unit": "packs",
+      "minThreshold": 3,
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "locationId": {
+        "$ref": {
+          "table": "storageLocation",
+          "key": "loc-2"
+        }
+      }
+    }
+  },
+  {
+    "key": "SKU-BIO-01",
+    "demo": true,
+    "match": {
+      "sku": "SKU-BIO-01"
+    },
+    "data": {
+      "sku": "SKU-BIO-01",
+      "name": "EM4 Microbial Inoculant Culture",
+      "category": "Biologicals",
+      "inStock": 6,
+      "unit": "liters",
+      "minThreshold": 2,
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "locationId": {
+        "$ref": {
+          "table": "storageLocation",
+          "key": "loc-3"
+        }
+      }
+    }
+  },
+  {
+    "key": "SKU-MIN-01",
+    "demo": true,
+    "match": {
+      "sku": "SKU-MIN-01"
+    },
+    "data": {
+      "sku": "SKU-MIN-01",
+      "name": "Agricultural Horticultural Lime (CaCO3)",
+      "category": "Soil & Water Amendments",
+      "inStock": 40,
+      "unit": "kg",
+      "minThreshold": 15,
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "locationId": {
+        "$ref": {
+          "table": "storageLocation",
+          "key": "loc-0"
+        }
+      }
+    }
+  },
+  {
+    "key": "SKU-FOO-01",
+    "demo": true,
+    "match": {
+      "sku": "SKU-FOO-01"
+    },
+    "data": {
+      "sku": "SKU-FOO-01",
+      "name": "Frozen Nile Tilapia Clean Fillets",
+      "category": "Homestead Food Pantry",
+      "inStock": 22.5,
+      "unit": "kg",
+      "minThreshold": 10,
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "locationId": {
+        "$ref": {
+          "table": "storageLocation",
+          "key": "loc-1"
+        }
+      }
+    }
+  }
+]

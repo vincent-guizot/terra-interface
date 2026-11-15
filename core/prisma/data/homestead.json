@@ -1,0 +1,17 @@
+[
+  {
+    "key": "farm",
+    "demo": true,
+    "match": {
+      "name": "Vincent's Farm"
+    },
+    "data": {
+      "name": "Vincent's Farm",
+      "totalAreaSqm": 300,
+      "dimensions": "15m x 20m Master Plan",
+      "location": "West Java, Indonesia",
+      "climateType": "Tropical Highland Monsoon",
+      "stewardName": "Vincent"
+    }
+  }
+]

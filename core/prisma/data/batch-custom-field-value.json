@@ -1,0 +1,21 @@
+[
+  {
+    "key": "demo-ec-value",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "customFieldId": {
+        "$ref": {
+          "table": "customField",
+          "key": "type-0-0"
+        }
+      },
+      "value": "1.6"
+    }
+  }
+]

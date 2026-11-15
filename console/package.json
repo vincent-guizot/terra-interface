@@ -7,21 +7,29 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "node scripts/check-imports.cjs",
+    "test": "node --test tests/ui.test.cjs tests/api-client.test.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.9",
     "@mui/material": "^5.10.12",
+    "@radix-ui/react-dropdown-menu": "^2.2.1",
+    "@radix-ui/react-slot": "^1.5.0",
+    "@radix-ui/react-tooltip": "^1.4.1",
+    "@reduxjs/toolkit": "^2.14.0",
     "@tailwindcss/postcss": "^4.3.5",
+    "@tanstack/react-query": "^5.107.1",
     "autoprefixer": "^10.6.2",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^7.6.4",
     "lucide-react": "^1.72.0",
     "postcss": "^8.5.33",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-redux": "^9.3.1",
     "react-router-dom": "^6.22.0",
     "tailwind-merge": "^3.7.0",
     "tailwindcss": "^4.3.5"

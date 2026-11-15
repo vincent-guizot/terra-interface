@@ -1,0 +1,116 @@
+[
+  {
+    "key": "BAT-2026-CUL-01-0",
+    "demo": true,
+    "data": {
+      "productName": "Bok Choy Grade A",
+      "quantity": 14.5,
+      "measurementUnit": "kg",
+      "qualityGrade": "Grade A",
+      "destination": "Homestead Kitchen",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  },
+  {
+    "key": "BAT-2026-CUL-01-1",
+    "demo": true,
+    "data": {
+      "productName": "Bok Choy Grade A (Cut 2)",
+      "quantity": 12,
+      "measurementUnit": "kg",
+      "qualityGrade": "Grade A",
+      "destination": "Cold Cellar Storage",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  },
+  {
+    "key": "BAT-2026-AQU-01-0",
+    "demo": true,
+    "data": {
+      "productName": "Nile Tilapia (Table Size)",
+      "quantity": 18.5,
+      "measurementUnit": "kg",
+      "qualityGrade": "Prime Table Size",
+      "destination": "Homestead Freezer",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-AQU-01"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  },
+  {
+    "key": "BAT-2026-LIV-01-0",
+    "demo": true,
+    "data": {
+      "productName": "Fresh Pastured Eggs",
+      "quantity": 21,
+      "measurementUnit": "pcs",
+      "qualityGrade": "Grade A",
+      "destination": "Daily Homestead Consumption",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-LIV-01"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  },
+  {
+    "key": "BAT-2026-LIV-01-1",
+    "demo": true,
+    "data": {
+      "productName": "Fresh Pastured Eggs",
+      "quantity": 22,
+      "measurementUnit": "pcs",
+      "qualityGrade": "Grade A",
+      "destination": "Daily Homestead Consumption",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-LIV-01"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  },
+  {
+    "key": "BAT-2026-CMP-12-0",
+    "demo": true,
+    "data": {
+      "productName": "Mature Bokashi Humus",
+      "quantity": 60,
+      "measurementUnit": "kg",
+      "qualityGrade": "Rich Living Compost",
+      "destination": "Keyhole Raised Bed #1",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CMP-12"
+        }
+      },
+      "harvestDate": "2026-11-14T00:00:00.000Z",
+      "notes": "Demo seed output; not an actual harvest."
+    }
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-bsf-detail",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "demo-bsf"
+        }
+      },
+      "substrateType": "KITCHEN_SCRAPS",
+      "substrateWeightKg": 10,
+      "trayCount": 1
+    }
+  }
+]

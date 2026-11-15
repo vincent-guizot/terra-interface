@@ -1,0 +1,114 @@
+[
+  {
+    "key": "BAT-2026-CUL-01-0",
+    "demo": true,
+    "data": {
+      "action": "Universal Batch Created",
+      "details": "Demo seed: Initial transplant of 120 heads into NFT gullies",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-CUL-01-1",
+    "demo": true,
+    "data": {
+      "action": "First Cut Harvest Recorded",
+      "details": "Demo seed: 14.5 kg harvested from channel Alpha",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-AQU-01-0",
+    "demo": true,
+    "data": {
+      "action": "Batch Stocked",
+      "details": "Demo seed: 450 graded fingerlings introduced into Pond Alpha",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-AQU-01"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-AQU-01-1",
+    "demo": true,
+    "data": {
+      "action": "Sample Biometrics Taken",
+      "details": "Demo seed: Average weight sampled at 440g with FCR 1.25",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-AQU-01"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-LIV-01-0",
+    "demo": true,
+    "data": {
+      "action": "Flock Housed",
+      "details": "Demo seed: 24 point-of-lay pullets installed in Zone 3 coop",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-LIV-01"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-CMP-12-0",
+    "demo": true,
+    "data": {
+      "action": "Pile Inoculated",
+      "details": "Demo seed: EM4 anaerobic starter applied with moisture tuned to 55%",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CMP-12"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  },
+  {
+    "key": "BAT-2026-CMP-12-1",
+    "demo": true,
+    "data": {
+      "action": "Thermophilic Turn",
+      "details": "Demo seed: Core temperature reached 62°C",
+      "performedBy": "Vincent",
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CMP-12"
+        }
+      },
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  }
+]

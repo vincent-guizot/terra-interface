@@ -1,0 +1,1 @@
+export const COMMON_FEED_TYPES = ['BSF Live Prepupae + Rice Bran Mash', 'Commercial Layer Pellets (17% CP)', 'Pastured Forage & Azolla Greens', 'Brewer Spent Grains + Minerals', 'Fermented Maize & Fishmeal Ruminant Mash'];

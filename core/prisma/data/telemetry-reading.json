@@ -1,0 +1,24 @@
+[
+  {
+    "key": "demo-moisture",
+    "demo": true,
+    "data": {
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      },
+      "sensorId": {
+        "$ref": {
+          "table": "sensorDevice",
+          "key": "demo-sensor"
+        }
+      },
+      "metric": "SOIL_MOISTURE",
+      "value": 38,
+      "unit": "%",
+      "timestamp": "2026-11-14T00:00:00.000Z"
+    }
+  }
+]

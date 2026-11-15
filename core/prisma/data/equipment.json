@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-pump",
+    "demo": true,
+    "data": {
+      "facilityId": {
+        "$ref": {
+          "table": "facility",
+          "key": "demo-nft"
+        }
+      },
+      "name": "Demo Nutrient Pump",
+      "ratedPowerWatt": 20,
+      "status": "OPERATIONAL"
+    }
+  }
+]
