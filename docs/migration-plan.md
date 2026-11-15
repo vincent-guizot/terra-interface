@@ -1,73 +1,33 @@
-# Migration Plan — Terra Interface
+# Migration status and branch workflow
 
-> **Execution Blueprint & Data Migration Protocols**  
-> **Document Version**: 1.0.0 | **Status**: Architecture Specification
+## Completed architecture changes
 
----
+- Console runs as a Vite React JavaScript SPA with React Router.
+- Core runs as an Express JavaScript ES-module application with Prisma.
+- Redux and routing are grouped under console/src/app/.
+- Static Console data and reusable helpers are grouped by purpose.
+- Core constants, per-table JSON seeders and REST response envelopes are separated and documented.
 
-## 1. Migration Strategy Overview
+These structural changes do not establish that every domain is persisted, every request is validated, or physical hardware is connected. See [remaining work](implementation-roadmap.md).
 
-The migration transitions Terra Interface from a prototype with centralized mock fallbacks and a generic Prisma schema to a fully normalized **Domain Modular Monolith** and **Feature-Based Console**.
+## Starting new work
 
-The plan follows a 4-phase zero-downtime path:
+Fetch origin first and verify git status. For a new task, create a focused branch from origin/development. Reusing integrations is safe when it has no unique work and can be fast-forwarded to origin/development:
 
-```mermaid
-graph TD
-    P1["Phase 1: Database Schema Expansion (Prisma Non-Destructive Migrations)"] --> P2["Phase 2: Core Domain Modules Implementation & Registration"]
-    P2 --> P3["Phase 3: Console Feature-Based Decomposition & Hook Integration"]
-    P3 --> P4["Phase 4: API Client Error Propagation & Offline Banner System"]
+```sh
+git fetch origin
+git switch integrations
+git merge --ff-only origin/development
 ```
 
----
+If fast-forward fails, inspect the unique commits before choosing merge or rebase. Do not reset away other work or force-push a shared branch. Keep the PR focused on its own delta, even when its history contains earlier merged commits. Commit with the repository's configured Git identity.
 
-## 2. Phase-by-Phase Execution
+## Delivery
 
-### Phase 1: Database Schema Expansion (Non-Destructive)
-- **Goal**: Expand [core/prisma/schema.prisma](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/core/prisma/schema.prisma) to add the normalized 12-domain models without dropping existing `Homestead`, `Zone`, or `Batch` tables.
-- **Actions**:
-  1. Add 1-to-1 detail models (`CultivationBatchDetail`, `LivestockBatchDetail`, `AquacultureBatchDetail`, `BsfBatchDetail`, `CompostBatchDetail`).
-  2. Introduce `StockMovement` table with foreign key to `InventoryItem`.
-  3. Execute `npx prisma migrate dev --name init_normalized_domains`.
-  4. Run seeder updates to populate default product definitions and initial stock ledgers.
-- **Rollback Plan**: Prisma down migration script or restoring PostgreSQL snapshot taken before migration.
+1. Update the affected documentation together with behavior or dependency changes.
+2. Refresh the root workspace lockfile; refresh package-level locks for standalone installs when relevant.
+3. Run applicable source, contract and build checks.
+4. Push the task branch and open a PR into development.
+5. Validate the combined development state before opening a release PR into main.
 
-### Phase 2: Core Domain Modularization
-- **Goal**: Implement dedicated NestJS modules under `core/src/modules/` and mount them in `AppModule`.
-- **Actions**:
-  1. Scaffold `CultivationModule`, `LivestockModule`, `AquacultureModule`, `CircularModule`, `InventoryModule`, `MicrogridModule`, `IntelligenceModule`.
-  2. Implement controllers with Swagger `@ApiTags` and `@ApiOperation` decorators.
-  3. Wire domain services to validate business invariants before calling Prisma.
-  4. Register all modules into `core/src/app.module.ts`.
-  5. Verify that `/api/docs` reflects all 12 domains.
-- **Rollback Plan**: Revert `app.module.ts` to only import `UniversalBatchModule`.
-
-### Phase 3: Console Feature-Based Decomposition
-- **Goal**: Decompose monolithic 1,191-line [operations/index.js](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/console/pages/operations/index.js) into feature folders while preserving the approved Light Nature UI.
-- **Actions**:
-  1. Move contextual drawers to `console/features/<domain>/drawers/`.
-  2. Connect UI tables to [useUniversalBatches.js](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/console/hooks/useUniversalBatches.js) and [useOperationsCRUD.js](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/console/hooks/useOperationsCRUD.js).
-  3. Replace inline mock arrays with SWR queries that fetch from `/api/v1/`.
-  4. Verify build succeeds with `npm run build:console`.
-- **Rollback Plan**: Git checkout of `operations/index.js` to previous commit.
-
-### Phase 4: API Client Hardening & Offline Resilience
-- **Goal**: Eliminate silent fallback returns (`return null`) in [apiClient.js](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/console/services/apiClient.js) that disguise network errors as mock data.
-- **Actions**:
-  1. Update `ApiClient.request` to throw typed `ApiError` instances containing HTTP status codes.
-  2. Add a global "Core Offline" banner in [MainLayout.js](file:///D:/All%20Coding/05%20-%20Applications/Web%20Applications/terra-interface/console/components/MainLayout.js) when backend is unreachable.
-  3. Store pending offline form submissions in IndexedDB / LocalStorage queue for background re-sync.
-- **Rollback Plan**: Revert `apiClient.js` changes.
-
----
-
-## 3. Data Preservation & Verification Protocol
-
-Before running any database migration:
-1. **Take PostgreSQL Dump**:
-   ```bash
-   pg_dump -U postgres -d terra_interface -F c -b -v -f "backup_pre_migration_$(date +%Y%m%d).dump"
-   ```
-2. **Verify Integrity of Seed Data**:
-   Ensure all 7 zones in `homestead.constants.ts` remain intact with exact areas summing to 300.0 m².
-3. **Verify Next.js Static Generation**:
-   Ensure `npm run build:console` continues to generate 10/10 routes cleanly.
+A PR into main does not deploy the application by itself unless hosting automation is configured separately. Reverting code does not automatically revert database migrations or seeded records; plan database rollback independently.
