@@ -1,0 +1,185 @@
+import React from 'react';
+import { Box, Chip, Tooltip, Typography } from '@mui/material';
+import { masterPlanFacilities } from '../../data/masterPlanData.js';
+
+export const ZONE_TELEMETRY_NODES = [
+  {
+    zoneId: 'fac-gud-01',
+    name: 'Gudang & Utilitas',
+    code: 'FAC-GUD-01',
+    telemetry: '2 Lvls • 420W Base',
+    dataSource: 'LIVE',
+    color: '#4B5563',
+    left: '68%',
+    top: '28%',
+  },
+  {
+    zoneId: 'fac-msh-01',
+    name: 'Mushroom House',
+    code: 'FAC-MSH-01',
+    telemetry: '24.2°C • 88% RH',
+    dataSource: 'LIVE',
+    color: '#10B981',
+    left: '76%',
+    top: '36%',
+  },
+  {
+    zoneId: 'fac-chk-01',
+    name: 'Chicken Coop',
+    code: 'FAC-CHK-01',
+    telemetry: '21 Eggs/d • 54 Birds',
+    dataSource: 'MANUAL',
+    color: '#F59E0B',
+    left: '64%',
+    top: '52%',
+  },
+  {
+    zoneId: 'fac-gt-01',
+    name: 'Goat Barn',
+    code: 'FAC-GT-01',
+    telemetry: '4 Head • Boer Cross',
+    dataSource: 'MANUAL',
+    color: '#D97706',
+    left: '46%',
+    top: '22%',
+  },
+  {
+    zoneId: 'fac-shp-01',
+    name: 'Sheep Barn',
+    code: 'FAC-SHP-01',
+    telemetry: '4 Head • Garut Sheep',
+    dataSource: 'MANUAL',
+    color: '#B45309',
+    left: '32%',
+    top: '26%',
+  },
+  {
+    zoneId: 'fac-bsf-01',
+    name: 'BSF / Maggot House',
+    code: 'FAC-BSF-01',
+    telemetry: '2.4 kg Prepupae • 36°C',
+    dataSource: 'MANUAL',
+    color: '#059669',
+    left: '74%',
+    top: '58%',
+  },
+  {
+    zoneId: 'fac-hyd-01',
+    name: 'Hydroponic / Vertical Garden',
+    code: 'FAC-HYD-01',
+    telemetry: '1.6 EC • 6.2 pH',
+    dataSource: 'LIVE',
+    color: '#10B981',
+    left: '26%',
+    top: '44%',
+  },
+  {
+    zoneId: 'fac-crg-01',
+    name: 'Carport Rooftop Greenhouse',
+    code: 'FAC-CRG-01',
+    telemetry: '27.4°C • 48 Trays',
+    dataSource: 'LIVE',
+    color: '#0284C7',
+    left: '38%',
+    top: '72%',
+  },
+  {
+    zoneId: 'fac-tog-01',
+    name: 'TOGA Garden',
+    code: 'FAC-TOG-01',
+    telemetry: '36% Moist • 9.4% OM',
+    dataSource: 'MANUAL',
+    color: '#65A30D',
+    left: '58%',
+    top: '74%',
+  },
+  {
+    zoneId: 'fac-pft-01',
+    name: 'Perimeter Fruit Trees',
+    code: 'FAC-PFT-01',
+    telemetry: '8 Papaya • 4 Bananas',
+    dataSource: 'MANUAL',
+    color: '#4D7C0F',
+    left: '14%',
+    top: '48%',
+  },
+];
+
+export function ZoneLiveTelemetryOverlay({ onSelectZone, visible = true }) {
+  if (!visible) return null;
+
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        pointerEvents: 'none',
+      }}
+    >
+      {ZONE_TELEMETRY_NODES.map((node) => (
+        <Box
+          key={node.zoneId}
+          sx={{
+            position: 'absolute',
+            left: node.left,
+            top: node.top,
+            transform: 'translate(-50%, -50%)',
+            pointerEvents: 'auto',
+          }}
+        >
+          <Tooltip
+            title={
+              <Box sx={{ p: 0.5 }}>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: '#FFFFFF', display: 'block' }}>
+                  {node.code} • {node.name}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#E2E8F0', display: 'block' }}>
+                  Provenance: {node.dataSource} • Click to inspect facility records
+                </Typography>
+              </Box>
+            }
+          >
+            <Chip
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
+                  <Box
+                    sx={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: '50%',
+                      bgcolor: node.dataSource === 'LIVE' ? '#10B981' : '#0284C7',
+                    }}
+                  />
+                  <span>{node.telemetry}</span>
+                </Box>
+              }
+              size="small"
+              onClick={() => onSelectZone && onSelectZone(node.zoneId)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.94)',
+                border: `1.5px solid ${node.color}`,
+                color: '#14281D',
+                fontWeight: 700,
+                fontSize: '0.68rem',
+                height: 22,
+                boxShadow: '0 4px 12px rgba(27,67,50,0.12)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  bgcolor: '#FFFFFF',
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 6px 16px rgba(27,67,50,0.18)',
+                },
+              }}
+            />
+          </Tooltip>
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+export default ZoneLiveTelemetryOverlay;

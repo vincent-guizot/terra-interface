@@ -4,6 +4,9 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    'process.env': {},
+  },
   plugins: [
     react({
       include: '**/*.{jsx,js}',
@@ -23,10 +26,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
-      'next/head': path.resolve(__dirname, './src/compat/Head.jsx'),
-      'next/link': path.resolve(__dirname, './src/compat/Link.jsx'),
-      'next/router': path.resolve(__dirname, './src/compat/Router.jsx'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
@@ -42,11 +42,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         manualChunks: {
           reactVendor: ['react', 'react-dom', 'react-router-dom'],
+          reduxVendor: ['@reduxjs/toolkit', 'react-redux'],
+          queryVendor: ['@tanstack/react-query', 'axios'],
           muiVendor: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
         },
       },
