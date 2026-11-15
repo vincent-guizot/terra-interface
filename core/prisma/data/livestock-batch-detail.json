@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-flock-detail",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-LIV-01"
+        }
+      },
+      "breed": "Ayam KUB",
+      "housingSystem": "DEEP_LITTER_COOP",
+      "targetFcr": 2.4
+    }
+  }
+]

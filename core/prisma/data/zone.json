@@ -1,0 +1,149 @@
+[
+  {
+    "key": "Z-01",
+    "demo": true,
+    "match": {
+      "code": "Z-01"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-01",
+      "name": "Smart Micro-Greenhouse",
+      "areaSqm": 35,
+      "type": "CULTIVATION",
+      "domainTag": "CULTIVATION",
+      "colorHex": "#10B981"
+    }
+  },
+  {
+    "key": "Z-02",
+    "demo": true,
+    "match": {
+      "code": "Z-02"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-02",
+      "name": "Aquaponics & Bio-Pond",
+      "areaSqm": 25,
+      "type": "AQUACULTURE",
+      "domainTag": "AQUACULTURE",
+      "colorHex": "#0284C7"
+    }
+  },
+  {
+    "key": "Z-03",
+    "demo": true,
+    "match": {
+      "code": "Z-03"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-03",
+      "name": "Intensive Poultry & BSF Hub",
+      "areaSqm": 20,
+      "type": "LIVESTOCK",
+      "domainTag": "LIVESTOCK",
+      "colorHex": "#F59E0B"
+    }
+  },
+  {
+    "key": "Z-04",
+    "demo": true,
+    "match": {
+      "code": "Z-04"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-04",
+      "name": "Permaculture Food Forest & Beds",
+      "areaSqm": 110,
+      "type": "CULTIVATION",
+      "domainTag": "CULTIVATION",
+      "colorHex": "#65A30D"
+    }
+  },
+  {
+    "key": "Z-05",
+    "demo": true,
+    "match": {
+      "code": "Z-05"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-05",
+      "name": "Solar Array & Battery Hub",
+      "areaSqm": 30,
+      "type": "ENERGY_WATER",
+      "domainTag": "ENERGY_WATER",
+      "colorHex": "#D97706"
+    }
+  },
+  {
+    "key": "Z-06",
+    "demo": true,
+    "match": {
+      "code": "Z-06"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-06",
+      "name": "Water Catchment & Filtration",
+      "areaSqm": 25,
+      "type": "ENERGY_WATER",
+      "domainTag": "ENERGY_WATER",
+      "colorHex": "#0D9488"
+    }
+  },
+  {
+    "key": "Z-07",
+    "demo": true,
+    "match": {
+      "code": "Z-07"
+    },
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "code": "Z-07",
+      "name": "Eco-Living Quarters & Nursery",
+      "areaSqm": 55,
+      "type": "CULTIVATION",
+      "domainTag": "CULTIVATION",
+      "colorHex": "#8B5CF6"
+    }
+  }
+]

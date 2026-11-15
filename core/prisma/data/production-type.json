@@ -1,0 +1,146 @@
+[
+  {
+    "key": "type-0",
+    "demo": true,
+    "match": {
+      "name": "Hydroponic Leafy Greens & Brassicas",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Hydroponic Leafy Greens & Brassicas",
+      "domain": "CULTIVATION",
+      "defaultUnit": "kg",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-1",
+    "demo": true,
+    "match": {
+      "name": "Gourmet Mushrooms & Fungi",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Gourmet Mushrooms & Fungi",
+      "domain": "CULTIVATION",
+      "defaultUnit": "kg",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-2",
+    "demo": true,
+    "match": {
+      "name": "Pastured Dual-Purpose Poultry",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Pastured Dual-Purpose Poultry",
+      "domain": "LIVESTOCK",
+      "defaultUnit": "pcs",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-3",
+    "demo": true,
+    "match": {
+      "name": "Recirculating Aquaculture Finfish",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Recirculating Aquaculture Finfish",
+      "domain": "AQUACULTURE",
+      "defaultUnit": "kg",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-4",
+    "demo": true,
+    "match": {
+      "name": "Black Soldier Fly Insect Protein",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Black Soldier Fly Insect Protein",
+      "domain": "CIRCULAR",
+      "defaultUnit": "kg",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-5",
+    "demo": true,
+    "match": {
+      "name": "Thermophilic Bokashi Compost",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    },
+    "data": {
+      "name": "Thermophilic Bokashi Compost",
+      "domain": "CIRCULAR",
+      "defaultUnit": "kg",
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      }
+    }
+  }
+]

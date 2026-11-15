@@ -1,0 +1,16 @@
+[
+  {
+    "key": "demo-sensor",
+    "demo": true,
+    "data": {
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      },
+      "deviceModel": "DEMO-SENSOR",
+      "status": "OFFLINE"
+    }
+  }
+]

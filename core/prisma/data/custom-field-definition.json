@@ -1,0 +1,18 @@
+[
+  {
+    "key": "demo-brix",
+    "demo": true,
+    "data": {
+      "productDefinitionId": {
+        "$ref": {
+          "table": "productDefinition",
+          "key": "demo-bok-choy"
+        }
+      },
+      "key": "brix",
+      "label": "Demo Brix",
+      "dataType": "NUMBER",
+      "isRequired": false
+    }
+  }
+]

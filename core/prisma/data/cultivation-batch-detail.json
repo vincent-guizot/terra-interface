@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-crop-detail",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "growingMedium": "NFT_SOLUTION",
+      "ecTarget": 1.6,
+      "phTarget": 6.2
+    }
+  }
+]

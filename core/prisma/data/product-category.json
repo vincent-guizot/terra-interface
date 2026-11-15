@@ -1,0 +1,16 @@
+[
+  {
+    "key": "demo-leafy",
+    "demo": true,
+    "data": {
+      "homesteadId": {
+        "$ref": {
+          "table": "homestead",
+          "key": "farm"
+        }
+      },
+      "name": "Demo Leafy Greens",
+      "domain": "CULTIVATION"
+    }
+  }
+]

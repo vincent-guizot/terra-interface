@@ -1,0 +1,16 @@
+[
+  {
+    "key": "demo-compost-detail",
+    "demo": true,
+    "data": {
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CMP-12"
+        }
+      },
+      "bayNumber": "Demo Bay",
+      "carbonNitrogenRatio": 30
+    }
+  }
+]

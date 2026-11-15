@@ -1,0 +1,21 @@
+[
+  {
+    "key": "demo-brix-value",
+    "demo": true,
+    "data": {
+      "fieldDefId": {
+        "$ref": {
+          "table": "customFieldDefinition",
+          "key": "demo-brix"
+        }
+      },
+      "batchId": {
+        "$ref": {
+          "table": "batch",
+          "key": "BAT-2026-CUL-01"
+        }
+      },
+      "value": "5.0"
+    }
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "key": "demo-greenhouse",
+    "demo": true,
+    "data": {
+      "zoneId": {
+        "$ref": {
+          "table": "zone",
+          "key": "Z-01"
+        }
+      },
+      "name": "Demo Greenhouse",
+      "footprintSqm": 12,
+      "roofAreaSqm": 12
+    }
+  }
+]
