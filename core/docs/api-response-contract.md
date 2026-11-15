@@ -1,5 +1,7 @@
 # API response contract — v1
 
+See [the Core documentation index](README.md) for setup, persistence and testing, and [the mounted route inventory](../../docs/api-contracts.md) for endpoint paths. The current Express application does not serve Swagger UI at `/api/docs`.
+
 All ordinary JSON endpoints under `/api/v1`, including legacy operation and gateway routes, use the following envelope. Domain payloads remain inside `data`; this document defines the envelope, not every domain payload schema. The machine-readable definition is [api-response.schema.json](api-response.schema.json).
 
 ## Success

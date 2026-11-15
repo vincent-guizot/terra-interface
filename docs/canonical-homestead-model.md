@@ -1,9 +1,11 @@
 # Canonical Homestead Spatial Model — Vincent's Farm (300 m²)
 
+> Design reference: dimensions, hardware, biological targets and illustrative schema below describe the intended homestead. They are not verified installed hardware, live readings, or the exact Prisma/API contract. See [architecture](architecture-overview.md), [database reference](database-erd.md) and [API contracts](api-contracts.md) for current implementation.
+
 > **Physical Site Specification & Spatial Taxonomy**  
 > **Location**: West Java, Indonesia (Tropical Highland Monsoon, -6.9175° S, 107.6191° E)  
 > **Master Dimensions**: 15.0 meters wide × 20.0 meters deep = **300.0 m²**  
-> **Document Version**: 1.0.0 | **Status**: Verified Master Plan Specification
+> **Document Version**: 1.0.0 | **Status**: Master Plan Design Reference
 
 ---
 
@@ -131,24 +133,21 @@ The 300 m² property is oriented along a North-South axis to maximize solar capt
 - **Buildings**: Passive solar homestead dwelling ($8.0\text{ m} \times 5.0\text{ m}$) with shaded verandas.
 - **Micro Storage & Systems**:
   - Climate-controlled heirloom seed vault (74 cataloged heritage varieties at 16°C and 40% RH).
-  - Central Home OS terminal and local edge server (Intel N100 running NestJS and PostgreSQL).
+  - Central Home OS terminal and local edge server (Intel N100 running Express and PostgreSQL).
   - Domestic kitchen preparation station with dedicated organic scrap separation buckets.
 
 ---
 
-## 4. Verification Status: Ground Truth vs. Micro-Measurements
+## 4. Verification boundaries
 
-| Dimension / Element | Value | Status | Action Required |
-| :--- | :--- | :---: | :--- |
-| **Total Property Area** | 300.0 m² ($15\text{ m} \times 20\text{ m}$) | **Verified** | Approved Master Plan boundary; non-negotiable baseline. |
-| **Zone 1 Area** | 35.0 m² | **Verified** | Built footprint matches CAD layout. |
-| **Zone 2 Area** | 25.0 m² | **Verified** | Bio-pond containment walls completed. |
-| **Zone 3 Area** | 20.0 m² | **Verified** | Poultry coop and BSF shelter constructed. |
-| **Zone 4 Area** | 110.0 m² | **Verified** | Food forest perimeter staked and swaled. |
-| **Zone 5 Area** | 30.0 m² | **Verified** | Solar canopy footings installed. |
-| **Zone 6 Area** | 25.0 m² | **Verified** | Concrete pad for 3x cisterns completed. |
-| **Zone 7 Area** | 55.0 m² | **Verified** | Residence foundation dimensions verified. |
-| **Total Area Check** | $\sum = 300.0\text{ m²}$ | **Verified** | Exact match. |
-| **Z-07 Seed Vault Partition** | $\approx 10\text{ cm}$ | *Unverified* | Verify physical wall insulation thickness on-site. |
-| **Z-06 to Z-02 Drain Slope** | $\approx 2.5\%$ grade | *Unverified* | Measure underground PVC elevation with laser level. |
-| **Z-04 Shade Trellis Clearance**| $\approx 2.4\text{ m}$ height | *Unverified* | Measure overhead cable clearance from finished soil bed. |
+The seven design areas above sum to 300 m². This arithmetic and the repository's reference constants do not verify construction, installed equipment or on-site measurements.
+
+| Element | Design value | Verification still required |
+| --- | --- | --- |
+| Property boundary | 15 m x 20 m | Site survey and current plan approval |
+| Zones 1-7 | 35, 25, 20, 110, 30, 25, 55 m² | Compare reference geometry with surveyed footprints |
+| Seed-vault partition | Approximately 10 cm | Measure wall/insulation on site |
+| Drain slope | Approximately 2.5% | Measure pipe elevations |
+| Shade-trellis clearance | Approximately 2.4 m | Measure clearance from finished beds |
+
+Physical observations should include date and source before being marked verified. Live API readings and demo fixture values must remain distinguishable.
