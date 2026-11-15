@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "test": "npm run test:invariants && npm run test:http",
+    "test": "npm run test:invariants && npm run test:seeders && npm run test:http",
     "db:test": "node scripts/test-db.js",
     "test:invariants": "node tests/invariants/runner.js",
     "prisma:generate": "prisma generate",
@@ -15,7 +15,7 @@
     "prisma:seed": "node prisma/seeders/seed.js --demo",
     "prisma:studio": "prisma studio",
     "db:setup": "node scripts/init-db.js",
-    "test:http": "node tests/runner.js && node --test tests/router-contract.test.js",
+    "test:http": "node tests/runner.js && node --test tests/router-contract.test.js tests/api-response.test.js",
     "build": "node scripts/check-source.js",
     "start:dev": "node --watch src/server.js",
     "prisma:seed:check": "node prisma/seeders/seed.js --check",

@@ -1,5 +1,5 @@
 import inventoryService from './inventory.service.js';
-import { sendSuccess, sendCreated } from '../../utils/response.js';
+import { sendSuccess, sendCreated, sendError } from '../../utils/response.js';
 export async function getSummary(req, res, next) {
   try {
     const summary = await inventoryService.getSummary();
@@ -24,14 +24,7 @@ export async function getItemById(req, res, next) {
   try {
     const item = await inventoryService.getItemById(req.params.id);
     if (!item) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: `Inventory item '${req.params.id}' not found`,
-          statusCode: 404,
-          code: 'NOT_FOUND'
-        }
-      });
+      return sendError(res, 404, `Inventory item '${req.params.id}' not found`);
     }
     return sendSuccess(res, item, 'Inventory item retrieved');
   } catch (err) {

@@ -12,7 +12,7 @@ export async function getHealth(req, res) {
       }
   } catch (err) {
     dbStatus = 'disconnected';
-    dbError = err.message;
+    dbError = 'Database connection unavailable';
     isHealthy = false;
   }
   const response = {

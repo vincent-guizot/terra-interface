@@ -1,3 +1,4 @@
+import { sendSuccess } from "../../utils/response.js";
 import { Router } from 'express';
 import circularController from './circular.controller.js';
 const router = Router();
@@ -19,7 +20,7 @@ const service = circular_service_1.default;
 router.get('/compost/piles', async (req, res, next) => {
   try {
     const piles = await service.getCompostBatches();
-    res.json(piles);
+    sendSuccess(res, piles);
   } catch (err) {
     next(err);
   }
@@ -27,7 +28,7 @@ router.get('/compost/piles', async (req, res, next) => {
 router.post('/compost/turn', async (req, res, next) => {
   try {
     const result = await service.recordCompostTurn(req.body);
-    res.json(result);
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
@@ -35,7 +36,7 @@ router.post('/compost/turn', async (req, res, next) => {
 router.post('/compost/harvest', async (req, res, next) => {
   try {
     const result = await service.recordCompostHarvest(req.body);
-    res.json(result);
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }

@@ -1,5 +1,5 @@
 import resourcesService from './resources.service.js';
-import { sendSuccess } from '../../utils/response.js';
+import { sendSuccess, sendError } from '../../utils/response.js';
 export async function getOverview(req, res, next) {
   try {
     const overview = await resourcesService.getResourcesOverview();
@@ -24,14 +24,7 @@ export async function getFlowById(req, res, next) {
   try {
     const flow = await resourcesService.getFlowById(req.params.id);
     if (!flow) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: `Resource flow '${req.params.id}' not found`,
-          statusCode: 404,
-          code: 'NOT_FOUND'
-        }
-      });
+      return sendError(res, 404, `Resource flow '${req.params.id}' not found`);
     }
     return sendSuccess(res, flow, 'Resource flow retrieved');
   } catch (err) {

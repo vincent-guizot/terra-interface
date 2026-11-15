@@ -11,6 +11,7 @@ import healthController from './controllers/healthController.js';
 import apiRoutes from './routes/index.js';
 import { registerInventoryEventListener } from './common/events/listeners/inventory-event.listener.js';
 import { registerTelemetryAlertListener } from './common/events/listeners/telemetry-alert.listener.js';
+import { sendSuccess } from './utils/response.js';
 
 registerInventoryEventListener();
 registerTelemetryAlertListener();
@@ -59,7 +60,7 @@ app.use('/api', apiRoutes);
 
 // Root informational endpoint
 app.get('/', (req, res) => {
-  res.json({
+  sendSuccess(res, {
     application: 'Terra Interface Core API Engine',
     version: '1.0.0',
     homestead: "Vincent's Farm (300 m² Master Plan)",

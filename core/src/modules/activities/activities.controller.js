@@ -1,5 +1,5 @@
 import activitiesService from './activities.service.js';
-import { sendSuccess, sendCreated } from '../../utils/response.js';
+import { sendSuccess, sendCreated, sendError } from '../../utils/response.js';
 export async function getSummary(req, res, next) {
   try {
     const summary = await activitiesService.getActivitiesSummary();
@@ -24,14 +24,7 @@ export async function getTaskById(req, res, next) {
   try {
     const task = await activitiesService.getTaskById(req.params.id);
     if (!task) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: `Task '${req.params.id}' not found`,
-          statusCode: 404,
-          code: 'NOT_FOUND'
-        }
-      });
+      return sendError(res, 404, `Task '${req.params.id}' not found`);
     }
     return sendSuccess(res, task, 'Homestead task retrieved');
   } catch (err) {

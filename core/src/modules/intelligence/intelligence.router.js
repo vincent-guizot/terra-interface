@@ -1,3 +1,4 @@
+import { sendSuccess } from "../../utils/response.js";
 import { Router } from 'express';
 import intelligenceController from './intelligence.controller.js';
 const router = Router();
@@ -14,7 +15,7 @@ const service = intelligence_service_1.default;
 router.get('/insights', async (req, res, next) => {
   try {
     const insights = await service.getInsights();
-    res.json(insights);
+    sendSuccess(res, insights);
   } catch (err) {
     next(err);
   }
@@ -22,7 +23,7 @@ router.get('/insights', async (req, res, next) => {
 router.post('/insights/:id/apply', async (req, res, next) => {
   try {
     const result = await service.applyRecommendation(req.params.id, req.body?.notes);
-    res.json(result);
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
@@ -30,7 +31,7 @@ router.post('/insights/:id/apply', async (req, res, next) => {
 router.post('/insights/:id/dismiss', async (req, res, next) => {
   try {
     const result = await service.dismissRecommendation(req.params.id);
-    res.json(result);
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }
@@ -38,7 +39,7 @@ router.post('/insights/:id/dismiss', async (req, res, next) => {
 router.post('/diagnose', async (req, res, next) => {
   try {
     const diagnosis = await service.diagnosePlant(req.body);
-    res.json(diagnosis);
+    sendSuccess(res, diagnosis);
   } catch (err) {
     next(err);
   }
@@ -46,7 +47,7 @@ router.post('/diagnose', async (req, res, next) => {
 router.post('/query', async (req, res, next) => {
   try {
     const response = await service.processQuery(req.body);
-    res.json(response);
+    sendSuccess(res, response);
   } catch (err) {
     next(err);
   }
@@ -54,7 +55,7 @@ router.post('/query', async (req, res, next) => {
 router.get('/forecast', async (req, res, next) => {
   try {
     const forecast = await service.getForecast();
-    res.json(forecast);
+    sendSuccess(res, forecast);
   } catch (err) {
     next(err);
   }

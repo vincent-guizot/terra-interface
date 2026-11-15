@@ -17,12 +17,19 @@ test('legacy operational endpoints and SSE survive the ESM cleanup', async () =>
       body: JSON.stringify({ ecTarget: 1.8, currentEc: 1.2, reservoirLiters: 200 }),
     });
     assert.equal(dosing.status, 200);
-    assert.equal((await dosing.json()).solutionAPumpMl, 600);
+    const dosingResponse = await dosing.json();
+    assert.equal(dosingResponse.success, true);
+    assert.equal(dosingResponse.data.solutionAPumpMl, 600);
 
     const invalid = await fetch(`${url}/energy-water/gateway/ingest`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}',
     });
     assert.equal(invalid.status, 400);
+    const invalidResponse = await invalid.json();
+    assert.equal(invalidResponse.success, false);
+    assert.equal(invalidResponse.error.code, 'VALIDATION_ERROR');
+    assert.equal(invalidResponse.error.statusCode, 400);
+    assert(Array.isArray(invalidResponse.error.details));
 
     const stream = await fetch(`${url}/telemetry/stream`, { signal: controller.signal });
     assert.equal(stream.status, 200);

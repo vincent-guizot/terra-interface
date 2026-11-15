@@ -1,3 +1,4 @@
+import { sendSuccess, sendCreated, sendError } from "../../utils/response.js";
 import { Router } from 'express';
 import energyWaterController from './energy-water.controller.js';
 const router = Router();
@@ -14,7 +15,7 @@ import * as energy_water_service_1 from './energy-water.service.js';
 import * as iot_gateway_service_1 from './gateway/iot-gateway.service.js';
 const service = energy_water_service_1.default;
 router.get('/gateway/status', (req, res) => {
-  res.json(iot_gateway_service_1.iotGatewayService.getStats());
+  sendSuccess(res, iot_gateway_service_1.iotGatewayService.getStats());
 });
 router.post('/gateway/ingest', async (req, res, next) => {
   try {
@@ -23,12 +24,13 @@ router.post('/gateway/ingest', async (req, res, next) => {
       payload
     } = req.body;
     if (!topic || payload === undefined) {
-      return res.status(400).json({
-        error: "Missing required fields 'topic' or 'payload'"
-      });
+      return sendError(res, 400, "Missing required fields 'topic' or 'payload'", "VALIDATION_ERROR", [{
+        field: "topic/payload",
+        message: "Both topic and payload are required"
+      }]);
     }
     const snapshot = await iot_gateway_service_1.iotGatewayService.handleEdgeMessage(topic, payload);
-    res.status(201).json(snapshot);
+    sendCreated(res, snapshot);
   } catch (err) {
     next(err);
   }
@@ -36,7 +38,7 @@ router.post('/gateway/ingest', async (req, res, next) => {
 router.get('/telemetry/live', async (req, res, next) => {
   try {
     const snapshot = service.getLiveSnapshot();
-    res.json(snapshot);
+    sendSuccess(res, snapshot);
   } catch (err) {
     next(err);
   }
@@ -45,7 +47,7 @@ router.get('/telemetry/history', async (req, res, next) => {
   try {
     const hours = req.query.hours ? parseInt(req.query.hours, 10) : 24;
     const history = service.getHistoricalTelemetry(hours);
-    res.json(history);
+    sendSuccess(res, history);
   } catch (err) {
     next(err);
   }
@@ -53,18 +55,18 @@ router.get('/telemetry/history', async (req, res, next) => {
 router.post('/telemetry/ingest', async (req, res, next) => {
   try {
     const result = await service.ingestTelemetry(req.body);
-    res.status(201).json(result);
+    sendCreated(res, result);
   } catch (err) {
     next(err);
   }
 });
 router.post('/policy', (req, res) => {
   const updated = service.updateDispatchPolicy(req.body);
-  res.json(updated);
+  sendSuccess(res, updated);
 });
 router.get('/dump-load/status', (req, res) => {
   const status = service.getDumpLoadStatus();
-  res.json(status);
+  sendSuccess(res, status);
 });
 // Server-Sent Events (SSE) Stream
 router.get('/telemetry/stream', (req, res) => {

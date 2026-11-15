@@ -1,5 +1,5 @@
 import productionService from './production.service.js';
-import { sendSuccess } from '../../utils/response.js';
+import { sendSuccess, sendError } from '../../utils/response.js';
 export async function getSummary(req, res, next) {
   try {
     const summary = await productionService.getSummary();
@@ -20,14 +20,7 @@ export async function getCategoryById(req, res, next) {
   try {
     const category = await productionService.getCategoryById(req.params.id);
     if (!category) {
-      return res.status(404).json({
-        success: false,
-        error: {
-          message: `Production category '${req.params.id}' not found`,
-          statusCode: 404,
-          code: 'NOT_FOUND'
-        }
-      });
+      return sendError(res, 404, `Production category '${req.params.id}' not found`);
     }
     return sendSuccess(res, category, 'Production category retrieved');
   } catch (err) {

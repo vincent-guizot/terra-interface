@@ -1,3 +1,4 @@
+import { sendSuccess, sendCreated } from "../../utils/response.js";
 import { Router } from 'express';
 import cultivationController from './cultivation.controller.js';
 const router = Router();
@@ -7,12 +8,16 @@ router.get('/', cultivationController.getSummary);
 import * as cultivation_service_1 from './cultivation.service.js';
 const service = cultivation_service_1.default;
 router.get('/microgreens/calibration', (req, res, next) => {
-  try { res.json(service.getMicrogreenCalibration()); } catch (error) { next(error); }
+  try {
+    sendSuccess(res, service.getMicrogreenCalibration());
+  } catch (error) {
+    next(error);
+  }
 });
 router.get('/catalog', async (req, res, next) => {
   try {
     const catalog = await service.getCatalog(req.query.category);
-    res.json(catalog);
+    sendSuccess(res, catalog);
   } catch (err) {
     next(err);
   }
@@ -20,7 +25,7 @@ router.get('/catalog', async (req, res, next) => {
 router.post('/catalog', async (req, res, next) => {
   try {
     const variety = await service.createCropVariety(req.body);
-    res.status(201).json(variety);
+    sendCreated(res, variety);
   } catch (err) {
     next(err);
   }
@@ -28,7 +33,7 @@ router.post('/catalog', async (req, res, next) => {
 router.get('/batches/active', async (req, res, next) => {
   try {
     const batches = await service.getActiveBatches();
-    res.json(batches);
+    sendSuccess(res, batches);
   } catch (err) {
     next(err);
   }
@@ -36,7 +41,7 @@ router.get('/batches/active', async (req, res, next) => {
 router.post('/nutrient-dosing', async (req, res, next) => {
   try {
     const dosing = await service.calculateNutrientDosing(req.body);
-    res.json(dosing);
+    sendSuccess(res, dosing);
   } catch (err) {
     next(err);
   }

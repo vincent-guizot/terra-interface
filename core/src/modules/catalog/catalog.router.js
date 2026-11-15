@@ -1,3 +1,4 @@
+import { sendSuccess, sendCreated } from "../../utils/response.js";
 import { Router } from 'express';
 import catalogController from './catalog.controller.js';
 const router = Router();
@@ -10,7 +11,7 @@ const service = catalog_service_1.default;
 router.post('/products', async (req, res, next) => {
   try {
     const product = await service.createProduct(req.body);
-    res.status(201).json(product);
+    sendCreated(res, product);
   } catch (err) {
     next(err);
   }
@@ -18,7 +19,7 @@ router.post('/products', async (req, res, next) => {
 router.post('/units/convert', async (req, res, next) => {
   try {
     const result = await service.convertUnit(req.body);
-    res.json(result);
+    sendSuccess(res, result);
   } catch (err) {
     next(err);
   }

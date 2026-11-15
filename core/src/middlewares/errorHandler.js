@@ -1,4 +1,6 @@
 import env from '../config/env.js';
+import { sendError } from '../utils/response.js';
+import { ERROR_CODES_BY_STATUS } from '../constants/api-response.constants.js';
 export class AppError extends Error {
   constructor(message, statusCode = 500, code = 'INTERNAL_ERROR', details = null) {
     super(message);
@@ -9,9 +11,12 @@ export class AppError extends Error {
   }
 }
 export function errorHandler(err, req, res, next) {
-  const statusCode = err.statusCode || (err.status ? err.status : 500);
-  const code = err.code || (statusCode >= 500 ? 'INTERNAL_SERVER_ERROR' : 'BAD_REQUEST');
-  const message = err.message || 'An unexpected internal error occurred';
+  if (res.headersSent) return next(err);
+  const requestedStatus = err.statusCode || err.status;
+  const statusCode = Number.isInteger(requestedStatus) && requestedStatus >= 400 && requestedStatus <= 599 ? requestedStatus : 500;
+  const invalidJson = err.type === 'entity.parse.failed';
+  const code = invalidJson ? 'INVALID_JSON' : statusCode >= 500 ? ERROR_CODES_BY_STATUS[statusCode] || 'INTERNAL_SERVER_ERROR' : err.code || ERROR_CODES_BY_STATUS[statusCode] || 'REQUEST_FAILED';
+  const message = invalidJson ? 'Request body must contain valid JSON' : statusCode >= 500 ? 'An unexpected internal error occurred' : err.message || 'Request failed';
 
   // Log error details for server diagnostics
   if (statusCode >= 500) {
@@ -19,21 +24,6 @@ export function errorHandler(err, req, res, next) {
   } else if (env.isDevelopment) {
     console.warn(`[CLIENT ERROR ${statusCode}] [${req.method} ${req.originalUrl}]:`, message);
   }
-  const response = {
-    success: false,
-    error: {
-      message,
-      statusCode,
-      code,
-      details: err.details || null
-    },
-    timestamp: new Date().toISOString()
-  };
-
-  // Only include stack trace in non-production environments
-  if (env.isDevelopment && err.stack) {
-    response.error.stack = err.stack;
-  }
-  res.status(statusCode).json(response);
+  return sendError(res, statusCode, message, code, statusCode >= 500 ? null : err.details ?? null);
 }
 export default errorHandler;

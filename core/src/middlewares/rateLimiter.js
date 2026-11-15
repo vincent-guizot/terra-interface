@@ -1,4 +1,6 @@
 import rateLimit from 'express-rate-limit';
+import { sendError } from '../utils/response.js';
+export const rateLimitHandler = (req, res) => sendError(res, 429, 'Too many requests. Please try again later.', 'RATE_LIMIT_EXCEEDED');
 export const apiRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   // 1 minute
@@ -6,18 +8,10 @@ export const apiRateLimiter = rateLimit({
   // 300 requests per minute per IP
   standardHeaders: true,
   legacyHeaders: false,
-  message: {
-    success: false,
-    error: {
-      message: 'Too many requests dispatched to Terra Interface Core API. Please rate-limit telemetry.',
-      statusCode: 429,
-      code: 'RATE_LIMIT_EXCEEDED'
-    },
-    timestamp: new Date().toISOString()
-  },
+  handler: rateLimitHandler,
   skip: req => {
     // Skip rate limiting for internal health check or SSE telemetry stream
-    return req.path === '/api/health' || req.path.includes('/telemetry/stream');
+    return req.path === '/health' || ['/v1/telemetry/stream', '/v1/energy-water/telemetry/stream', '/v1/energy-water/stream'].includes(req.path);
   }
 });
 export default apiRateLimiter;
