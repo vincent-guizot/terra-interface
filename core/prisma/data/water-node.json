@@ -1,0 +1,12 @@
+[
+  {
+    "key": "demo-water",
+    "demo": true,
+    "data": {
+      "cisternLevelPct": 92,
+      "currentVolumeL": 11040,
+      "totalCapacityL": 12000,
+      "dailyUsageL": 380
+    }
+  }
+]

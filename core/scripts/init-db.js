@@ -5,7 +5,10 @@
  * Executes Prisma schema push and canonical homestead seeders
  */
 
-const { execSync } = require('child_process');
+import { execSync } from 'node:child_process';
+import { databaseUrl } from '../src/prisma/prisma.service.js';
+
+process.env.DATABASE_URL = databaseUrl;
 
 console.log('================================================================');
 console.log('🌱 TERRA INTERFACE — POSTGRESQL DATABASE INITIALIZER');
@@ -20,7 +23,7 @@ try {
   execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
 
   console.log('\n[3/3] Running canonical homestead seeders...');
-  execSync('node prisma/seeders/seed.js', { stdio: 'inherit' });
+  execSync('node prisma/seeders/seed.js --demo', { stdio: 'inherit' });
 
   console.log('\n✅ Database initialization completed successfully!');
 } catch (error) {

@@ -1,0 +1,13 @@
+[
+  {
+    "key": "demo-inspection",
+    "demo": true,
+    "data": {
+      "title": "Demo: inspect nutrient pump",
+      "domain": "CULTIVATION",
+      "dueDate": "2026-11-14T00:00:00.000Z",
+      "priority": "MEDIUM",
+      "status": "PENDING"
+    }
+  }
+]

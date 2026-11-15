@@ -1,46 +1,17 @@
+import { Router } from 'express';
+import aquacultureController from './aquaculture.controller.js';
+const router = Router();
+router.get('/summary', aquacultureController.getSummary);
+router.get('/ponds', aquacultureController.getPonds);
+router.get('/water-quality', aquacultureController.getWaterQuality);
+router.post('/water-test', aquacultureController.recordWaterTest);
+router.post('/feeding', aquacultureController.recordFeeding);
+router.get('/feeding-logs', aquacultureController.getFeedingLogs);
+router.get('/aeration-schedule', aquacultureController.getAerationSchedule);
+router.get('/', aquacultureController.getSummary);
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.aquacultureRouter = void 0;
-const express_1 = require("express");
-const aquaculture_service_1 = require("./aquaculture.service");
-const tilapia_telemetry_service_1 = require("./tilapia-telemetry.service");
-const prisma_service_1 = require("../../prisma/prisma.service");
-exports.aquacultureRouter = (0, express_1.Router)();
+import * as aquaculture_service_1 from './aquaculture.service.js';
+import * as tilapia_telemetry_service_1 from './tilapia-telemetry.service.js';
 const telemetryService = new tilapia_telemetry_service_1.TilapiaTelemetryService();
-const service = new aquaculture_service_1.AquacultureService(prisma_service_1.prisma, telemetryService);
-exports.aquacultureRouter.get('/ponds', async (req, res, next) => {
-    try {
-        const ponds = await service.getPonds();
-        res.json(ponds);
-    }
-    catch (err) {
-        next(err);
-    }
-});
-exports.aquacultureRouter.get('/water-quality', async (req, res, next) => {
-    try {
-        const quality = await service.getWaterQuality(req.query.pondId);
-        res.json(quality);
-    }
-    catch (err) {
-        next(err);
-    }
-});
-exports.aquacultureRouter.post('/water-test', async (req, res, next) => {
-    try {
-        const result = await service.recordWaterTest(req.body);
-        res.status(201).json(result);
-    }
-    catch (err) {
-        next(err);
-    }
-});
-exports.aquacultureRouter.post('/feeding', async (req, res, next) => {
-    try {
-        const result = await service.recordFeeding(req.body);
-        res.status(201).json(result);
-    }
-    catch (err) {
-        next(err);
-    }
-});
+const service = aquaculture_service_1.default;
+export default router;

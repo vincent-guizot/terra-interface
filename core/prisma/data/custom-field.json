@@ -1,0 +1,290 @@
+[
+  {
+    "key": "type-0-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Electrical Conductivity (EC mS/cm)",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-0"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Electrical Conductivity (EC mS/cm)",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-0"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-0-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Solution pH",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-0"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Solution pH",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-0"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-1-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Substrate Moisture %",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-1"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Substrate Moisture %",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-1"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-1-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Flush Number",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-1"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Flush Number",
+      "fieldType": "NUMBER",
+      "isRequired": false,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-1"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-2-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Hen-Day Production %",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-2"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Hen-Day Production %",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-2"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-2-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Average Egg Weight (g)",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-2"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Average Egg Weight (g)",
+      "fieldType": "NUMBER",
+      "isRequired": false,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-2"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-3-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Average Body Weight (g)",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-3"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Average Body Weight (g)",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-3"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-3-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Feed Conversion Ratio (FCR)",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-3"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Feed Conversion Ratio (FCR)",
+      "fieldType": "NUMBER",
+      "isRequired": false,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-3"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-4-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Bioconversion Efficiency %",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-4"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Bioconversion Efficiency %",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-4"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-4-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Crude Protein %",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-4"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Crude Protein %",
+      "fieldType": "NUMBER",
+      "isRequired": false,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-4"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-5-0",
+    "demo": true,
+    "match": {
+      "fieldName": "Peak Core Temperature (°C)",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-5"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Peak Core Temperature (°C)",
+      "fieldType": "NUMBER",
+      "isRequired": true,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-5"
+        }
+      }
+    }
+  },
+  {
+    "key": "type-5-1",
+    "demo": true,
+    "match": {
+      "fieldName": "Maturity Solvita Index",
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-5"
+        }
+      }
+    },
+    "data": {
+      "fieldName": "Maturity Solvita Index",
+      "fieldType": "NUMBER",
+      "isRequired": false,
+      "productionTypeId": {
+        "$ref": {
+          "table": "productionType",
+          "key": "type-5"
+        }
+      }
+    }
+  }
+]

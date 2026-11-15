@@ -1,17 +1,24 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.prisma = exports.PrismaService = void 0;
-const client_1 = require("@prisma/client");
-class PrismaService extends client_1.PrismaClient {
-    constructor() {
-        super();
-    }
-    static getInstance() {
-        if (!PrismaService.instance) {
-            PrismaService.instance = new PrismaService();
-        }
-        return PrismaService.instance;
-    }
+import { PrismaClient } from '@prisma/client';
+import env from '../config/env.js';
+
+const localUrl = new URL('postgresql://localhost');
+localUrl.hostname = env.PGHOST;
+localUrl.port = String(env.PGPORT);
+localUrl.username = env.PGUSER;
+localUrl.password = env.PGPASSWORD;
+localUrl.pathname = `/${env.PGDATABASE}`;
+export const databaseUrl = env.DATABASE_URL || localUrl.toString();
+
+export class PrismaService extends PrismaClient {
+  constructor() {
+    super({ datasources: { db: { url: databaseUrl } } });
+  }
+
+  static getInstance() {
+    if (!PrismaService.instance) PrismaService.instance = new PrismaService();
+    return PrismaService.instance;
+  }
 }
-exports.PrismaService = PrismaService;
-exports.prisma = PrismaService.getInstance();
+
+export const prisma = PrismaService.getInstance();
+export default prisma;
