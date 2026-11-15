@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import activitiesController from './activities.controller.js';
+const router = Router();
+router.get('/summary', activitiesController.getSummary);
+router.get('/tasks', activitiesController.getTasks);
+router.post('/tasks', activitiesController.createTask);
+router.get('/tasks/:id', activitiesController.getTaskById);
+router.patch('/tasks/:id/toggle', activitiesController.toggleCompleted);
+router.get('/', activitiesController.getSummary);
+export default router;

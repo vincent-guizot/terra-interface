@@ -3,32 +3,37 @@
   "version": "1.0.0",
   "description": "Terra Interface — Home OS Modular Backend Engine (Express)",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "node -e \"console.log('Core is plain JavaScript; no build step required.')\"",
-    "start": "node src/main.js",
-    "start:dev": "node --watch src/main.js",
-    "test": "node test/runner.js",
-    "test:invariants": "node test/runner.js",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "test": "npm run test:invariants && npm run test:http",
+    "db:test": "node scripts/test-db.js",
+    "test:invariants": "node tests/invariants/runner.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "node prisma/seeders/seed.js",
     "prisma:studio": "prisma studio",
-    "db:setup": "node scripts/init-db.js"
+    "db:setup": "node scripts/init-db.js",
+    "test:http": "node tests/runner.js && node --test tests/router-contract.test.js",
+    "build": "node scripts/check-source.js",
+    "start:dev": "node --watch src/server.js"
   },
   "prisma": {
     "seed": "node prisma/seeders/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^5.10.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.1",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
     "express": "^4.19.2",
-    "reflect-metadata": "^0.2.1",
-    "rxjs": "^7.8.1",
-    "swagger-ui-express": "^5.0.0"
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "morgan": "^1.12.1",
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
+    "nodemon": "^3.1.14",
     "prisma": "^5.10.0"
   }
 }
