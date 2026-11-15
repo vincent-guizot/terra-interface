@@ -48,7 +48,7 @@ export default defineConfig({
         manualChunks: {
           reactVendor: ['react', 'react-dom', 'react-router-dom'],
           reduxVendor: ['@reduxjs/toolkit', 'react-redux'],
-          queryVendor: ['@tanstack/react-query', 'axios'],
+          queryVendor: ['@tanstack/react-query'],
           muiVendor: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
         },
       },

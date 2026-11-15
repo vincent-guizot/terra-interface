@@ -15,11 +15,12 @@ const API_BASE_URL = getEnvVar('VITE_API_BASE_URL') || getEnvVar('VITE_API_URL')
 const IS_DEMO_MODE = getEnvVar('VITE_DEMO_MODE') === 'true' || getEnvVar('NEXT_PUBLIC_DEMO_MODE') === 'true';
 
 export class ApiError extends Error {
-  constructor(message, statusCode = 500, details = null) {
+  constructor(message, statusCode = 500, details = null, code = null) {
     super(message);
     this.name = 'ApiError';
     this.statusCode = statusCode;
     this.details = details;
+    this.code = code;
   }
 }
 
@@ -56,10 +57,11 @@ export class ApiClient {
     }
 
     if (!response.ok) {
-      const errorMessage = responseBody?.message || `HTTP ${response.status}: ${response.statusText}`;
-      const details = responseBody?.details || responseBody?.error || null;
+      const errorMessage = responseBody?.error?.message || responseBody?.message || `HTTP ${response.status}: ${response.statusText}`;
+      const details = responseBody?.error?.details ?? responseBody?.details ?? null;
+      const code = responseBody?.error?.code ?? null;
       console.error(`[ApiClient Error] ${options.method || 'GET'} ${endpoint} [${response.status}]:`, errorMessage);
-      throw new ApiError(errorMessage, response.status, details);
+      throw new ApiError(errorMessage, response.status, details, code);
     }
 
     // Unpack standardized envelope if present: { success: true, data: T } -> return data
