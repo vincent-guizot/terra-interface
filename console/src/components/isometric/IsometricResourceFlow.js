@@ -1,224 +1,155 @@
+import { getFlowTypeColor } from "@/helpers/presentation.js";
+import { ecologicalLoops } from "../../data/isometric/ecological-loops.data.js";
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Chip,
-  Grid,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  ButtonGroup,
-  Button
-} from '@mui/material';
-import {
-  Sync,
-  Bolt,
-  Opacity,
-  Grass,
-  Loop,
-  CheckCircle,
-  ArrowForward,
-  SwapHoriz,
-  FilterList,
-  Egg,
-  Pets,
-  Yard,
-  Park,
-  Warehouse
-} from '@mui/icons-material';
-import { masterPlanResourceFlows } from '../../data/masterPlanData.js';
+import { Box, Typography, Paper, Chip, Grid, Table, TableHead, TableBody, TableRow, TableCell, ButtonGroup, Button } from '@mui/material';
+import { Sync, Bolt, Opacity, Grass, Loop, CheckCircle, ArrowForward, SwapHoriz, FilterList, Egg, Pets, Yard, Park, Warehouse } from '@mui/icons-material';
+import { masterPlanResourceFlows } from '../../data/homestead/master-plan.js';
 import DataSourceBadge from '../ui/DataSourceBadge.js';
-
 export default function IsometricResourceFlow() {
   const [activeCycle, setActiveCycle] = useState('all');
   const [flowTypeFilter, setFlowTypeFilter] = useState('all'); // 'all' | 'ACTUAL' | 'PLANNED' | 'ESTIMATED'
 
-  const ecologicalLoops = [
-    {
-      id: 'bsf-protein',
-      name: 'Chicken Waste → BSF Maggot Bioconversion',
-      color: '#F59E0B',
-      metric: '14.0 kg waste → 2.4 kg live protein',
-      description: 'Poultry manure and spent deep-litter bedding are diverted to the BSF House -> Hermetia illucens larvae digest biomass in 12 days -> 42% crude protein prepupae returned to hens as live feed.',
-      steps: ['Chicken Coop (Manure & Bedding)', 'BSF / Maggot House (5-Tray Trays)', 'Live Prepupae Harvest', 'High-Protein Hen Feed']
-    },
-    {
-      id: 'compost-soil',
-      name: 'BSF Frass & Manure → Thermophilic Composting',
-      color: '#059669',
-      metric: '98.2% biomass circular diversion',
-      description: 'BSF insect frass and collected goat/sheep manure pellets are combined with biochar and Bokashi inoculant -> 55-65°C aerobic composting -> Cured humus applied to TOGA Garden and Perimeter Fruit Trees.',
-      steps: ['BSF Frass + Ruminant Droppings', 'Hot Compost Pile (55-65°C)', '30-Day Curing Humus', 'TOGA & Perimeter Fruit Guilds']
-    },
-    {
-      id: 'water-consumers',
-      name: 'Rainwater Storage → Homestead Consumers',
-      color: '#0284C7',
-      metric: '10,400 L stored • 30.5 days autonomy',
-      description: '140 m² roof catchment water diverted through vortex first-flush and sand/biochar filter -> 12,000 L cisterns -> Gravity-fed to Hydroponic Garden, Carport Greenhouse, TOGA drip lines, and Livestock drinkers.',
-      steps: ['Roof Monsoon Catchment', 'Vortex First-Flush Diverter', 'Central HDPE Cisterns', 'Hydroponics, Greenhouse, TOGA & Animals']
-    },
-    {
-      id: 'aqua-hydro',
-      name: 'Aquaponics & Hydroponics Closed Loop',
-      color: '#10B981',
-      metric: '250 L/day recirculation • 97.4% recovery',
-      description: 'Fish excrete ammonia in bio-ponds -> Moving bed bio-filter (MBBR) converts NH3 into NO3 nitrates -> Nitrified water feeds vertical NFT hydroponic channels -> Purified water returns to fish sump.',
-      steps: ['Tilapia Bio-Ponds (Ammonia)', 'Kaldnes K1 Bio-Filter (NO3-)', 'A-Frame Vertical NFT Beds', 'Purified Return Sump']
-    }
-  ];
-
-  const filteredFlows = masterPlanResourceFlows.filter((flow) => {
+  const filteredFlows = masterPlanResourceFlows.filter(flow => {
     const matchesType = flowTypeFilter === 'all' || flow.flowType === flowTypeFilter;
-    const matchesCycle = activeCycle === 'all' ||
-      (activeCycle === 'bsf-protein' && (flow.id.includes('chk') || flow.id.includes('bsf') || flow.id.includes('scraps'))) ||
-      (activeCycle === 'compost-soil' && (flow.id.includes('frass') || flow.id.includes('compost') || flow.id.includes('manure'))) ||
-      (activeCycle === 'water-consumers' && flow.id.includes('water')) ||
-      (activeCycle === 'aqua-hydro' && flow.id.includes('aqua'));
+    const matchesCycle = activeCycle === 'all' || activeCycle === 'bsf-protein' && (flow.id.includes('chk') || flow.id.includes('bsf') || flow.id.includes('scraps')) || activeCycle === 'compost-soil' && (flow.id.includes('frass') || flow.id.includes('compost') || flow.id.includes('manure')) || activeCycle === 'water-consumers' && flow.id.includes('water') || activeCycle === 'aqua-hydro' && flow.id.includes('aqua');
     return matchesType && matchesCycle;
   });
-
-  const getFlowTypeColor = (type) => {
-    switch (type) {
-      case 'ACTUAL': return { bg: 'rgba(16, 185, 129, 0.14)', text: '#065F46', border: 'rgba(16, 185, 129, 0.3)' };
-      case 'PLANNED': return { bg: 'rgba(2, 132, 199, 0.14)', text: '#0369A1', border: 'rgba(2, 132, 199, 0.3)' };
-      case 'ESTIMATED': return { bg: 'rgba(245, 158, 11, 0.14)', text: '#92400E', border: 'rgba(245, 158, 11, 0.3)' };
-      default: return { bg: 'rgba(100, 116, 139, 0.14)', text: '#475569', border: 'rgba(100, 116, 139, 0.3)' };
-    }
-  };
-
-  return (
-    <Box sx={{ width: '100%', py: 1 }}>
+  return <Box sx={{
+    width: '100%',
+    py: 1
+  }}>
       {/* FILTER CONTROLS */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 3 }}>
+      <Box sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: 2,
+      mb: 3
+    }}>
         {/* Cycle Filter Pills */}
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          <Chip
-            label="All Ecological Loops"
-            onClick={() => setActiveCycle('all')}
-            sx={{
-              fontWeight: 700,
-              borderRadius: 3,
-              px: 1,
-              bgcolor: activeCycle === 'all' ? '#1B4332' : 'rgba(255,255,255,0.9)',
-              color: activeCycle === 'all' ? '#FFFFFF' : '#1B4332',
-              border: '1px solid rgba(27,67,50,0.1)',
-            }}
-          />
-          {ecologicalLoops.map((c) => (
-            <Chip
-              key={c.id}
-              label={c.name}
-              onClick={() => setActiveCycle(c.id)}
-              sx={{
-                fontWeight: 700,
-                borderRadius: 3,
-                px: 1,
-                bgcolor: activeCycle === c.id ? `${c.color}25` : 'rgba(255,255,255,0.9)',
-                color: activeCycle === c.id ? c.color : '#486253',
-                borderColor: activeCycle === c.id ? c.color : 'rgba(27,67,50,0.1)',
-                borderWidth: 1,
-                borderStyle: 'solid',
-              }}
-            />
-          ))}
+        <Box sx={{
+        display: 'flex',
+        gap: 1,
+        flexWrap: 'wrap'
+      }}>
+          <Chip label="All Ecological Loops" onClick={() => setActiveCycle('all')} sx={{
+          fontWeight: 700,
+          borderRadius: 3,
+          px: 1,
+          bgcolor: activeCycle === 'all' ? '#1B4332' : 'rgba(255,255,255,0.9)',
+          color: activeCycle === 'all' ? '#FFFFFF' : '#1B4332',
+          border: '1px solid rgba(27,67,50,0.1)'
+        }} />
+          {ecologicalLoops.map(c => <Chip key={c.id} label={c.name} onClick={() => setActiveCycle(c.id)} sx={{
+          fontWeight: 700,
+          borderRadius: 3,
+          px: 1,
+          bgcolor: activeCycle === c.id ? `${c.color}25` : 'rgba(255,255,255,0.9)',
+          color: activeCycle === c.id ? c.color : '#486253',
+          borderColor: activeCycle === c.id ? c.color : 'rgba(27,67,50,0.1)',
+          borderWidth: 1,
+          borderStyle: 'solid'
+        }} />)}
         </Box>
 
         {/* Flow Classification Switcher: ACTUAL vs PLANNED vs ESTIMATED */}
-        <ButtonGroup
-          size="small"
-          sx={{
-            bgcolor: '#FFFFFF',
-            borderRadius: 2.5,
-            p: 0.4,
-            border: '1px solid rgba(27,67,50,0.12)',
-            '& .MuiButton-root': {
-              borderRadius: '8px !important',
-              border: 'none !important',
-              px: 1.5,
-              py: 0.5,
-              fontWeight: 700,
-              fontSize: '0.75rem',
-              textTransform: 'none',
-            }
-          }}
-        >
-          <Button
-            onClick={() => setFlowTypeFilter('all')}
-            sx={{
-              bgcolor: flowTypeFilter === 'all' ? '#1B4332 !important' : 'transparent',
-              color: flowTypeFilter === 'all' ? '#FFFFFF !important' : '#486253',
-            }}
-          >
+        <ButtonGroup size="small" sx={{
+        bgcolor: '#FFFFFF',
+        borderRadius: 2.5,
+        p: 0.4,
+        border: '1px solid rgba(27,67,50,0.12)',
+        '& .MuiButton-root': {
+          borderRadius: '8px !important',
+          border: 'none !important',
+          px: 1.5,
+          py: 0.5,
+          fontWeight: 700,
+          fontSize: '0.75rem',
+          textTransform: 'none'
+        }
+      }}>
+          <Button onClick={() => setFlowTypeFilter('all')} sx={{
+          bgcolor: flowTypeFilter === 'all' ? '#1B4332 !important' : 'transparent',
+          color: flowTypeFilter === 'all' ? '#FFFFFF !important' : '#486253'
+        }}>
             All Flows ({masterPlanResourceFlows.length})
           </Button>
-          <Button
-            onClick={() => setFlowTypeFilter('ACTUAL')}
-            sx={{
-              bgcolor: flowTypeFilter === 'ACTUAL' ? '#10B981 !important' : 'transparent',
-              color: flowTypeFilter === 'ACTUAL' ? '#FFFFFF !important' : '#065F46',
-            }}
-          >
+          <Button onClick={() => setFlowTypeFilter('ACTUAL')} sx={{
+          bgcolor: flowTypeFilter === 'ACTUAL' ? '#10B981 !important' : 'transparent',
+          color: flowTypeFilter === 'ACTUAL' ? '#FFFFFF !important' : '#065F46'
+        }}>
             ACTUAL ({masterPlanResourceFlows.filter(f => f.flowType === 'ACTUAL').length})
           </Button>
-          <Button
-            onClick={() => setFlowTypeFilter('PLANNED')}
-            sx={{
-              bgcolor: flowTypeFilter === 'PLANNED' ? '#0284C7 !important' : 'transparent',
-              color: flowTypeFilter === 'PLANNED' ? '#FFFFFF !important' : '#0369A1',
-            }}
-          >
+          <Button onClick={() => setFlowTypeFilter('PLANNED')} sx={{
+          bgcolor: flowTypeFilter === 'PLANNED' ? '#0284C7 !important' : 'transparent',
+          color: flowTypeFilter === 'PLANNED' ? '#FFFFFF !important' : '#0369A1'
+        }}>
             PLANNED ({masterPlanResourceFlows.filter(f => f.flowType === 'PLANNED').length})
           </Button>
-          <Button
-            onClick={() => setFlowTypeFilter('ESTIMATED')}
-            sx={{
-              bgcolor: flowTypeFilter === 'ESTIMATED' ? '#D97706 !important' : 'transparent',
-              color: flowTypeFilter === 'ESTIMATED' ? '#FFFFFF !important' : '#92400E',
-            }}
-          >
+          <Button onClick={() => setFlowTypeFilter('ESTIMATED')} sx={{
+          bgcolor: flowTypeFilter === 'ESTIMATED' ? '#D97706 !important' : 'transparent',
+          color: flowTypeFilter === 'ESTIMATED' ? '#FFFFFF !important' : '#92400E'
+        }}>
             ESTIMATED ({masterPlanResourceFlows.filter(f => f.flowType === 'ESTIMATED').length})
           </Button>
         </ButtonGroup>
       </Box>
 
       {/* ISOMETRIC FLOW DIAGRAM SCHEMATIC */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: { xs: 2.5, md: 3.5 },
-          borderRadius: 4,
-          background: 'linear-gradient(135deg, #FAFBF8 0%, #F1F6F0 100%)',
-          border: '1px solid rgba(27, 67, 50, 0.1)',
-          mb: 3,
-        }}
-      >
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+      <Paper elevation={0} sx={{
+      p: {
+        xs: 2.5,
+        md: 3.5
+      },
+      borderRadius: 4,
+      background: 'linear-gradient(135deg, #FAFBF8 0%, #F1F6F0 100%)',
+      border: '1px solid rgba(27, 67, 50, 0.1)',
+      mb: 3
+    }}>
+        <Box sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mb: 2,
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+            <Typography variant="h6" sx={{
+            fontWeight: 800,
+            color: '#1B4332'
+          }}>
               Vincent's Farm Closed-Loop Ecological Topology
             </Typography>
-            <Typography variant="body2" sx={{ color: '#5A7565' }}>
+            <Typography variant="body2" sx={{
+            color: '#5A7565'
+          }}>
               Modeled according to approved Master Plan: waste streams feed biological converters without invented links.
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                bgcolor: 'rgba(16, 185, 129, 0.15)',
-                px: 2,
-                py: 0.8,
-                borderRadius: 3,
-              }}
-            >
-              <Loop sx={{ color: '#059669', fontSize: 20 }} />
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#065F46' }}>
+          <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5
+        }}>
+            <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            bgcolor: 'rgba(16, 185, 129, 0.15)',
+            px: 2,
+            py: 0.8,
+            borderRadius: 3
+          }}>
+              <Loop sx={{
+              color: '#059669',
+              fontSize: 20
+            }} />
+              <Typography variant="subtitle2" sx={{
+              fontWeight: 800,
+              color: '#065F46'
+            }}>
                 98.2% Organic Biomass Retained
               </Typography>
             </Box>
@@ -226,8 +157,17 @@ export default function IsometricResourceFlow() {
         </Box>
 
         {/* Isometric SVG Schematic */}
-        <Box sx={{ width: '100%', overflowX: 'auto', textAlign: 'center', py: 2 }}>
-          <svg viewBox="0 0 880 340" style={{ maxWidth: '100%', height: 'auto', minWidth: 700 }}>
+        <Box sx={{
+        width: '100%',
+        overflowX: 'auto',
+        textAlign: 'center',
+        py: 2
+      }}>
+          <svg viewBox="0 0 880 340" style={{
+          maxWidth: '100%',
+          height: 'auto',
+          minWidth: 700
+        }}>
             <defs>
               <linearGradient id="flowChkBsf" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#F59E0B" />
@@ -325,113 +265,179 @@ export default function IsometricResourceFlow() {
       </Paper>
 
       {/* DETAILED FLOW LEDGER TABLE (Supports Source, Destination, Quantity, Unit, Timestamp, FlowType, Status) */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: 4,
-          bgcolor: '#FFFFFF',
-          border: '1px solid rgba(27,67,50,0.08)',
-          overflow: 'hidden',
-          boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
-        }}
-      >
-        <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+      <Paper elevation={0} sx={{
+      borderRadius: 4,
+      bgcolor: '#FFFFFF',
+      border: '1px solid rgba(27,67,50,0.08)',
+      overflow: 'hidden',
+      boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)'
+    }}>
+        <Box sx={{
+        p: 2.5,
+        borderBottom: '1px solid rgba(27,67,50,0.08)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: 1
+      }}>
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
+            <Typography variant="h6" sx={{
+            fontWeight: 800,
+            color: '#1B4332'
+          }}>
               Ecological Resource Flow Ledger ({filteredFlows.length} Active Records)
             </Typography>
-            <Typography variant="caption" sx={{ color: '#5A7565' }}>
+            <Typography variant="caption" sx={{
+            color: '#5A7565'
+          }}>
               Distinguishing ACTUAL, PLANNED, and ESTIMATED mass and energy vectors. No invented flow quantities.
             </Typography>
           </Box>
-          <Chip
-            icon={<FilterList fontSize="small" />}
-            label={`Filter: ${flowTypeFilter.toUpperCase()}`}
-            size="small"
-            sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 700 }}
-          />
+          <Chip icon={<FilterList fontSize="small" />} label={`Filter: ${flowTypeFilter.toUpperCase()}`} size="small" sx={{
+          bgcolor: 'rgba(27,67,50,0.08)',
+          color: '#1B4332',
+          fontWeight: 700
+        }} />
         </Box>
 
         <Table>
-          <TableHead sx={{ bgcolor: '#FAF9F5' }}>
+          <TableHead sx={{
+          bgcolor: '#FAF9F5'
+        }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>FLOW ID</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>SOURCE → DESTINATION</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>MATERIAL / STREAM</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>QUANTITY & UNIT</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>CLASSIFICATION</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>TIMESTAMP / SCHEDULE</TableCell>
-              <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.78rem' }}>STATUS</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>FLOW ID</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>SOURCE → DESTINATION</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>MATERIAL / STREAM</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>QUANTITY & UNIT</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>CLASSIFICATION</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>TIMESTAMP / SCHEDULE</TableCell>
+              <TableCell sx={{
+              fontWeight: 800,
+              color: '#1B4332',
+              fontSize: '0.78rem'
+            }}>STATUS</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredFlows.map((flow) => {
-              const typeStyle = getFlowTypeColor(flow.flowType);
-              return (
-                <TableRow key={flow.id} hover>
-                  <TableCell sx={{ fontWeight: 700, color: '#748B7D', fontSize: '0.75rem' }}>
+            {filteredFlows.map(flow => {
+            const typeStyle = getFlowTypeColor(flow.flowType);
+            return <TableRow key={flow.id} hover>
+                  <TableCell sx={{
+                fontWeight: 700,
+                color: '#748B7D',
+                fontSize: '0.75rem'
+              }}>
                     {flow.id}
                   </TableCell>
                   <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.82rem' }}>
+                    <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.8
+                }}>
+                      <Typography variant="subtitle2" sx={{
+                    fontWeight: 800,
+                    color: '#1B4332',
+                    fontSize: '0.82rem'
+                  }}>
                         {flow.source}
                       </Typography>
-                      <ArrowForward sx={{ fontSize: 14, color: '#748B7D' }} />
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#047857', fontSize: '0.82rem' }}>
+                      <ArrowForward sx={{
+                    fontSize: 14,
+                    color: '#748B7D'
+                  }} />
+                      <Typography variant="subtitle2" sx={{
+                    fontWeight: 800,
+                    color: '#047857',
+                    fontSize: '0.82rem'
+                  }}>
                         {flow.destination}
                       </Typography>
                     </Box>
-                    <Typography variant="caption" sx={{ color: '#5A7565', fontSize: '0.7rem' }}>
+                    <Typography variant="caption" sx={{
+                  color: '#5A7565',
+                  fontSize: '0.7rem'
+                }}>
                       {flow.name}
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#14281D', fontSize: '0.8rem' }}>
+                    <Typography variant="body2" sx={{
+                  fontWeight: 700,
+                  color: '#14281D',
+                  fontSize: '0.8rem'
+                }}>
                       {flow.material}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', fontSize: '0.68rem' }}>
+                    <Typography variant="caption" sx={{
+                  color: '#748B7D',
+                  display: 'block',
+                  fontSize: '0.68rem'
+                }}>
                       {flow.description}
                     </Typography>
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.85rem' }}>
+                  <TableCell sx={{
+                fontWeight: 800,
+                color: '#1B4332',
+                fontSize: '0.85rem'
+              }}>
                     {flow.quantity !== null ? `${flow.quantity} ${flow.unit}` : 'Pending Measurement'}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={flow.flowType}
-                      size="small"
-                      sx={{
-                        bgcolor: typeStyle.bg,
-                        color: typeStyle.text,
-                        border: `1px solid ${typeStyle.border}`,
-                        fontWeight: 800,
-                        fontSize: '0.68rem',
-                        height: 20
-                      }}
-                    />
+                    <Chip label={flow.flowType} size="small" sx={{
+                  bgcolor: typeStyle.bg,
+                  color: typeStyle.text,
+                  border: `1px solid ${typeStyle.border}`,
+                  fontWeight: 800,
+                  fontSize: '0.68rem',
+                  height: 20
+                }} />
                   </TableCell>
-                  <TableCell sx={{ fontSize: '0.75rem', color: '#486253', fontWeight: 600 }}>
+                  <TableCell sx={{
+                fontSize: '0.75rem',
+                color: '#486253',
+                fontWeight: 600
+              }}>
                     {flow.timestamp}
                   </TableCell>
                   <TableCell>
-                    <Chip
-                      label={flow.status}
-                      size="small"
-                      sx={{
-                        bgcolor: 'rgba(16, 185, 129, 0.12)',
-                        color: '#065F46',
-                        fontWeight: 700,
-                        fontSize: '0.7rem'
-                      }}
-                    />
+                    <Chip label={flow.status} size="small" sx={{
+                  bgcolor: 'rgba(16, 185, 129, 0.12)',
+                  color: '#065F46',
+                  fontWeight: 700,
+                  fontSize: '0.7rem'
+                }} />
                   </TableCell>
-                </TableRow>
-              );
-            })}
+                </TableRow>;
+          })}
           </TableBody>
         </Table>
       </Paper>
-    </Box>
-  );
+    </Box>;
 }

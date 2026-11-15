@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Head from '@/components/shared/PageHead';
-import Link from '@/components/shared/AppLink';
+import Head from '../../components/shared/PageHead.jsx';
+import Link from '../../components/shared/AppLink.jsx';
 
 import {
   Box,
@@ -30,7 +30,7 @@ import {
   Thermostat
 } from '@mui/icons-material';
 import IsometricHomesteadHero from '../../components/isometric/IsometricHomesteadHero.js';
-import { homesteadProfile, homesteadZones, productionData, resourcesData, intelligenceData } from '../../data/homesteadData.js';
+import { homesteadProfile, homesteadZones, productionData, resourcesData, intelligenceData } from '../../data/homestead/index.js';
 import DataSourceBadge from '../../components/ui/DataSourceBadge.js';
 
 export default function OverviewPage() {

@@ -1,4 +1,4 @@
-import { homesteadProfile, resourcesData } from '../data/homesteadData.js';
+import { homesteadProfile, resourcesData } from '../data/homestead/index.js';
 import { ApiClient } from './apiClient.js';
 
 export class TelemetryService {

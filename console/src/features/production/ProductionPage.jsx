@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Head from '@/components/shared/PageHead';
+import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
   Typography,
@@ -33,7 +33,7 @@ import {
   Spa,
   SavingsOutlined
 } from '@mui/icons-material';
-import { productionData } from '../../data/homesteadData.js';
+import { productionData } from '../../data/homestead/index.js';
 
 export default function ProductionPage() {
   const [activeCategoryTab, setActiveCategoryTab] = useState('all');

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Head from '@/components/shared/PageHead';
+import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
   Typography,
@@ -34,7 +34,7 @@ import {
   Yard,
   Bolt
 } from '@mui/icons-material';
-import { activitiesData } from '../../data/homesteadData.js';
+import { activitiesData } from '../../data/homestead/index.js';
 
 export default function ActivitiesPage() {
   const [tasks, setTasks] = useState(activitiesData.todayTasks);

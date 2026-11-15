@@ -1,0 +1,1 @@
+export const SCRAP_TYPES = ['Kitchen Veg Scraps + Brewery Spent Grain', 'Fruit Waste (Papaya/Banana skins) + Coffee Grounds', 'Zone 1 Hydroponic Plant Trimmings & Root Cuttings', 'Zone 2 Aquaponics Bio-Pond Mineral Sludge', 'Expired Household Leftovers & Bread'];

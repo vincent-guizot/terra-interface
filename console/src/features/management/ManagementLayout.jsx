@@ -1,7 +1,6 @@
 import React from 'react';
-import { useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import OperationsHub from './OperationsHub.jsx';
-import { PATHS } from '../../router/paths.js';
 
 /**
  * ManagementLayout
@@ -10,7 +9,6 @@ import { PATHS } from '../../router/paths.js';
  */
 export default function ManagementLayout({ initialTab = null }) {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Determine active tab based on route pathname
   const getTabFromPath = () => {

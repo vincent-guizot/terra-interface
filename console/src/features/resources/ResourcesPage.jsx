@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Head from '@/components/shared/PageHead';
+import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
   Typography,
@@ -26,7 +26,7 @@ import {
   WarningAmber,
   ErrorOutline,
 } from '@mui/icons-material';
-import { resourcesData } from '../../data/homesteadData.js';
+import { resourcesData } from '../../data/homestead/index.js';
 import { useMicrogridTelemetry } from '../../hooks/useMicrogridTelemetry.js';
 import { ConfigureDispatchPolicyDrawer, ManualTelemetryIngestDrawer } from '../microgrid/index.js';
 

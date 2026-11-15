@@ -1,5 +1,5 @@
 import React from 'react';
-import AppRouter from '../router/index.jsx';
+import AppRouter from './router/index.jsx';
 
 /**
  * Main Application Component

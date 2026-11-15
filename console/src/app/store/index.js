@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from './rootReducer.js';
-import { telemetrySyncMiddleware } from '../../redux/middleware/telemetrySyncMiddleware.js';
+import { telemetrySyncMiddleware } from '../redux/middleware/telemetrySyncMiddleware.js';
 
 export const store = configureStore({
   reducer: rootReducer,

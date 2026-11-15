@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Head from '@/components/shared/PageHead';
+import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
   Typography,
@@ -29,7 +29,7 @@ import {
   DeleteOutline,
   Check,
 } from '@mui/icons-material';
-import { intelligenceData } from '../../data/homesteadData.js';
+import { intelligenceData } from '../../data/homestead/index.js';
 import { IntelligenceService } from '../../services/intelligenceService.js';
 import { PlantDiagnosisDrawer, AutonomyAuditDrawer } from './index.js';
 

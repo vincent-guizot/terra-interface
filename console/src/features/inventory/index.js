@@ -1,16 +1,6 @@
+import { STOCK_MOVEMENT_TYPES } from "../../data/inventory/domain.data.js";
 // Inventory Ledger Feature Module — Terra Interface
 export const INVENTORY_DOMAIN = 'INVENTORY';
-
-export const STOCK_MOVEMENT_TYPES = {
-  PURCHASE_IN: 'PURCHASE_IN',
-  HARVEST_IN: 'HARVEST_IN',
-  BATCH_CONSUME_OUT: 'BATCH_CONSUME_OUT',
-  FEEDING_OUT: 'FEEDING_OUT',
-  MORTALITY_LOSS_OUT: 'MORTALITY_LOSS_OUT',
-  WASTE_OUT: 'WASTE_OUT',
-  INTERNAL_TRANSFER: 'INTERNAL_TRANSFER',
-  CYCLE_COUNT_ADJUSTMENT: 'CYCLE_COUNT_ADJUSTMENT',
-};
-
+export { STOCK_MOVEMENT_TYPES };
 export { default as RecordStockMovementDrawer } from './drawers/RecordStockMovementDrawer.js';
 export { default as InventoryLedgerHistoryDrawer } from './drawers/InventoryLedgerHistoryDrawer.js';

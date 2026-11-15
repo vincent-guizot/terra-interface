@@ -2,15 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/features/*": ["./src/features/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/redux/*": ["./src/redux/*"],
-      "@/router/*": ["./src/router/*"],
-      "@/services/*": ["./src/services/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/constants/*": ["./src/constants/*"]
+      "@/*": ["./src/*"]
     },
     "jsx": "react-jsx"
   },

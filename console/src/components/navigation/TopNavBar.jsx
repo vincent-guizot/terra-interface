@@ -33,7 +33,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu.jsx';
 import { Badge } from '../ui/badge.jsx';
-import { PATHS } from '../../router/paths.js';
+import { PATHS } from '../../app/router/paths.js';
 
 export default function TopNavBar() {
   const location = useLocation();

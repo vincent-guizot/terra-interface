@@ -1,0 +1,1 @@
+export const FISH_FEED_OPTIONS = ['Floating Extruded Pellets (32% CP)', 'Fresh Harvested Duckweed (Lemna minor)', 'Live BSF Larvae (Zone 3 Circular Inoculum)', 'Azolla pinnata Aquatic Fern', 'Commercial Sinking Catfish Pellets'];

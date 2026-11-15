@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, Chip, Paper, Tooltip, IconButton, Button } from '@mui/material';
 import ZoneLiveTelemetryOverlay from './ZoneLiveTelemetryOverlay.js';
 import DataSourceBadge from '../ui/DataSourceBadge.js';
-import { masterPlanFacilities, MASTER_PLAN_SPECS } from '../../data/masterPlanData.js';
+import { masterPlanFacilities, MASTER_PLAN_SPECS } from '../../data/homestead/master-plan.js';
 import {
   WbSunny,
   Opacity,
