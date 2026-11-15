@@ -3,7 +3,7 @@
 import * as livestock_service_1 from "../../src/modules/livestock/livestock.service.js";
 import * as aquaculture_service_1 from "../../src/modules/aquaculture/aquaculture.service.js";
 import * as tilapia_telemetry_service_1 from "../../src/modules/aquaculture/tilapia-telemetry.service.js";
-import * as kub_poultry_model_1 from "../../src/modules/livestock/kub-poultry.model.js";
+import * as kub_poultry_model_1 from "../../src/constants/livestock/kub-poultry.constants.js";
 async function testLivestockAndAquacultureInvariants() {
   console.log('🧪 Running Livestock & Aquaculture Domain Invariant Tests...');
   const hdpResult = (0, kub_poultry_model_1.calculateHenDayProduction)(24, 21, 2.5);

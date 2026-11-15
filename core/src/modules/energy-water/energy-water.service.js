@@ -3,7 +3,7 @@
 import * as rxjs_1 from "rxjs";
 import * as battery_bms_service_1 from "./battery-bms.service.js";
 import * as autonomy_forecast_service_1 from "./autonomy-forecast.service.js";
-import * as cistern_levels_model_1 from "./cistern-levels.model.js";
+import * as cistern_levels_model_1 from "../../constants/energy-water/cistern-levels.constants.js";
 import * as prisma_service_1 from "../../prisma/prisma.service.js";
 var EnergyWaterService_1;
 var _a, _b, _c;

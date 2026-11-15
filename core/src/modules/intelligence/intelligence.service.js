@@ -7,7 +7,7 @@ import * as plant_diagnosis_engine_1 from "./plant-diagnosis.engine.js";
 import * as weather_forecast_dto_1 from "./weather-forecast.dto.js";
 import * as chat_history_serializer_1 from "./chat-history.serializer.js";
 import * as ecological_calculator_helper_1 from "../../helpers/ecological-calculator.helper.js";
-import masterEcologicalRules from './ecological-rules.js';
+import masterEcologicalRules from '../../constants/intelligence/ecological-rules.constants.js';
 var IntelligenceService_1;
 let IntelligenceService = IntelligenceService_1 = class IntelligenceService {
   constructor(prisma) {

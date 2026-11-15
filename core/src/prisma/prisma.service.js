@@ -7,10 +7,11 @@ localUrl.port = String(env.PGPORT);
 localUrl.username = env.PGUSER;
 localUrl.password = env.PGPASSWORD;
 localUrl.pathname = `/${env.PGDATABASE}`;
+export const databaseUrl = env.DATABASE_URL || localUrl.toString();
 
 export class PrismaService extends PrismaClient {
   constructor() {
-    super({ datasources: { db: { url: env.DATABASE_URL || localUrl.toString() } } });
+    super({ datasources: { db: { url: databaseUrl } } });
   }
 
   static getInstance() {

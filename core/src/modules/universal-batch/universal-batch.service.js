@@ -1,15 +1,8 @@
 "use strict";
 
+import { VALID_TRANSITIONS } from "../../constants/universal-batch.constants.js";
 import * as common_1 from "../../common/errors/http-exceptions.js";
 import * as client_1 from "@prisma/client";
-const VALID_TRANSITIONS = {
-  [client_1.BatchStatus.DRAFT]: [client_1.BatchStatus.PLANNED, client_1.BatchStatus.CANCELLED],
-  [client_1.BatchStatus.PLANNED]: [client_1.BatchStatus.ACTIVE, client_1.BatchStatus.CANCELLED],
-  [client_1.BatchStatus.ACTIVE]: [client_1.BatchStatus.ON_HOLD, client_1.BatchStatus.COMPLETED, client_1.BatchStatus.CANCELLED],
-  [client_1.BatchStatus.ON_HOLD]: [client_1.BatchStatus.ACTIVE, client_1.BatchStatus.CANCELLED],
-  [client_1.BatchStatus.COMPLETED]: [],
-  [client_1.BatchStatus.CANCELLED]: []
-};
 let UniversalBatchService = class UniversalBatchService {
   constructor(prisma) {
     this.prisma = prisma;

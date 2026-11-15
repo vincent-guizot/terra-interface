@@ -1,43 +1,15 @@
 "use strict";
 
+import { CANONICAL_COMPOST_BATCHES } from "../../constants/circular.constants.js";
 import * as prisma_service_1 from "../../prisma/prisma.service.js";
 import * as inventory_service_1 from "../inventory/inventory.service.js";
-import * as bsf_bioconversion_model_1 from "./bsf-bioconversion.model.js";
-import * as bokashi_temperature_model_1 from "./bokashi-temperature.model.js";
+import * as bsf_bioconversion_model_1 from "../../constants/circular/bsf-bioconversion.constants.js";
+import * as bokashi_temperature_model_1 from "../../constants/circular/bokashi-temperature.constants.js";
 import * as circularity_index_calculator_1 from "./circularity-index.calculator.js";
-import * as biochar_activation_1 from "./biochar-activation.js";
+import * as biochar_activation_1 from "../../constants/circular/biochar-activation.constants.js";
 import * as client_1 from "@prisma/client";
 import maggotHarvestService from './maggot-harvest.service.js';
 var CircularService_1;
-const CANONICAL_COMPOST_BATCHES = [{
-  id: 'cmp-01',
-  batchCode: 'BAT-2026-CMP-12',
-  name: 'Bokashi Aerobic Hot Pile #12',
-  bayNumber: 'Bay 1',
-  temperatureC: 62.0,
-  edgeTempC: 48.0,
-  moisturePercent: 55,
-  maturityIndex: 78,
-  maturityStage: 'Thermophilic Active Pasteurization (Week 2)',
-  turnCount: 3,
-  recipe: 'Deep-litter chicken manure + BSF frass + 10% biochar + EM4 inoculant',
-  carbonNitrogenRatio: 28.5,
-  biocharPercent: 10.0
-}, {
-  id: 'cmp-02',
-  batchCode: 'BAT-2026-CMP-11',
-  name: 'Vermicompost & Cured Humus Bay 2',
-  bayNumber: 'Bay 2',
-  temperatureC: 32.5,
-  edgeTempC: 29.0,
-  moisturePercent: 62,
-  maturityIndex: 96,
-  maturityStage: 'Curing & Fungal Conditioning (Ready for Beds)',
-  turnCount: 6,
-  recipe: 'Pre-digested bokashi + banana stems + crushed eggshells',
-  carbonNitrogenRatio: 22.0,
-  biocharPercent: 12.5
-}];
 let CircularService = CircularService_1 = class CircularService {
   constructor(prisma, maggotHarvestService, inventoryService) {
     this.prisma = prisma;

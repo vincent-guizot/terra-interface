@@ -30,7 +30,7 @@ async function runAllTests() {
       console.log(`[PASS] ${suite} (${durationMs}ms)`);
     } catch (err) {
       const durationMs = Date.now() - start;
-      const errorOutput = err.stdout || err.stderr || err.message;
+      const errorOutput = [err.stdout, err.stderr].filter(Boolean).join('\n') || err.message;
       results.push({
         suite,
         passed: false,

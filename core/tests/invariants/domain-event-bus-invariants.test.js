@@ -7,6 +7,19 @@ import * as telemetry_alert_listener_1 from "../../src/common/events/listeners/t
 import * as inventory_service_1 from "../../src/modules/inventory/inventory.service.js";
 async function testDomainEventBusInvariants() {
   console.log('🧪 Running Domain Event Bus & Decoupled Invariant Tests...');
+  const service = inventory_service_1.inventoryService;
+  // Exercise the event-driven memory ledger without connecting to a real database.
+  service.prisma = { inventoryItem: { findMany: async () => [], findFirst: async () => null } };
+  const originalRecordMovement = service.recordMovement;
+  const harvestCompleted = new Promise((resolve, reject) => {
+    service.recordMovement = async function (dto) {
+      try {
+        const movement = await originalRecordMovement.call(this, dto);
+        resolve(movement);
+        return movement;
+      } catch (error) { reject(error); throw error; }
+    };
+  });
   (0, inventory_event_listener_1.registerInventoryEventListener)();
   (0, telemetry_alert_listener_1.registerTelemetryAlertListener)();
   event_audit_logger_1.eventAuditLogger.clearAuditLog();
@@ -25,7 +38,15 @@ async function testDomainEventBusInvariants() {
     stewardName: 'Vincent',
     destination: 'Eco-Living Cold Cellar'
   });
-  await new Promise(resolve => setTimeout(resolve, 50));
+  let timeout;
+  try {
+    await Promise.race([harvestCompleted, new Promise((resolve, reject) => {
+      timeout = setTimeout(() => reject(new Error('Harvest event handler did not complete')), 2000);
+    })]);
+  } finally {
+    clearTimeout(timeout);
+    service.recordMovement = originalRecordMovement;
+  }
   const itemAfter = await inventory_service_1.inventoryService.getItemById('inv-5');
   if (itemAfter.inStock !== initialStock + 15.0) {
     throw new Error(`Inventory stock intake invariant failed: expected ${initialStock + 15.0}, got ${itemAfter.inStock}`);
@@ -38,7 +59,6 @@ async function testDomainEventBusInvariants() {
     severity: 'CRITICAL',
     actionTaken: 'AUTOMATED_SHUTDOWN_PROTECTION_ENGAGED'
   });
-  await new Promise(resolve => setTimeout(resolve, 50));
   const latestAlert = telemetry_alert_listener_1.telemetryAlertHistory[0];
   if (!latestAlert || latestAlert.metric !== 'BATTERY_SOC' || latestAlert.severity !== 'CRITICAL') {
     throw new Error('Telemetry threshold breach alert invariant failed');

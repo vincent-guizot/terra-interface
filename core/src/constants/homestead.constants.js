@@ -186,3 +186,81 @@ export const STANDARD_MEASUREMENT_UNITS = [{
   name: 'Kilowatt-Peak',
   dimension: 'POWER'
 }];
+
+export const ZONE_DEFINITIONS = [
+  {
+    "code": "Z-01",
+    "name": "Smart Micro-Greenhouse",
+    "areaSqm": 35,
+    "domain": "CULTIVATION",
+    "colorHex": "#10B981",
+    "description": "Climate-controlled nursery with vertical NFT and oyster mushroom chambers."
+  },
+  {
+    "code": "Z-02",
+    "name": "Aquaponics & Bio-Pond",
+    "areaSqm": 25,
+    "domain": "AQUACULTURE",
+    "colorHex": "#0284C7",
+    "description": "Recirculating aquaculture with Nile tilapia, catfish, and nitrifying bio-filtration."
+  },
+  {
+    "code": "Z-03",
+    "name": "Intensive Poultry & BSF Hub",
+    "areaSqm": 20,
+    "domain": "LIVESTOCK",
+    "colorHex": "#F59E0B",
+    "description": "Deep litter coop for Ayam KUB, Joper, and 5-tray Black Soldier Fly bioconversion."
+  },
+  {
+    "code": "Z-04",
+    "name": "Permaculture Food Forest & Beds",
+    "areaSqm": 110,
+    "domain": "CULTIVATION",
+    "colorHex": "#65A30D",
+    "description": "Keyhole raised beds, California papaya, and dwarf Cavendish banana circles."
+  },
+  {
+    "code": "Z-05",
+    "name": "Solar Array & Battery Hub",
+    "areaSqm": 30,
+    "domain": "ENERGY_WATER",
+    "colorHex": "#D97706",
+    "description": "5.2 kWp bifacial rooftop array, 8 kW hybrid inverter, and 15.3 kWh LiFePO4 battery pack."
+  },
+  {
+    "code": "Z-06",
+    "name": "Water Catchment & Filtration",
+    "areaSqm": 25,
+    "domain": "ENERGY_WATER",
+    "colorHex": "#0D9488",
+    "description": "140 m² roof catchment with vortex pre-filter and 12,000 L gravity-fed storage."
+  },
+  {
+    "code": "Z-07",
+    "name": "Eco-Living Quarters & Nursery",
+    "areaSqm": 55,
+    "domain": "CULTIVATION",
+    "colorHex": "#8B5CF6",
+    "description": "Passive solar homestead dwelling, seed vault, and central Home OS terminal."
+  }
+];
+
+export const ALERT_THRESHOLDS = {
+  "WATER_QUALITY": {
+    "DO_MIN_MG_L": 5,
+    "PH_MIN": 6.5,
+    "PH_MAX": 8,
+    "AMMONIA_MAX_PPM": 0.5,
+    "NITRATE_MAX_PPM": 60
+  },
+  "ENERGY": {
+    "BATTERY_MIN_SOC": 20,
+    "BATTERY_DUMP_LOAD_SOC": 90,
+    "MAX_CELL_DELTA_V": 0.03
+  },
+  "WATER_STORAGE": {
+    "CRITICAL_LEVEL_LITERS": 2500,
+    "FULL_CAPACITY_LITERS": 12000
+  }
+};

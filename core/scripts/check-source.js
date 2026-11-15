@@ -13,6 +13,9 @@ function walk(dir) {
 const files = ['src', 'tests', 'scripts', 'prisma/seeders'].flatMap(dir => walk(path.join(root, dir)));
 for (const file of files) {
   execFileSync(process.execPath, ['--check', file], { stdio: 'pipe' });
+  if (/\brequire\s*\(|\bmodule\.exports\b|\bexports\./.test(fs.readFileSync(file, 'utf8'))) {
+    throw new Error(`${file}: CommonJS syntax is not supported in this ESM package`);
+  }
   for (const [, spec] of fs.readFileSync(file, 'utf8').matchAll(/(?:from\s*|import\s*|import\(\s*)['"](\.[^'"]+)['"]/g)) {
     if (!fs.existsSync(path.resolve(path.dirname(file), spec))) throw new Error(`${file}: missing import ${spec}`);
   }

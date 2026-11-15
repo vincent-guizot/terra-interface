@@ -3,7 +3,7 @@
 import * as common_1 from "../../common/errors/http-exceptions.js";
 import * as prisma_service_1 from "../../prisma/prisma.service.js";
 import * as client_1 from "@prisma/client";
-import * as inventory_canonical_data_1 from "./data/inventory.canonical-data.js";
+import * as inventory_canonical_data_1 from "../../constants/inventory/inventory.constants.js";
 var InventoryService_1;
 let InventoryService = InventoryService_1 = class InventoryService {
   constructor(prisma) {

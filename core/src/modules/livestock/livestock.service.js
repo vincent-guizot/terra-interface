@@ -1,62 +1,10 @@
 "use strict";
 
+import { CANONICAL_LIVESTOCK } from "../../constants/livestock.constants.js";
 import * as prisma_service_1 from "../../prisma/prisma.service.js";
-import * as joper_growth_model_1 from "./joper-growth.model.js";
-import * as ruminant_paddock_1 from "./ruminant-paddock.js";
+import * as joper_growth_model_1 from "../../constants/livestock/joper-growth.constants.js";
+import * as ruminant_paddock_1 from "../../constants/livestock/ruminant-paddock.constants.js";
 var LivestockService_1;
-const CANONICAL_LIVESTOCK = [{
-  id: 'liv-kub-flock-01',
-  batchCode: 'BAT-2026-LIV-01',
-  name: 'Ayam KUB Layer Flock Season 2',
-  breed: 'Ayam KUB (Kampung Unggul Balitbangtan)',
-  species: 'Gallus gallus domesticus',
-  zoneCode: 'Z-03',
-  zoneName: 'Poultry & Small Ruminants Hub',
-  headCount: 24,
-  housingSystem: 'Deep Litter Bedding + Covered Run',
-  status: 'ACTIVE',
-  primaryOutput: 'Pastured Table Eggs',
-  productionRate: '87.5% Hen-Day Production (21 eggs/day)'
-}, {
-  id: 'liv-joper-flock-02',
-  batchCode: 'BAT-2026-LIV-02',
-  name: 'Joper Cross Meat Cohort #4',
-  breed: 'Ayam Joper (Jawa Super)',
-  species: 'Gallus gallus domesticus',
-  zoneCode: 'Z-03',
-  zoneName: 'Poultry & Small Ruminants Hub',
-  headCount: 45,
-  housingSystem: 'Slatted Bamboo Rearing Bay',
-  status: 'ACTIVE',
-  primaryOutput: 'Poultry Meat (Target 1.1 kg)',
-  productionRate: 'Average Weight 890g (FCR 1.48)'
-}, {
-  id: 'liv-garut-sheep-01',
-  batchCode: 'BAT-2026-LIV-03',
-  name: 'Garut Sheep Grazing Mob',
-  breed: 'Domba Garut',
-  species: 'Ovis aries',
-  zoneCode: 'Z-03',
-  zoneName: 'Poultry & Small Ruminants Hub',
-  headCount: 4,
-  housingSystem: 'Rotational Grazing Paddock (Swale Run)',
-  status: 'ACTIVE',
-  primaryOutput: 'Biomass Mowing & Living Manure',
-  productionRate: 'Paddock Rest Cycle 25 Days'
-}, {
-  id: 'liv-boer-goat-01',
-  batchCode: 'BAT-2026-LIV-04',
-  name: 'Boer Cross Brush Browsers',
-  breed: 'Boer Cross Goat',
-  species: 'Capra hircus',
-  zoneCode: 'Z-03',
-  zoneName: 'Poultry & Small Ruminants Hub',
-  headCount: 4,
-  housingSystem: 'Elevated Slatted Shed + Orchard Tether',
-  status: 'ACTIVE',
-  primaryOutput: 'Weed Clearance & Manure Pellets',
-  productionRate: 'Orchard Understory Browse Cycle'
-}];
 let LivestockService = LivestockService_1 = class LivestockService {
   constructor(prisma) {
     this.prisma = prisma;
