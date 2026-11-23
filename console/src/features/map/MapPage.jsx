@@ -135,12 +135,12 @@ export default function MapPage() {
         {/* 3 Visualization Modes Switcher */}
         <ButtonGroup variant="outlined" sx={{
         bgcolor: '#FFFFFF',
-        borderRadius: 3,
+        borderRadius: 1.5,
         p: 0.5,
         border: '1px solid rgba(27,67,50,0.1)',
-        boxShadow: '0 4px 12px rgba(27,67,50,0.04)',
+        boxShadow: '0 2px 8px rgba(27,67,50,0.04)',
         '& .MuiButtonGroup-grouped': {
-          borderRadius: '10px !important',
+          borderRadius: '6px !important',
           border: 'none !important',
           px: 2,
           py: 0.8,
@@ -150,19 +150,19 @@ export default function MapPage() {
         }
       }}>
           <Button onClick={() => setViewMode('3d')} startIcon={<MapOutlined fontSize="small" />} sx={{
-          bgcolor: viewMode === '3d' ? '#1B4332 !important' : 'transparent',
+          bgcolor: viewMode === '3d' ? '#144E36 !important' : 'transparent',
           color: viewMode === '3d' ? '#FFFFFF !important' : '#486253'
         }}>
             3D Site Map
           </Button>
           <Button onClick={() => setViewMode('zones')} startIcon={<ViewModuleOutlined fontSize="small" />} sx={{
-          bgcolor: viewMode === 'zones' ? '#1B4332 !important' : 'transparent',
+          bgcolor: viewMode === 'zones' ? '#144E36 !important' : 'transparent',
           color: viewMode === 'zones' ? '#FFFFFF !important' : '#486253'
         }}>
             Master Plan Facilities ({facilities.length})
           </Button>
           <Button onClick={() => setViewMode('flow')} startIcon={<SyncAltOutlined fontSize="small" />} sx={{
-          bgcolor: viewMode === 'flow' ? '#1B4332 !important' : 'transparent',
+          bgcolor: viewMode === 'flow' ? '#144E36 !important' : 'transparent',
           color: viewMode === 'flow' ? '#FFFFFF !important' : '#486253'
         }}>
             Resource Flow
@@ -181,10 +181,10 @@ export default function MapPage() {
           {/* Quick Facility Navigator Bar */}
           <Paper elevation={0} sx={{
         p: 2.5,
-        borderRadius: 4,
+        borderRadius: 1.5,
         bgcolor: '#FFFFFF',
         border: '1px solid rgba(27,67,50,0.08)',
-        boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)'
+        boxShadow: '0 4px 12px -2px rgba(27,67,50,0.04)'
       }}>
             <Box sx={{
           display: 'flex',
@@ -216,7 +216,7 @@ export default function MapPage() {
               {facilities.map(f => <Box key={f.id} onClick={() => handleSelectFacility(f.id)} sx={{
             minWidth: 175,
             p: 1.5,
-            borderRadius: 3,
+            borderRadius: 1.5,
             bgcolor: selectedFacility?.id === f.id ? `${f.color}15` : '#FAF9F5',
             border: `1.5px solid ${selectedFacility?.id === f.id ? f.color : 'rgba(27,67,50,0.08)'}`,
             cursor: 'pointer',
@@ -282,8 +282,8 @@ export default function MapPage() {
         }}>
               {categories.map(cat => <Chip key={cat} label={cat} onClick={() => setCategoryFilter(cat)} sx={{
             fontWeight: 700,
-            borderRadius: 3,
-            bgcolor: categoryFilter === cat ? '#1B4332' : 'rgba(255,255,255,0.9)',
+            borderRadius: 1.5,
+            bgcolor: categoryFilter === cat ? '#144E36' : 'rgba(255,255,255,0.9)',
             color: categoryFilter === cat ? '#FFFFFF' : '#486253',
             border: '1px solid rgba(27,67,50,0.1)'
           }} />)}
@@ -292,7 +292,8 @@ export default function MapPage() {
             <Chip icon={<HelpOutline fontSize="small" />} label={`${MASTER_PLAN_CLARIFICATIONS_NEEDED.length} Master Plan Items Pending Clarification`} size="small" sx={{
           bgcolor: 'rgba(245, 158, 11, 0.14)',
           color: '#B45309',
-          fontWeight: 700
+          fontWeight: 700,
+          borderRadius: 1.5
         }} />
           </Box>
 
@@ -300,17 +301,17 @@ export default function MapPage() {
             {filteredFacilities.map(facility => <Grid item xs={12} md={6} lg={4} key={facility.id}>
                 <Paper elevation={0} sx={{
             p: 3,
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
             border: '1px solid rgba(27, 67, 50, 0.08)',
-            boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+            boxShadow: '0 4px 16px -4px rgba(27,67,50,0.05)',
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
             transition: 'all 0.25s ease',
             '&:hover': {
               transform: 'translateY(-3px)',
-              boxShadow: '0 16px 36px -10px rgba(27,67,50,0.1)',
+              boxShadow: '0 12px 28px -8px rgba(27,67,50,0.1)',
               borderColor: facility.color
             }
           }}>
@@ -390,7 +391,7 @@ export default function MapPage() {
                   {/* Area Specification Box */}
                   <Box sx={{
               p: 1.5,
-              borderRadius: 2.5,
+              borderRadius: 1.5,
               bgcolor: '#FAF9F5',
               border: '1px solid rgba(27,67,50,0.06)',
               mb: 2
@@ -414,13 +415,15 @@ export default function MapPage() {
                   fontSize: '0.65rem',
                   bgcolor: 'rgba(16,185,129,0.15)',
                   color: '#065F46',
-                  fontWeight: 800
+                  fontWeight: 800,
+                  borderRadius: 1
                 }} /> : <Chip label="CAD Survey TBD" size="small" sx={{
                   height: 18,
                   fontSize: '0.65rem',
                   bgcolor: 'rgba(245,158,11,0.15)',
                   color: '#B45309',
-                  fontWeight: 800
+                  fontWeight: 800,
+                  borderRadius: 1
                 }} />}
                     </Box>
                     <Typography variant="body2" sx={{
@@ -455,28 +458,30 @@ export default function MapPage() {
                   fontSize: '0.68rem',
                   bgcolor: 'rgba(27,67,50,0.06)',
                   color: '#1B4332',
-                  fontWeight: 600
+                  fontWeight: 600,
+                  borderRadius: 1
                 }} />)}
                       {facility.relatedModules.map((mod, idx) => <Chip key={`mod-${idx}`} label={mod} size="small" sx={{
                   height: 20,
                   fontSize: '0.68rem',
                   bgcolor: `${facility.color}15`,
                   color: facility.color,
-                  fontWeight: 700
+                  fontWeight: 700,
+                  borderRadius: 1
                 }} />)}
                     </Box>
                   </Box>
 
                   <Button fullWidth variant="outlined" onClick={() => handleSelectFacility(facility.id)} sx={{
-              borderRadius: 2.5,
+              borderRadius: 1.5,
               borderColor: 'rgba(27,67,50,0.18)',
-              color: '#1B4332',
+              color: '#144E36',
               textTransform: 'none',
               fontWeight: 700,
               fontSize: '0.82rem',
               '&:hover': {
                 bgcolor: '#F0F6F1',
-                borderColor: '#1B4332'
+                borderColor: '#144E36'
               }
             }}>
                     Inspect Facility Details
@@ -578,7 +583,7 @@ export default function MapPage() {
             <Paper elevation={0} sx={{
           p: 2,
           bgcolor: '#FAF9F5',
-          borderRadius: 3,
+          borderRadius: 1.5,
           border: '1px solid rgba(27,67,50,0.06)',
           mb: 2.5
         }}>
@@ -631,7 +636,7 @@ export default function MapPage() {
                   {Object.entries(selectedFacility.metrics).map(([key, val], idx) => <Grid item xs={6} key={idx}>
                       <Box sx={{
                 p: 1.5,
-                borderRadius: 2.5,
+                borderRadius: 1.5,
                 bgcolor: '#F3F8F4',
                 border: '1px solid rgba(16,185,129,0.12)'
               }}>
@@ -692,7 +697,7 @@ export default function MapPage() {
             {selectedFacility.missingPlanDetails && selectedFacility.missingPlanDetails.length > 0 && <Box sx={{
           p: 2,
           bgcolor: '#FFFBEB',
-          borderRadius: 3,
+          borderRadius: 1.5,
           border: '1px solid rgba(245,158,11,0.25)',
           mb: 3
         }}>
@@ -733,14 +738,14 @@ export default function MapPage() {
           gap: 1
         }}>
               <Button variant="contained" onClick={() => handleFacilityAction("Operational Protocol Calibration")} sx={{
-            bgcolor: '#1B4332',
-            color: '#FFFFFF',
-            borderRadius: 3,
+            bgcolor: '#144E36',
+            color: '#FFFFFF !important',
+            borderRadius: 1.5,
             py: 1.2,
             fontWeight: 700,
             textTransform: 'none',
             '&:hover': {
-              bgcolor: '#123124'
+              bgcolor: '#0F3827'
             }
           }}>
                 Trigger Calibration Routine
@@ -755,8 +760,8 @@ export default function MapPage() {
       horizontal: 'center'
     }}>
         <Alert onClose={() => setToastMsg('')} severity="success" sx={{
-        borderRadius: 3,
-        bgcolor: '#1B4332',
+        borderRadius: 1.5,
+        bgcolor: '#144E36',
         color: '#FFFFFF',
         fontWeight: 600,
         '& .MuiAlert-icon': {

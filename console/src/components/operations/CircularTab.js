@@ -29,9 +29,10 @@ export default function CircularTab({
           elevation={0}
           sx={{
             p: 3,
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
-            border: '1px solid rgba(27,67,50,0.08)',
+            border: '1px solid rgba(27,67,50,0.1)',
+            boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -52,12 +53,13 @@ export default function CircularTab({
                 setBsfFeedDrawerOpen(true);
               }}
               sx={{
-                bgcolor: '#10B981',
-                color: '#FFFFFF',
-                borderRadius: 2,
+                bgcolor: '#144E36',
+                color: '#FFFFFF !important',
+                borderRadius: 1.5,
                 fontWeight: 700,
                 textTransform: 'none',
-                '&:hover': { bgcolor: '#059669' },
+                boxShadow: '0 2px 8px rgba(20,78,54,0.2)',
+                '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
               }}
             >
               + Feed Tray
@@ -68,12 +70,12 @@ export default function CircularTab({
             <Chip
               label="1.8 kg/day Live Protein"
               size="small"
-              sx={{ bgcolor: 'rgba(245,158,11,0.15)', color: '#D97706', fontWeight: 800 }}
+              sx={{ bgcolor: 'rgba(245,158,11,0.15)', color: '#D97706', fontWeight: 800, borderRadius: 1.5 }}
             />
             <Chip
               label="96.6% Closed Loop"
               size="small"
-              sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }}
+              sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1.5 }}
             />
           </Box>
 
@@ -82,7 +84,7 @@ export default function CircularTab({
               key={bsf.id}
               sx={{
                 p: 2,
-                borderRadius: 3,
+                borderRadius: 1.5,
                 bgcolor: '#FAF9F5',
                 border: '1px solid rgba(27,67,50,0.06)',
                 mb: 2,
@@ -95,7 +97,7 @@ export default function CircularTab({
                 <Chip
                   label={bsf.status}
                   size="small"
-                  sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }}
+                  sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1 }}
                 />
               </Box>
               <Typography variant="caption" sx={{ color: '#5A7565', display: 'block', mb: 0.5 }}>
@@ -114,13 +116,14 @@ export default function CircularTab({
                     setMaggotHarvestDrawerOpen(true);
                   }}
                   sx={{
-                    bgcolor: '#10B981',
-                    color: '#FFFFFF',
-                    borderRadius: 2,
+                    bgcolor: '#144E36',
+                    color: '#FFFFFF !important',
+                    borderRadius: 1.5,
                     textTransform: 'none',
                     fontWeight: 700,
                     fontSize: '0.75rem',
-                    '&:hover': { bgcolor: '#059669' },
+                    boxShadow: '0 2px 6px rgba(20,78,54,0.2)',
+                    '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
                   }}
                 >
                   Harvest Prepupae
@@ -134,7 +137,7 @@ export default function CircularTab({
                     setBsfFeedDrawerOpen(true);
                   }}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1.5,
                     textTransform: 'none',
                     color: '#1B4332',
                     borderColor: 'rgba(27,67,50,0.3)',
@@ -156,9 +159,10 @@ export default function CircularTab({
           elevation={0}
           sx={{
             p: 3,
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
-            border: '1px solid rgba(27,67,50,0.08)',
+            border: '1px solid rgba(27,67,50,0.1)',
+            boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
           }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -173,7 +177,7 @@ export default function CircularTab({
             <Chip
               label="480 kg Mature Humus"
               size="small"
-              sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 800 }}
+              sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 800, borderRadius: 1.5 }}
             />
           </Box>
 
@@ -182,7 +186,7 @@ export default function CircularTab({
               key={cmp.id}
               sx={{
                 p: 2,
-                borderRadius: 3,
+                borderRadius: 1.5,
                 bgcolor: '#FAF9F5',
                 border: '1px solid rgba(27,67,50,0.06)',
                 mb: 2,
@@ -207,9 +211,9 @@ export default function CircularTab({
                 value={cmp.maturityIndex}
                 sx={{
                   height: 6,
-                  borderRadius: 3,
+                  borderRadius: 1.5,
                   mb: 1,
-                  '& .MuiLinearProgress-bar': { bgcolor: '#10B981' },
+                  '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: 1.5 },
                 }}
               />
               <Typography variant="caption" sx={{ color: '#748B7D', display: 'block', mb: 1.5 }}>
@@ -224,7 +228,7 @@ export default function CircularTab({
                     setCompostTurnDrawerOpen(true);
                   }}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 1.5,
                     textTransform: 'none',
                     color: '#1B4332',
                     borderColor: 'rgba(27,67,50,0.3)',

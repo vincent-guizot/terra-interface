@@ -3,9 +3,9 @@ import { testDbConnection, closeDbConnection } from './config/database.js';
 import app from './app.js';
 let server = null;
 async function startServer() {
-  console.log('================================================================');
+  console.log('=================================================');
   console.log('  TERRA INTERFACE CORE — SYSTEM STARTUP SEQUENCE');
-  console.log('================================================================');
+  console.log('=================================================');
   console.log(`[CONFIG] Node Environment: ${env.NODE_ENV}`);
   console.log(`[CONFIG] Port: ${env.PORT}`);
 
@@ -13,23 +13,23 @@ async function startServer() {
   console.log('[STARTUP] Verifying database connectivity...');
   const dbResult = await testDbConnection();
   if (!dbResult.ok) {
-    console.error('================================================================');
+    console.error('=================================================');
     console.error(' [FATAL] Database connection verification failed during startup.');
     console.error(` [FATAL] Reason: ${dbResult.error}`);
     console.error(' [FATAL] Server aborting start. Exiting with status code 1.');
-    console.error('================================================================');
+    console.error('=================================================');
     process.exit(1);
   }
 
   // Step 3: Start HTTP Server only if database connectivity succeeds
   server = app.listen(env.PORT, () => {
-    console.log('================================================================');
+    console.log('=================================================');
     console.log(`  Terra Interface Core API is running!`);
     console.log(`  URL:         http://localhost:${env.PORT}`);
     console.log(`  Health:      http://localhost:${env.PORT}/api/health`);
     console.log(`  API V1:      http://localhost:${env.PORT}/api/v1`);
     console.log(`  DB Mode:     ${dbResult.mode}`);
-    console.log('================================================================');
+    console.log('=================================================');
   });
   server.on('error', err => {
     console.error('[SERVER ERROR] Express HTTP server encountered an error:', err.message);

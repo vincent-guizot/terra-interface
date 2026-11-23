@@ -22,7 +22,7 @@ export default function ConfigTab({
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} lg={7}>
-        <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
@@ -40,8 +40,9 @@ export default function ConfigTab({
                 key={t.id}
                 sx={{
                   p: 1.8,
-                  borderRadius: 2.5,
+                  borderRadius: 1.5,
                   bgcolor: '#FAF9F5',
+                  border: '1px solid rgba(27,67,50,0.06)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -61,7 +62,7 @@ export default function ConfigTab({
                 <Chip
                   label={`Unit: ${t.defaultUnit}`}
                   size="small"
-                  sx={{ fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332' }}
+                  sx={{ fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', borderRadius: 1 }}
                 />
               </Box>
             ))}
@@ -71,7 +72,7 @@ export default function ConfigTab({
           <Box
             component="form"
             onSubmit={handleAddCustomType}
-            sx={{ p: 2, borderRadius: 3, bgcolor: '#F3F8F4', border: '1px dashed #10B981' }}
+            sx={{ p: 2, borderRadius: 1.5, bgcolor: '#F3F8F4', border: '1px dashed #10B981' }}
           >
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', mb: 1.5 }}>
               + Add Custom Production Type
@@ -85,7 +86,7 @@ export default function ConfigTab({
                   value={newTypeForm.name}
                   onChange={(e) => setNewTypeForm({ ...newTypeForm, name: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -95,7 +96,7 @@ export default function ConfigTab({
                   value={newTypeForm.domain}
                   onChange={(e) => setNewTypeForm({ ...newTypeForm, domain: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Cultivation">Cultivation</MenuItem>
                   <MenuItem value="Livestock">Livestock</MenuItem>
@@ -109,12 +110,14 @@ export default function ConfigTab({
                   type="submit"
                   variant="contained"
                   sx={{
-                    bgcolor: '#1B4332',
-                    color: '#FFFFFF',
-                    borderRadius: 2,
+                    bgcolor: '#144E36',
+                    color: '#FFFFFF !important',
+                    borderRadius: 1.5,
                     height: 40,
                     fontWeight: 700,
                     textTransform: 'none',
+                    boxShadow: '0 2px 8px rgba(20,78,54,0.2)',
+                    '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
                   }}
                 >
                   Add Type
@@ -126,7 +129,7 @@ export default function ConfigTab({
       </Grid>
 
       <Grid item xs={12} lg={5}>
-        <Paper elevation={0} sx={{ p: 3, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332', mb: 1 }}>
             Measurement Units & Custom Fields
           </Typography>
@@ -138,7 +141,7 @@ export default function ConfigTab({
               <Chip
                 key={u}
                 label={u}
-                sx={{ fontWeight: 700, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.1)' }}
+                sx={{ fontWeight: 700, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.1)', borderRadius: 1 }}
               />
             ))}
           </Box>
@@ -152,8 +155,9 @@ export default function ConfigTab({
                 key={cf.id}
                 sx={{
                   p: 1.2,
-                  borderRadius: 2,
+                  borderRadius: 1.5,
                   bgcolor: '#FAF9F5',
+                  border: '1px solid rgba(27,67,50,0.06)',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -162,7 +166,7 @@ export default function ConfigTab({
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>
                   {cf.name}
                 </Typography>
-                <Chip label={cf.appliesTo.join(', ')} size="small" sx={{ height: 18, fontSize: '0.65rem' }} />
+                <Chip label={cf.appliesTo.join(', ')} size="small" sx={{ height: 18, fontSize: '0.65rem', borderRadius: 1 }} />
               </Box>
             ))}
           </Box>

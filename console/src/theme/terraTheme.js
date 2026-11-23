@@ -94,23 +94,24 @@ export const terraTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: 16,
+    borderRadius: 8,
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 8,
           padding: '8px 20px',
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 6px 20px rgba(27, 67, 50, 0.12)',
+            boxShadow: '0 4px 14px rgba(27, 67, 50, 0.12)',
           },
         },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)',
+          background: '#144E36',
+          color: '#FFFFFF',
           '&:hover': {
-            background: 'linear-gradient(135deg, #143427 0%, #23563F 100%)',
+            background: '#0F291E',
           },
         },
       },
@@ -119,18 +120,18 @@ export const terraTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          borderRadius: 20,
-          border: '1px solid rgba(27, 67, 50, 0.08)',
-          boxShadow: '0 10px 30px -8px rgba(27, 67, 50, 0.05), 0 2px 6px rgba(27, 67, 50, 0.02)',
+          borderRadius: 8,
+          border: '1px solid rgba(27, 67, 50, 0.1)',
+          boxShadow: '0 4px 12px rgba(27, 67, 50, 0.05)',
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 20,
-          border: '1px solid rgba(27, 67, 50, 0.08)',
-          boxShadow: '0 10px 30px -8px rgba(27, 67, 50, 0.05), 0 2px 6px rgba(27, 67, 50, 0.02)',
+          borderRadius: 8,
+          border: '1px solid rgba(27, 67, 50, 0.1)',
+          boxShadow: '0 4px 12px rgba(27, 67, 50, 0.05)',
         },
       },
     },
@@ -138,7 +139,7 @@ export const terraTheme = createTheme({
       styleOverrides: {
         root: {
           fontWeight: 600,
-          borderRadius: 10,
+          borderRadius: 6,
         },
       },
     },

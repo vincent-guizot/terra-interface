@@ -20,10 +20,14 @@ import energyWaterController from '../../modules/energy-water/energy-water.contr
 import { universalBatchRouter } from '../../modules/universal-batch/universal-batch.router.js';
 import { spatialRouter } from '../../modules/spatial/spatial.router.js';
 import { eventsRouter } from '../../common/events/events.router.js';
+import dashboardRouter from '../../modules/dashboard/dashboard.router.js';
+import notificationsRouter from '../../modules/notifications/notifications.router.js';
 const router = Router();
 router.use('/universal-batches', universalBatchRouter);
 router.use('/spatial', spatialRouter);
 router.use('/events', eventsRouter);
+router.use('/dashboard', dashboardRouter);
+router.use('/notifications', notificationsRouter);
 
 // 1. Homesteads
 router.use('/homesteads', homesteadsRouter);
