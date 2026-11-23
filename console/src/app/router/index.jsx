@@ -8,7 +8,7 @@ import { PATHS } from './paths.js';
 function NotFoundPage() {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in">
-      <div className="p-8 rounded-3xl bg-white border border-[rgba(27,67,50,0.1)] shadow-card max-w-md w-full">
+      <div className="p-8 rounded-md bg-white border border-[rgba(27,67,50,0.1)] shadow-card max-w-md w-full">
         <h2 className="text-5xl font-black text-[#1B4332] mb-2">404</h2>
         <p className="text-base font-semibold text-[#14281D] mb-1">Page Not Found in Terra Interface</p>
         <p className="text-xs text-[#5A7565] mb-6">
@@ -16,7 +16,7 @@ function NotFoundPage() {
         </p>
         <a
           href={PATHS.HOME}
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-[#1B4332] text-white text-sm font-bold shadow-sm hover:bg-[#2D6A4F] transition-all"
+          className="inline-flex items-center justify-center px-5 py-2.5 rounded-md bg-[#144E36] text-white text-sm font-bold shadow-sm hover:bg-[#0F3827] transition-all"
         >
           Return to Overview
         </a>
