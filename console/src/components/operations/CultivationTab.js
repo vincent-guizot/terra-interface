@@ -36,10 +36,10 @@ export default function CultivationTab({
     <Paper
       elevation={0}
       sx={{
-        borderRadius: 4,
+        borderRadius: 1.5,
         bgcolor: '#FFFFFF',
-        border: '1px solid rgba(27, 67, 50, 0.08)',
-        boxShadow: '0 8px 24px -6px rgba(27, 67, 50, 0.04)',
+        border: '1px solid rgba(27, 67, 50, 0.1)',
+        boxShadow: '0 2px 8px rgba(27, 67, 50, 0.03)',
         overflow: 'hidden',
       }}
     >
@@ -65,7 +65,7 @@ export default function CultivationTab({
         <Chip
           label={`${cultivation.batches.length} Active Batches`}
           size="small"
-          sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }}
+          sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1.5 }}
         />
       </Box>
 
@@ -141,7 +141,7 @@ export default function CultivationTab({
                         variant="outlined"
                         onClick={() => handleOpenDetail(batch)}
                         sx={{
-                          borderRadius: 2,
+                          borderRadius: 1.5,
                           fontSize: '0.75rem',
                           py: 0.3,
                           px: 1,

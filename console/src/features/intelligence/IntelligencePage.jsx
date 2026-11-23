@@ -253,7 +253,7 @@ export default function IntelligencePage() {
             onClick={() => setIsDiagnosisOpen(true)}
             startIcon={<Biotech sx={{ color: '#059669' }} />}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1.5,
               borderColor: 'rgba(27,67,50,0.18)',
               color: '#1B4332',
               bgcolor: '#FFFFFF',
@@ -269,14 +269,15 @@ export default function IntelligencePage() {
             variant="contained"
             size="small"
             onClick={() => setIsAuditOpen(true)}
-            startIcon={<Calculate />}
+            startIcon={<Calculate sx={{ color: '#FFFFFF' }} />}
             sx={{
-              borderRadius: 3,
-              bgcolor: '#1B4332',
-              color: '#FFFFFF',
+              borderRadius: 1.5,
+              bgcolor: '#144E36',
+              color: '#FFFFFF !important',
               fontWeight: 700,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#123124' },
+              boxShadow: '0 4px 14px rgba(20,78,54,0.2)',
+              '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
             }}
           >
             Autonomy Equation Audit
@@ -291,9 +292,10 @@ export default function IntelligencePage() {
           sx={{
             p: 2,
             mb: 3.5,
-            borderRadius: 3.5,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
             border: '1px solid rgba(2, 132, 199, 0.2)',
+            boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -306,7 +308,7 @@ export default function IntelligencePage() {
               sx={{
                 width: 38,
                 height: 38,
-                borderRadius: 2.5,
+                borderRadius: 1.5,
                 bgcolor: 'rgba(2, 132, 199, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
@@ -330,12 +332,12 @@ export default function IntelligencePage() {
               icon={<Opacity fontSize="small" sx={{ color: '#0284C7 !important' }} />}
               label={`+${forecast.expectedRoofCatchmentLiters} L Projected Catchment`}
               size="small"
-              sx={{ bgcolor: 'rgba(2, 132, 199, 0.08)', color: '#0369A1', fontWeight: 700 }}
+              sx={{ bgcolor: 'rgba(2, 132, 199, 0.08)', color: '#0369A1', fontWeight: 700, borderRadius: 1.5 }}
             />
             <Chip
               label={`${forecast.probabilityOfPrecipitationPercent}% Precipitation Probability`}
               size="small"
-              sx={{ bgcolor: '#F0F6F1', color: '#1B4332', fontWeight: 700 }}
+              sx={{ bgcolor: '#F0F6F1', color: '#1B4332', fontWeight: 700, borderRadius: 1.5 }}
             />
           </Box>
         </Paper>
@@ -349,10 +351,10 @@ export default function IntelligencePage() {
             onClick={() => setIsAuditOpen(true)}
             sx={{
               p: 2.5,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1.5px solid rgba(27,67,50,0.12)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
               cursor: 'pointer',
               '&:hover': { borderColor: '#1B4332' },
             }}
@@ -367,7 +369,7 @@ export default function IntelligencePage() {
               <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 700 }}>
                 Rating: {autonomy.rating}
               </Typography>
-              <Chip label="Audit &rarr;" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332' }} />
+              <Chip label="Audit &rarr;" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', borderRadius: 1 }} />
             </Box>
           </Paper>
         </Grid>
@@ -377,10 +379,10 @@ export default function IntelligencePage() {
             elevation={0}
             sx={{
               p: 2.5,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600, display: 'block', mb: 0.5 }}>
@@ -393,7 +395,7 @@ export default function IntelligencePage() {
               <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 700 }}>
                 {autonomy.metrics?.dailyCaloriesProduced || 4200} / {autonomy.metrics?.dailyCalorieTarget || 5000} kcal/day
               </Typography>
-              <Chip label="Food Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(5, 150, 105, 0.1)', color: '#047857' }} />
+              <Chip label="Food Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(5, 150, 105, 0.1)', color: '#047857', borderRadius: 1 }} />
             </Box>
           </Paper>
         </Grid>
@@ -403,10 +405,10 @@ export default function IntelligencePage() {
             elevation={0}
             sx={{
               p: 2.5,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600, display: 'block', mb: 0.5 }}>
@@ -419,7 +421,7 @@ export default function IntelligencePage() {
               <Typography variant="caption" sx={{ color: '#0284C7', fontWeight: 700 }}>
                 {autonomy.metrics?.cisternStorageLiters || 6850} L in Cisterns
               </Typography>
-              <Chip label="Water Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(2, 132, 199, 0.1)', color: '#0369A1' }} />
+              <Chip label="Water Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(2, 132, 199, 0.1)', color: '#0369A1', borderRadius: 1 }} />
             </Box>
           </Paper>
         </Grid>
@@ -429,10 +431,10 @@ export default function IntelligencePage() {
             elevation={0}
             sx={{
               p: 2.5,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600, display: 'block', mb: 0.5 }}>
@@ -445,7 +447,7 @@ export default function IntelligencePage() {
               <Typography variant="caption" sx={{ color: '#D97706', fontWeight: 700 }}>
                 {autonomy.metrics?.solarDailyGenerationKwh || 22.4} kWh Solar/Day
               </Typography>
-              <Chip label="Energy Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(217, 119, 6, 0.1)', color: '#B45309' }} />
+              <Chip label="Energy Pillar" size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(217, 119, 6, 0.1)', color: '#B45309', borderRadius: 1 }} />
             </Box>
           </Paper>
         </Grid>
@@ -458,10 +460,10 @@ export default function IntelligencePage() {
           <Paper
             elevation={0}
             sx={{
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
               display: 'flex',
               flexDirection: 'column',
               height: 580,
@@ -480,7 +482,7 @@ export default function IntelligencePage() {
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 38, height: 38, borderRadius: 2.5, bgcolor: '#1B4332', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ width: 38, height: 38, borderRadius: 1.5, bgcolor: '#144E36', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <SmartToyOutlined sx={{ color: '#10B981', fontSize: 22 }} />
                 </Box>
                 <Box>
@@ -492,7 +494,7 @@ export default function IntelligencePage() {
                   </Typography>
                 </Box>
               </Box>
-              <Chip label="Online & Monitoring" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700 }} />
+              <Chip label="Online & Monitoring" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700, borderRadius: 1.5 }} />
             </Box>
 
             {/* Quick Prompt Starters */}
@@ -510,6 +512,7 @@ export default function IntelligencePage() {
                     bgcolor: '#FFFFFF',
                     border: '1px solid rgba(27,67,50,0.1)',
                     color: '#1B4332',
+                    borderRadius: 1.5,
                     '&:hover': { bgcolor: '#F0F6F1' },
                   }}
                 />
@@ -541,10 +544,10 @@ export default function IntelligencePage() {
                     sx={{
                       maxWidth: '85%',
                       p: 2,
-                      borderRadius: 3.5,
-                      bgcolor: m.sender === 'user' ? '#1B4332' : '#FFFFFF',
+                      borderRadius: 1.5,
+                      bgcolor: m.sender === 'user' ? '#144E36' : '#FFFFFF',
                       color: m.sender === 'user' ? '#FFFFFF' : '#14281D',
-                      boxShadow: m.sender === 'user' ? '0 4px 14px rgba(27,67,50,0.15)' : '0 4px 12px rgba(27,67,50,0.04)',
+                      boxShadow: m.sender === 'user' ? '0 4px 14px rgba(20,78,54,0.15)' : '0 2px 8px rgba(27,67,50,0.03)',
                       border: m.sender === 'user' ? 'none' : '1px solid rgba(27,67,50,0.08)',
                     }}
                   >
@@ -557,14 +560,14 @@ export default function IntelligencePage() {
                         <Chip
                           label={m.intentCategory}
                           size="small"
-                          sx={{ height: 18, fontSize: '0.62rem', fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332' }}
+                          sx={{ height: 18, fontSize: '0.62rem', fontWeight: 700, bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', borderRadius: 1 }}
                         />
                         {m.relatedZones?.map((z, zIdx) => (
                           <Chip
                             key={zIdx}
                             label={z}
                             size="small"
-                            sx={{ height: 18, fontSize: '0.62rem', fontWeight: 600, bgcolor: '#FAF9F5', color: '#5A7565' }}
+                            sx={{ height: 18, fontSize: '0.62rem', fontWeight: 600, bgcolor: '#FAF9F5', color: '#5A7565', borderRadius: 1 }}
                           />
                         ))}
                       </Box>
@@ -606,9 +609,10 @@ export default function IntelligencePage() {
                         onClick={() => handleSend()}
                         disabled={!inputMsg.trim()}
                         sx={{
-                          bgcolor: inputMsg.trim() ? '#1B4332' : '#E2E8F0',
+                          bgcolor: inputMsg.trim() ? '#144E36' : '#E2E8F0',
                           color: '#FFFFFF',
-                          '&:hover': { bgcolor: '#123124' },
+                          borderRadius: 1.5,
+                          '&:hover': { bgcolor: '#0F291E' },
                           p: 0.8,
                         }}
                       >
@@ -617,7 +621,7 @@ export default function IntelligencePage() {
                     </InputAdornment>
                   ),
                   sx: {
-                    borderRadius: 3,
+                    borderRadius: 1.5,
                     bgcolor: '#FAF9F5',
                     '& fieldset': { borderColor: 'rgba(27,67,50,0.12)' },
                   },
@@ -633,10 +637,10 @@ export default function IntelligencePage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
               display: 'flex',
               flexDirection: 'column',
               height: 580,
@@ -675,7 +679,7 @@ export default function IntelligencePage() {
                       key={rec.id}
                       sx={{
                         p: 2,
-                        borderRadius: 3,
+                        borderRadius: 1.5,
                         bgcolor: '#FAF9F5',
                         border: `1.5px solid ${badgeColor}30`,
                       }}
@@ -691,6 +695,7 @@ export default function IntelligencePage() {
                             height: 20,
                             fontSize: '0.68rem',
                             fontWeight: 700,
+                            borderRadius: 1,
                             bgcolor: `${badgeColor}18`,
                             color: badgeColor,
                           }}
@@ -716,6 +721,7 @@ export default function IntelligencePage() {
                             textTransform: 'none',
                             fontWeight: 600,
                             fontSize: '0.75rem',
+                            borderRadius: 1.5,
                             '&:hover': { bgcolor: 'rgba(100, 116, 139, 0.08)' },
                           }}
                         >
@@ -726,15 +732,16 @@ export default function IntelligencePage() {
                           size="small"
                           variant="contained"
                           onClick={() => handleApplyRecommendation(rec.id, rec.actionTitle || rec.title)}
-                          startIcon={<Check fontSize="small" />}
+                          startIcon={<Check fontSize="small" sx={{ color: '#FFFFFF' }} />}
                           sx={{
-                            borderRadius: 2,
-                            bgcolor: '#1B4332',
-                            color: '#FFFFFF',
+                            borderRadius: 1.5,
+                            bgcolor: '#144E36',
+                            color: '#FFFFFF !important',
                             textTransform: 'none',
                             fontWeight: 700,
                             fontSize: '0.75rem',
-                            '&:hover': { bgcolor: '#123124' },
+                            boxShadow: '0 2px 8px rgba(20,78,54,0.2)',
+                            '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
                           }}
                         >
                           Accept & Dispatch
@@ -771,7 +778,7 @@ export default function IntelligencePage() {
         onClose={() => setToastMsg('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 3, bgcolor: '#1B4332', color: '#FFFFFF', fontWeight: 600 }}>
+        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 1.5, bgcolor: '#144E36', color: '#FFFFFF', fontWeight: 600 }}>
           {toastMsg}
         </Alert>
       </Snackbar>

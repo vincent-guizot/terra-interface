@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -10,13 +10,25 @@ import {
   TableHead,
   TableBody,
   TableRow,
-  TableCell
+  TableCell,
+  TablePagination
 } from '@mui/material';
 
 export default function LivestockTab({
   livestock,
+  searchQuery = '',
   handleOpenDetail
 }) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const filteredBatches = (livestock.batches || []).filter((b) =>
+    (b.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (b.code || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (b.breed || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (b.species || '').toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12}>
@@ -24,9 +36,10 @@ export default function LivestockTab({
           elevation={0}
           sx={{
             p: 2.5,
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
-            border: '1px solid rgba(27,67,50,0.08)',
+            border: '1px solid rgba(27,67,50,0.1)',
+            boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             mb: 3,
           }}
         >
@@ -42,7 +55,7 @@ export default function LivestockTab({
             <Chip
               label="Zero Mortality"
               size="small"
-              sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }}
+              sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1.5 }}
             />
           </Box>
 
@@ -52,7 +65,7 @@ export default function LivestockTab({
                 <Box
                   sx={{
                     p: 2,
-                    borderRadius: 3,
+                    borderRadius: 1.5,
                     bgcolor: '#FAF9F5',
                     border: '1px solid rgba(27,67,50,0.08)',
                   }}
@@ -61,7 +74,7 @@ export default function LivestockTab({
                     <Chip
                       label={ani.species}
                       size="small"
-                      sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, fontSize: '0.68rem' }}
+                      sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, fontSize: '0.68rem', borderRadius: 1 }}
                     />
                     <Typography variant="caption" sx={{ fontWeight: 800, color: '#10B981' }}>
                       {ani.health}
@@ -95,16 +108,22 @@ export default function LivestockTab({
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: '#FFFFFF',
-            border: '1px solid rgba(27,67,50,0.08)',
+            border: '1px solid rgba(27,67,50,0.1)',
+            boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             overflow: 'hidden',
           }}
         >
-          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)' }}>
+          <Box sx={{ p: 2.5, borderBottom: '1px solid rgba(27,67,50,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
               Livestock Production Batches
             </Typography>
+            <Chip
+              label={`${filteredBatches.length} Batches`}
+              size="small"
+              sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1.5 }}
+            />
           </Box>
           <Table>
             <TableHead sx={{ bgcolor: '#FAF9F5' }}>
@@ -118,7 +137,7 @@ export default function LivestockTab({
               </TableRow>
             </TableHead>
             <TableBody>
-              {livestock.batches.map((b) => (
+              {filteredBatches.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((b) => (
                 <TableRow key={b.id} hover>
                   <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>{b.code}</TableCell>
                   <TableCell>
@@ -135,7 +154,7 @@ export default function LivestockTab({
                     <Chip
                       label={b.status}
                       size="small"
-                      sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800 }}
+                      sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 800, borderRadius: 1.5 }}
                     />
                   </TableCell>
                   <TableCell align="right">
@@ -143,15 +162,34 @@ export default function LivestockTab({
                       size="small"
                       variant="outlined"
                       onClick={() => handleOpenDetail(b)}
-                      sx={{ borderRadius: 2, textTransform: 'none' }}
+                      sx={{ borderRadius: 1.5, textTransform: 'none', borderColor: 'rgba(27,67,50,0.3)', color: '#1B4332' }}
                     >
                       Inspect
                     </Button>
                   </TableCell>
                 </TableRow>
               ))}
+              {filteredBatches.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 3, color: '#748B7D' }}>
+                    No livestock batches found matching your search.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredBatches.length}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(e) => {
+              setRowsPerPage(parseInt(e.target.value, 10));
+              setPage(0);
+            }}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
         </Paper>
       </Grid>
     </Grid>
