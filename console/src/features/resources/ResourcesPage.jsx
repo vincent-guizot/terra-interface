@@ -103,7 +103,7 @@ export default function ResourcesPage() {
             onClick={() => setManualIngestOpen(true)}
             startIcon={<Sensors />}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1.5,
               borderColor: 'rgba(27,67,50,0.3)',
               color: '#1B4332',
               fontWeight: 700,
@@ -120,14 +120,14 @@ export default function ResourcesPage() {
             onClick={() => setDispatchDrawerOpen(true)}
             startIcon={<Tune />}
             sx={{
-              borderRadius: 3,
-              bgcolor: '#1B4332',
-              color: '#FFFFFF',
+              borderRadius: 1.5,
+              bgcolor: '#144E36',
+              color: '#FFFFFF !important',
               fontWeight: 700,
               fontSize: '0.85rem',
               textTransform: 'none',
-              boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
-              '&:hover': { bgcolor: '#123124' },
+              boxShadow: '0 4px 14px rgba(20,78,54,0.2)',
+              '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
             }}
           >
             Configure Dispatch Policy
@@ -145,7 +145,7 @@ export default function ResourcesPage() {
               sx={{
                 p: 2,
                 mb: 1.5,
-                borderRadius: 3,
+                borderRadius: 1.5,
                 bgcolor: alt.severity === 'CRITICAL' ? 'rgba(239,68,68,0.08)' : alt.severity === 'WARNING' ? 'rgba(245,158,11,0.08)' : 'rgba(2,132,199,0.08)',
                 border: alt.severity === 'CRITICAL' ? '1px solid rgba(239,68,68,0.3)' : alt.severity === 'WARNING' ? '1px solid rgba(245,158,11,0.3)' : '1px solid rgba(2,132,199,0.3)',
                 display: 'flex',
@@ -175,6 +175,7 @@ export default function ResourcesPage() {
                   bgcolor: alt.severity === 'CRITICAL' ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)',
                   color: alt.severity === 'CRITICAL' ? '#DC2626' : '#D97706',
                   fontWeight: 800,
+                  borderRadius: 1.5,
                 }}
               />
             </Paper>
@@ -190,10 +191,10 @@ export default function ResourcesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1.5px solid rgba(217, 119, 6, 0.2)',
-              boxShadow: '0 10px 30px -8px rgba(217, 119, 6, 0.08)',
+              border: '1px solid rgba(27, 67, 50, 0.1)',
+              boxShadow: '0 4px 14px rgba(27,67,50,0.05)',
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
@@ -201,7 +202,7 @@ export default function ResourcesPage() {
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: 'rgba(217, 119, 6, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ width: 42, height: 42, borderRadius: 1.5, bgcolor: 'rgba(217, 119, 6, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Bolt sx={{ color: '#D97706', fontSize: 24 }} />
                 </Box>
                 <Box>
@@ -216,13 +217,13 @@ export default function ResourcesPage() {
               <Chip
                 label={telemetry.batteryVoltage ? `${telemetry.batteryVoltage}V • ${telemetry.batteryHealthStatus}` : 'Grid-Isolated Stable'}
                 size="small"
-                sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700 }}
+                sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 700, borderRadius: 1.5 }}
               />
             </Box>
 
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Solar Output</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#D97706' }}>
                     {telemetry.solarGenerationKw} kW
@@ -230,7 +231,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>AC Load</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
                     {telemetry.inverterLoadWatts} W
@@ -238,7 +239,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Battery SoC</Typography>
                   <Typography
                     variant="h6"
@@ -252,7 +253,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Autonomy Left</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0284C7' }}>
                     {telemetry.autonomyHours}h
@@ -262,7 +263,7 @@ export default function ResourcesPage() {
             </Grid>
 
             {/* Battery SoC Progress Gauge */}
-            <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
+            <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: '#FAF9F5', mb: 2, border: '1px solid rgba(27,67,50,0.06)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>
                   15.3 kWh LiFePO4 Storage Bank
@@ -276,10 +277,11 @@ export default function ResourcesPage() {
                 value={telemetry.batterySoC}
                 sx={{
                   height: 8,
-                  borderRadius: 4,
+                  borderRadius: 1.5,
                   bgcolor: 'rgba(27,67,50,0.1)',
                   '& .MuiLinearProgress-bar': {
                     bgcolor: telemetry.batterySoC < 20 ? '#EF4444' : telemetry.batterySoC >= 95 ? '#D97706' : '#10B981',
+                    borderRadius: 1.5,
                   },
                 }}
               />
@@ -290,11 +292,11 @@ export default function ResourcesPage() {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mt: 'auto' }}>
               {(resourcesData.energy?.loads || []).map((load, idx) => (
-                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5' }}>
+                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.05)' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#1B4332' }}>{load.name}</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
                     <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>{load.power}</Typography>
-                    <Chip label={load.share} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(217, 119, 6, 0.12)', color: '#B45309' }} />
+                    <Chip label={load.share} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(217, 119, 6, 0.12)', color: '#B45309', borderRadius: 1 }} />
                   </Box>
                 </Box>
               ))}
@@ -308,10 +310,10 @@ export default function ResourcesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1.5px solid rgba(2, 132, 199, 0.2)',
-              boxShadow: '0 10px 30px -8px rgba(2, 132, 199, 0.08)',
+              border: '1px solid rgba(27, 67, 50, 0.1)',
+              boxShadow: '0 4px 14px rgba(27,67,50,0.05)',
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
@@ -319,7 +321,7 @@ export default function ResourcesPage() {
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 42, height: 42, borderRadius: 2.5, bgcolor: 'rgba(2, 132, 199, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ width: 42, height: 42, borderRadius: 1.5, bgcolor: 'rgba(2, 132, 199, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Opacity sx={{ color: '#0284C7', fontSize: 24 }} />
                 </Box>
                 <Box>
@@ -331,12 +333,12 @@ export default function ResourcesPage() {
                   </Typography>
                 </Box>
               </Box>
-              <Chip label="Purity: 42 ppm TDS" size="small" sx={{ bgcolor: 'rgba(2,132,199,0.12)', color: '#0369A1', fontWeight: 700 }} />
+              <Chip label="Purity: 42 ppm TDS" size="small" sx={{ bgcolor: 'rgba(2,132,199,0.12)', color: '#0369A1', fontWeight: 700, borderRadius: 1.5 }} />
             </Box>
 
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Stored Water</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#0284C7' }}>
                     {telemetry.cisternTotalLiters} L
@@ -344,7 +346,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Cistern Level</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
                     {telemetry.cisternPercentFull}%
@@ -352,7 +354,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Bio-Pond DO</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: telemetry.dissolvedOxygenMgL < 5 ? '#EF4444' : '#10B981' }}>
                     {telemetry.dissolvedOxygenMgL} mg/L
@@ -360,7 +362,7 @@ export default function ResourcesPage() {
                 </Box>
               </Grid>
               <Grid item xs={6} sm={3}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Water Buffer</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#059669' }}>
                     {telemetry.waterAutonomyDays}d
@@ -370,7 +372,7 @@ export default function ResourcesPage() {
             </Grid>
 
             {/* Cistern Storage Level Progress */}
-            <Box sx={{ p: 2, borderRadius: 2.5, bgcolor: '#FAF9F5', mb: 2 }}>
+            <Box sx={{ p: 2, borderRadius: 1.5, bgcolor: '#FAF9F5', mb: 2, border: '1px solid rgba(27,67,50,0.06)' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#748B7D' }}>
                   3-Bay Cistern Array (12,000 L)
@@ -384,9 +386,9 @@ export default function ResourcesPage() {
                 value={telemetry.cisternPercentFull}
                 sx={{
                   height: 8,
-                  borderRadius: 4,
+                  borderRadius: 1.5,
                   bgcolor: 'rgba(2,132,199,0.1)',
-                  '& .MuiLinearProgress-bar': { bgcolor: '#0284C7' },
+                  '& .MuiLinearProgress-bar': { bgcolor: '#0284C7', borderRadius: 1.5 },
                 }}
               />
             </Box>
@@ -396,11 +398,11 @@ export default function ResourcesPage() {
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2, mt: 'auto' }}>
               {(resourcesData.water?.streams || []).map((stream, idx) => (
-                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5' }}>
+                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.2, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.05)' }}>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: '#1B4332' }}>{stream.name}</Typography>
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
                     <Typography variant="caption" sx={{ color: '#0284C7', fontWeight: 700 }}>{stream.level}</Typography>
-                    <Chip label={stream.status} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(2, 132, 199, 0.12)', color: '#0284C7' }} />
+                    <Chip label={stream.status} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(2, 132, 199, 0.12)', color: '#0284C7', borderRadius: 1 }} />
                   </Box>
                 </Box>
               ))}
@@ -417,15 +419,15 @@ export default function ResourcesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 4px 14px rgba(27,67,50,0.05)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 40, height: 40, borderRadius: 2.5, bgcolor: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: 1.5, bgcolor: 'rgba(16, 185, 129, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Kitchen sx={{ color: '#10B981', fontSize: 22 }} />
                 </Box>
                 <Box>
@@ -437,19 +439,19 @@ export default function ResourcesPage() {
                   </Typography>
                 </Box>
               </Box>
-              <Chip label="74 Heirloom Seeds" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46', fontWeight: 700 }} />
+              <Chip label="74 Heirloom Seeds" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46', fontWeight: 700, borderRadius: 1.5 }} />
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               {(resourcesData.foodReserves?.categories || []).map((cat, idx) => (
-                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.05)' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
                     <Spa sx={{ color: '#10B981', fontSize: 18 }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>{cat.name}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>{cat.stock}</Typography>
-                    <Chip label={cat.status} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46' }} />
+                    <Chip label={cat.status} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', borderRadius: 1 }} />
                   </Box>
                 </Box>
               ))}
@@ -463,15 +465,15 @@ export default function ResourcesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 4px 14px rgba(27,67,50,0.05)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 40, height: 40, borderRadius: 2.5, bgcolor: 'rgba(101, 163, 13, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ width: 40, height: 40, borderRadius: 1.5, bgcolor: 'rgba(101, 163, 13, 0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Loop sx={{ color: '#65A30D', fontSize: 22 }} />
                 </Box>
                 <Box>
@@ -483,18 +485,18 @@ export default function ResourcesPage() {
                   </Typography>
                 </Box>
               </Box>
-              <Chip label="98.2% Diverted" size="small" sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 700 }} />
+              <Chip label="98.2% Diverted" size="small" sx={{ bgcolor: 'rgba(101,163,13,0.15)', color: '#4D7C0F', fontWeight: 700, borderRadius: 1.5 }} />
             </Box>
 
             <Grid container spacing={2} sx={{ mb: 2 }}>
               <Grid item xs={6}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>Mature Bokashi Compost</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>{resourcesData.circularEcosystem?.compostMaturedKg || 480} kg</Typography>
                 </Box>
               </Grid>
               <Grid item xs={6}>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: '#FAF9F5' }}>
+                <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.06)' }}>
                   <Typography variant="caption" sx={{ color: '#748B7D' }}>BSF Live Feed Output</Typography>
                   <Typography variant="h6" sx={{ fontWeight: 800, color: '#65A30D' }}>{resourcesData.circularEcosystem?.bsfLarvaeYieldKgDay || 1.8} kg/day</Typography>
                 </Box>
@@ -503,11 +505,11 @@ export default function ResourcesPage() {
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               {(resourcesData.circularEcosystem?.cycles || []).map((cyc, idx) => (
-                <Box key={idx} sx={{ p: 1.2, borderRadius: 2, bgcolor: '#FAF9F5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box key={idx} sx={{ p: 1.2, borderRadius: 1.5, bgcolor: '#FAF9F5', border: '1px solid rgba(27,67,50,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>
                     {cyc.source} &rarr; {cyc.destination}
                   </Typography>
-                  <Chip label={cyc.rate} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(101,163,13,0.12)', color: '#4D7C0F' }} />
+                  <Chip label={cyc.rate} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(101,163,13,0.12)', color: '#4D7C0F', borderRadius: 1 }} />
                 </Box>
               ))}
             </Box>
@@ -534,7 +536,7 @@ export default function ResourcesPage() {
         onClose={() => setToastMsg('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 3, bgcolor: '#1B4332', color: '#FFFFFF', fontWeight: 600 }}>
+        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 1.5, bgcolor: '#1B4332', color: '#FFFFFF', fontWeight: 600 }}>
           {toastMsg}
         </Alert>
       </Snackbar>

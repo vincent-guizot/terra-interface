@@ -18,7 +18,8 @@ import {
   Alert,
   Divider,
   Tab,
-  Tabs
+  Tabs,
+  TablePagination
 } from '@mui/material';
 import {
   AgricultureOutlined,
@@ -39,6 +40,8 @@ export default function ProductionPage() {
   const [activeCategoryTab, setActiveCategoryTab] = useState('all');
   const [batches, setBatches] = useState(productionData.activeBatches);
   const [harvests, setHarvests] = useState(productionData.recentHarvests);
+  const [batchPage, setBatchPage] = useState(0);
+  const [batchRowsPerPage, setBatchRowsPerPage] = useState(4);
 
   // Dialog States for Embedded CRUD
   const [logHarvestOpen, setLogHarvestOpen] = useState(false);
@@ -137,12 +140,13 @@ export default function ProductionPage() {
             onClick={() => setNewBatchOpen(true)}
             startIcon={<Spa />}
             sx={{
-              borderRadius: 3,
+              borderRadius: 1.5,
               borderColor: 'rgba(27,67,50,0.2)',
               color: '#1B4332',
               bgcolor: '#FFFFFF',
               fontWeight: 700,
               fontSize: '0.85rem',
+              textTransform: 'none',
               '&:hover': { bgcolor: '#F0F6F1', borderColor: '#1B4332' }
             }}
           >
@@ -152,15 +156,16 @@ export default function ProductionPage() {
           <Button
             variant="contained"
             onClick={() => setLogHarvestOpen(true)}
-            startIcon={<Add />}
+            startIcon={<Add sx={{ color: '#FFFFFF' }} />}
             sx={{
-              borderRadius: 3,
-              bgcolor: '#1B4332',
-              color: '#FFFFFF',
+              borderRadius: 1.5,
+              bgcolor: '#144E36',
+              color: '#FFFFFF !important',
               fontWeight: 700,
               fontSize: '0.85rem',
-              boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
-              '&:hover': { bgcolor: '#123124' }
+              textTransform: 'none',
+              boxShadow: '0 4px 14px rgba(20,78,54,0.2)',
+              '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' }
             }}
           >
             Log Harvest
@@ -171,16 +176,16 @@ export default function ProductionPage() {
       {/* TOP KPI OVERVIEW CARDS */}
       <Grid container spacing={2.5} sx={{ mb: 3.5 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>Monthly Harvest Volume</Typography>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#1B4332', my: 0.5 }}>168.4 kg</Typography>
-            <LinearProgress variant="determinate" value={93.5} sx={{ height: 6, borderRadius: 3, bgcolor: 'rgba(27,67,50,0.08)', mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#10B981' } }} />
+            <LinearProgress variant="determinate" value={93.5} sx={{ height: 6, borderRadius: 1.5, bgcolor: 'rgba(27,67,50,0.08)', mb: 1, '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: 1.5 } }} />
             <Typography variant="caption" sx={{ color: '#748B7D', fontWeight: 600 }}>Goal: 180.0 kg (93.5% achieved)</Typography>
           </Paper>
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>Active Production Batches</Typography>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#1B4332', my: 0.5 }}>{batches.length} Batches</Typography>
             <Typography variant="caption" sx={{ color: '#10B981', fontWeight: 700, display: 'block', mb: 0.5 }}>Across 5 Food Categories</Typography>
@@ -189,7 +194,7 @@ export default function ProductionPage() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>Food Dollar Value Produced</Typography>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#1B4332', my: 0.5 }}>Rp 7.850.000</Typography>
             <Typography variant="caption" sx={{ color: '#D97706', fontWeight: 700, display: 'block', mb: 0.5 }}>Clean Organic Quality</Typography>
@@ -198,7 +203,7 @@ export default function ProductionPage() {
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 4, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.08)' }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 1.5, bgcolor: '#FFFFFF', border: '1px solid rgba(27,67,50,0.1)', boxShadow: '0 2px 8px rgba(27,67,50,0.03)' }}>
             <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>Zero Chemical Rating</Typography>
             <Typography variant="h4" sx={{ fontWeight: 800, color: '#059669', my: 0.5 }}>100%</Typography>
             <Typography variant="caption" sx={{ color: '#059669', fontWeight: 700, display: 'block', mb: 0.5 }}>Beyond Organic Standard</Typography>
@@ -220,22 +225,22 @@ export default function ProductionPage() {
                 elevation={0}
                 sx={{
                   p: 2.5,
-                  borderRadius: 3.5,
+                  borderRadius: 1.5,
                   bgcolor: '#FFFFFF',
                   border: `1.5px solid ${cat.color}35`,
-                  boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+                  boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
                   height: '100%',
                   display: 'flex',
                   flexDirection: 'column',
                   transition: 'all 0.2s ease',
-                  '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 14px 30px -8px rgba(27,67,50,0.1)' }
+                  '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 16px rgba(27,67,50,0.08)' }
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-                  <Box sx={{ width: 34, height: 34, borderRadius: 2, bgcolor: `${cat.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: `${cat.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Spa sx={{ color: cat.color, fontSize: 18 }} />
                   </Box>
-                  <Chip label={cat.trend} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 800, fontSize: '0.68rem', height: 20 }} />
+                  <Chip label={cat.trend} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', fontWeight: 800, fontSize: '0.68rem', height: 20, borderRadius: 1 }} />
                 </Box>
 
                 <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1B4332', lineHeight: 1.2, mb: 0.5 }}>
@@ -267,10 +272,10 @@ export default function ProductionPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
@@ -291,10 +296,14 @@ export default function ProductionPage() {
                     label={tab.toUpperCase()}
                     clickable
                     size="small"
-                    onClick={() => setActiveCategoryTab(tab === 'all' ? 'all' : tab)}
+                    onClick={() => {
+                      setActiveCategoryTab(tab === 'all' ? 'all' : tab);
+                      setBatchPage(0);
+                    }}
                     sx={{
                       fontWeight: 700,
-                      bgcolor: activeCategoryTab.toLowerCase() === tab.toLowerCase() ? '#1B4332' : '#F0F5F1',
+                      borderRadius: 1.5,
+                      bgcolor: activeCategoryTab.toLowerCase() === tab.toLowerCase() ? '#144E36' : '#F0F5F1',
                       color: activeCategoryTab.toLowerCase() === tab.toLowerCase() ? '#FFFFFF' : '#486253',
                     }}
                   />
@@ -303,12 +312,14 @@ export default function ProductionPage() {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {filteredBatches.map((batch) => (
+              {filteredBatches
+                .slice(batchPage * batchRowsPerPage, batchPage * batchRowsPerPage + batchRowsPerPage)
+                .map((batch) => (
                 <Box
                   key={batch.id}
                   sx={{
                     p: 2.2,
-                    borderRadius: 3,
+                    borderRadius: 1.5,
                     bgcolor: '#FAF9F5',
                     border: '1px solid rgba(27,67,50,0.06)',
                     transition: 'all 0.2s ease',
@@ -317,12 +328,12 @@ export default function ProductionPage() {
                 >
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
-                      <Chip label={batch.code} size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, fontSize: '0.7rem' }} />
+                      <Chip label={batch.code} size="small" sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, fontSize: '0.7rem', borderRadius: 1 }} />
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1B4332' }}>
                         {batch.crop}
                       </Typography>
                     </Box>
-                    <Chip label={batch.status} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 700, fontSize: '0.7rem' }} />
+                    <Chip label={batch.status} size="small" sx={{ bgcolor: 'rgba(16,185,129,0.14)', color: '#065F46', fontWeight: 700, fontSize: '0.7rem', borderRadius: 1 }} />
                   </Box>
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
@@ -339,10 +350,10 @@ export default function ProductionPage() {
                     value={batch.progress}
                     sx={{
                       height: 6,
-                      borderRadius: 3,
+                      borderRadius: 1.5,
                       bgcolor: 'rgba(27,67,50,0.08)',
                       mb: 1,
-                      '& .MuiLinearProgress-bar': { bgcolor: batch.progress > 85 ? '#10B981' : '#65A30D' }
+                      '& .MuiLinearProgress-bar': { bgcolor: batch.progress > 85 ? '#10B981' : '#65A30D', borderRadius: 1.5 }
                     }}
                   />
 
@@ -356,7 +367,25 @@ export default function ProductionPage() {
                   </Box>
                 </Box>
               ))}
+              {filteredBatches.length === 0 && (
+                <Box sx={{ py: 3, textAlign: 'center', color: '#748B7D' }}>
+                  No active batches found in this category.
+                </Box>
+              )}
             </Box>
+
+            <TablePagination
+              component="div"
+              count={filteredBatches.length}
+              page={batchPage}
+              onPageChange={(e, newPage) => setBatchPage(newPage)}
+              rowsPerPage={batchRowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setBatchRowsPerPage(parseInt(e.target.value, 10));
+                setBatchPage(0);
+              }}
+              rowsPerPageOptions={[4, 8, 12]}
+            />
           </Paper>
         </Grid>
 
@@ -366,10 +395,10 @@ export default function ProductionPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -381,7 +410,7 @@ export default function ProductionPage() {
                   Logged yields gathered by farm stewards
                 </Typography>
               </Box>
-              <Chip label="Audited" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46', fontWeight: 700 }} />
+              <Chip label="Audited" size="small" sx={{ bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46', fontWeight: 700, borderRadius: 1.5 }} />
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
@@ -390,7 +419,7 @@ export default function ProductionPage() {
                   key={h.id}
                   sx={{
                     p: 1.8,
-                    borderRadius: 2.5,
+                    borderRadius: 1.5,
                     bgcolor: '#FAF9F5',
                     border: '1px solid rgba(27,67,50,0.06)',
                   }}
@@ -408,7 +437,7 @@ export default function ProductionPage() {
                     <Typography variant="caption" sx={{ color: '#748B7D' }}>
                       {h.date} • {h.zone}
                     </Typography>
-                    <Chip label={h.quality} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46' }} />
+                    <Chip label={h.quality} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: 'rgba(16,185,129,0.12)', color: '#065F46', borderRadius: 1 }} />
                   </Box>
                 </Box>
               ))}
@@ -423,7 +452,7 @@ export default function ProductionPage() {
         onClose={() => setLogHarvestOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 1.5, bgcolor: '#FFFFFF' } }}
+        PaperProps={{ sx: { borderRadius: 1.5, p: 1.5, bgcolor: '#FFFFFF' } }}
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
@@ -445,7 +474,7 @@ export default function ProductionPage() {
                   value={harvestForm.item}
                   onChange={(e) => setHarvestForm({ ...harvestForm, item: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={4}>
@@ -457,7 +486,7 @@ export default function ProductionPage() {
                   value={harvestForm.qty}
                   onChange={(e) => setHarvestForm({ ...harvestForm, qty: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={7}>
@@ -468,7 +497,7 @@ export default function ProductionPage() {
                   value={harvestForm.zone}
                   onChange={(e) => setHarvestForm({ ...harvestForm, zone: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
                   <MenuItem value="Zone 2: Aquaponics">Zone 2: Aquaponics Pond</MenuItem>
@@ -484,7 +513,7 @@ export default function ProductionPage() {
                   value={harvestForm.quality}
                   onChange={(e) => setHarvestForm({ ...harvestForm, quality: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Grade A">Grade A (Prime)</MenuItem>
                   <MenuItem value="Premium">Premium Heirloom</MenuItem>
@@ -500,7 +529,7 @@ export default function ProductionPage() {
             <Button
               type="submit"
               variant="contained"
-              sx={{ bgcolor: '#1B4332', color: '#FFFFFF', borderRadius: 2.5, px: 3, textTransform: 'none', fontWeight: 700 }}
+              sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >
               Save Harvest Record
             </Button>
@@ -514,7 +543,7 @@ export default function ProductionPage() {
         onClose={() => setNewBatchOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 1.5, bgcolor: '#FFFFFF' } }}
+        PaperProps={{ sx: { borderRadius: 1.5, p: 1.5, bgcolor: '#FFFFFF' } }}
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
@@ -536,7 +565,7 @@ export default function ProductionPage() {
                   value={batchForm.crop}
                   onChange={(e) => setBatchForm({ ...batchForm, crop: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -547,7 +576,7 @@ export default function ProductionPage() {
                   value={batchForm.category}
                   onChange={(e) => setBatchForm({ ...batchForm, category: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Crops & Greens">Crops & Greens</MenuItem>
                   <MenuItem value="Aquaculture">Aquaculture</MenuItem>
@@ -563,7 +592,7 @@ export default function ProductionPage() {
                   value={batchForm.targetYield}
                   onChange={(e) => setBatchForm({ ...batchForm, targetYield: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -574,7 +603,7 @@ export default function ProductionPage() {
                   value={batchForm.zone}
                   onChange={(e) => setBatchForm({ ...batchForm, zone: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
                   <MenuItem value="Zone 2: Aquaponics">Zone 2: Aquaponics</MenuItem>
@@ -591,7 +620,7 @@ export default function ProductionPage() {
                   value={batchForm.estDate}
                   onChange={(e) => setBatchForm({ ...batchForm, estDate: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
             </Grid>
@@ -603,7 +632,7 @@ export default function ProductionPage() {
             <Button
               type="submit"
               variant="contained"
-              sx={{ bgcolor: '#1B4332', color: '#FFFFFF', borderRadius: 2.5, px: 3, textTransform: 'none', fontWeight: 700 }}
+              sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >
               Create Batch
             </Button>
@@ -618,7 +647,7 @@ export default function ProductionPage() {
         onClose={() => setToastMsg('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 3, bgcolor: '#1B4332', color: '#FFFFFF', fontWeight: 600 }}>
+        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 1.5, bgcolor: '#144E36', color: '#FFFFFF', fontWeight: 600 }}>
           {toastMsg}
         </Alert>
       </Snackbar>
