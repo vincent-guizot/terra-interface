@@ -545,17 +545,24 @@ export default function OperationsHub({
               </Button>
             </>}
 
-          <Button variant="contained" onClick={() => activeModule === 'cultivation' ? setCultivationDrawerOpen(true) : setAddModalOpen(true)} startIcon={<Add />} sx={{
-          borderRadius: 3,
-          bgcolor: '#1B4332',
-          color: '#FFFFFF',
-          fontWeight: 700,
-          fontSize: '0.85rem',
-          boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
-          '&:hover': {
-            bgcolor: '#123124'
-          }
-        }}>
+          <Button
+            variant="contained"
+            onClick={() => activeModule === 'cultivation' ? setCultivationDrawerOpen(true) : setAddModalOpen(true)}
+            startIcon={<Add sx={{ color: '#FFFFFF' }} />}
+            sx={{
+              borderRadius: 1.5,
+              bgcolor: '#144E36',
+              color: '#FFFFFF !important',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              boxShadow: '0 4px 14px rgba(20,78,54,0.2)',
+              '&:hover': {
+                bgcolor: '#0F291E',
+                color: '#FFFFFF !important'
+              }
+            }}
+          >
             Create New Batch / Record
           </Button>
         </Box>
@@ -563,125 +570,202 @@ export default function OperationsHub({
 
       {/* MODULE SELECTOR TABS */}
       <Box sx={{
-      display: 'flex',
-      gap: 1.2,
-      overflowX: 'auto',
-      pb: 1,
-      mb: 3.5
-    }}>
-        {modules.map(m => <Box key={m.id} onClick={() => {
-        setActiveModule(m.id);
-        setPage(0);
-      }} sx={{
         display: 'flex',
-        alignItems: 'center',
         gap: 1.2,
-        px: 2,
-        py: 1.2,
-        borderRadius: 3,
-        cursor: 'pointer',
-        bgcolor: activeModule === m.id ? '#1B4332' : '#FFFFFF',
-        color: activeModule === m.id ? '#FFFFFF' : '#486253',
-        border: `1.5px solid ${activeModule === m.id ? '#1B4332' : 'rgba(27, 67, 50, 0.08)'}`,
-        boxShadow: activeModule === m.id ? '0 6px 18px rgba(27,67,50,0.18)' : '0 2px 6px rgba(27,67,50,0.02)',
-        transition: 'all 0.2s ease',
-        minWidth: 'fit-content',
-        '&:hover': {
-          bgcolor: activeModule === m.id ? '#1B4332' : '#F0F6F1',
-          borderColor: '#1B4332'
-        }
+        overflowX: 'auto',
+        pb: 1,
+        mb: 3.5
       }}>
+        {modules.map(m => (
+          <Box
+            key={m.id}
+            onClick={() => {
+              setActiveModule(m.id);
+              setPage(0);
+              if (typeof window !== 'undefined' && window.history) {
+                const url = new URL(window.location);
+                url.searchParams.set('tab', m.id);
+                window.history.pushState({}, '', url);
+              }
+            }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.2,
+              px: 2,
+              py: 1.2,
+              borderRadius: 1.5,
+              cursor: 'pointer',
+              bgcolor: activeModule === m.id ? '#144E36' : '#FFFFFF',
+              color: activeModule === m.id ? '#FFFFFF' : '#486253',
+              border: `1px solid ${activeModule === m.id ? '#144E36' : 'rgba(27, 67, 50, 0.12)'}`,
+              boxShadow: activeModule === m.id ? '0 4px 14px rgba(20,78,54,0.2)' : '0 1px 3px rgba(27,67,50,0.03)',
+              transition: 'all 0.2s ease',
+              minWidth: 'fit-content',
+              '&:hover': {
+                bgcolor: activeModule === m.id ? '#0F291E' : '#F0F6F1',
+                borderColor: '#144E36'
+              }
+            }}
+          >
             <Box sx={{
-          color: activeModule === m.id ? '#10B981' : '#5A7565',
-          display: 'flex'
-        }}>
+              color: activeModule === m.id ? '#10B981' : '#5A7565',
+              display: 'flex'
+            }}>
               {m.icon}
             </Box>
             <Box>
               <Typography variant="subtitle2" sx={{
-            fontWeight: 800,
-            color: 'inherit',
-            fontSize: '0.84rem',
-            lineHeight: 1.2
-          }}>
+                fontWeight: 800,
+                color: 'inherit',
+                fontSize: '0.84rem',
+                lineHeight: 1.2
+              }}>
                 {m.label}
               </Typography>
               <Typography variant="caption" sx={{
-            color: activeModule === m.id ? 'rgba(255,255,255,0.7)' : '#748B7D',
-            fontSize: '0.68rem',
-            display: 'block'
-          }}>
+                color: activeModule === m.id ? 'rgba(255,255,255,0.8)' : '#748B7D',
+                fontSize: '0.68rem',
+                display: 'block'
+              }}>
                 {m.count}
               </Typography>
             </Box>
-          </Box>)}
+          </Box>
+        ))}
       </Box>
 
       {/* SEARCH & ACTION TOOLBAR */}
       <Paper elevation={0} sx={{
-      p: 2,
-      borderRadius: 3.5,
-      bgcolor: '#FFFFFF',
-      border: '1px solid rgba(27, 67, 50, 0.08)',
-      boxShadow: '0 4px 16px rgba(27, 67, 50, 0.03)',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: 2,
-      mb: 3
-    }}>
-        <Box sx={{
+        p: 2,
+        borderRadius: 1.5,
+        bgcolor: '#FFFFFF',
+        border: '1px solid rgba(27, 67, 50, 0.1)',
+        boxShadow: '0 2px 8px rgba(27, 67, 50, 0.03)',
         display: 'flex',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 1.5,
-        flexGrow: 1,
-        maxWidth: 440
+        flexWrap: 'wrap',
+        gap: 2,
+        mb: 3
       }}>
-          <TextField fullWidth size="small" placeholder={`Search ${activeModule} records, codes, varieties, zones...`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} InputProps={{
-          startAdornment: <InputAdornment position="start">
-                  <Search sx={{
-              color: '#1B4332'
-            }} fontSize="small" />
-                </InputAdornment>,
-          sx: {
-            borderRadius: 2.5,
-            bgcolor: '#FAF9F5',
-            '& fieldset': {
-              borderColor: 'rgba(27,67,50,0.1)'
-            }
-          }
-        }} />
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          flexGrow: 1,
+          maxWidth: 440
+        }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={`Search ${activeModule} records, codes, varieties, zones...`}
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ color: '#1B4332' }} fontSize="small" />
+                </InputAdornment>
+              ),
+              sx: {
+                borderRadius: 1.5,
+                bgcolor: '#FAF9F5',
+                '& fieldset': {
+                  borderColor: 'rgba(27,67,50,0.1)'
+                }
+              }
+            }}
+          />
         </Box>
 
         <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1.5
-      }}>
-          <Chip icon={<FilterList fontSize="small" />} label="Universal Lifecycle: Draft → Planned → Active → On Hold → Completed" sx={{
-          bgcolor: 'rgba(27,67,50,0.06)',
-          color: '#1B4332',
-          fontWeight: 700,
-          fontSize: '0.72rem'
-        }} />
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5
+        }}>
+          <Chip
+            icon={<FilterList fontSize="small" />}
+            label="Universal Lifecycle: Draft → Planned → Active → On Hold → Completed"
+            sx={{
+              bgcolor: 'rgba(27,67,50,0.06)',
+              color: '#1B4332',
+              fontWeight: 700,
+              fontSize: '0.72rem',
+              borderRadius: 1.5
+            }}
+          />
         </Box>
       </Paper>
 
       {/* TAB VIEWS */}
-      {activeModule === 'cultivation' && <CultivationTab cultivation={cultivation} searchQuery={searchQuery} page={page} rowsPerPage={rowsPerPage} setPage={setPage} setRowsPerPage={setRowsPerPage} handleOpenDetail={handleOpenDetail} handleDeleteRecord={handleDeleteRecord} getStatusColor={getStatusColor} />}
+      {activeModule === 'cultivation' && (
+        <CultivationTab
+          cultivation={cultivation}
+          searchQuery={searchQuery}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          setPage={setPage}
+          setRowsPerPage={setRowsPerPage}
+          handleOpenDetail={handleOpenDetail}
+          handleDeleteRecord={handleDeleteRecord}
+          getStatusColor={getStatusColor}
+        />
+      )}
 
-      {activeModule === 'livestock' && <LivestockTab livestock={livestock} handleOpenDetail={handleOpenDetail} />}
+      {activeModule === 'livestock' && (
+        <LivestockTab
+          livestock={livestock}
+          searchQuery={searchQuery}
+          handleOpenDetail={handleOpenDetail}
+        />
+      )}
 
-      {activeModule === 'aquaculture' && <AquacultureTab aquaculture={aquaculture} handleOpenDetail={handleOpenDetail} />}
+      {activeModule === 'aquaculture' && (
+        <AquacultureTab
+          aquaculture={aquaculture}
+          searchQuery={searchQuery}
+          handleOpenDetail={handleOpenDetail}
+        />
+      )}
 
-      {activeModule === 'circular' && <CircularTab circular={circular} setActiveBsfBatch={setActiveBsfBatch} setBsfFeedDrawerOpen={setBsfFeedDrawerOpen} setMaggotHarvestDrawerOpen={setMaggotHarvestDrawerOpen} setActiveCompostBatch={setActiveCompostBatch} setCompostTurnDrawerOpen={setCompostTurnDrawerOpen} />}
+      {activeModule === 'circular' && (
+        <CircularTab
+          circular={circular}
+          setActiveBsfBatch={setActiveBsfBatch}
+          setBsfFeedDrawerOpen={setBsfFeedDrawerOpen}
+          setMaggotHarvestDrawerOpen={setMaggotHarvestDrawerOpen}
+          setActiveCompostBatch={setActiveCompostBatch}
+          setCompostTurnDrawerOpen={setCompostTurnDrawerOpen}
+        />
+      )}
 
-      {activeModule === 'inventory' && <InventoryTab inventory={inventory} searchQuery={searchQuery} setActiveInventoryItem={setActiveInventoryItem} setStockMovementDrawerOpen={setStockMovementDrawerOpen} setLedgerHistoryDrawerOpen={setLedgerHistoryDrawerOpen} />}
+      {activeModule === 'inventory' && (
+        <InventoryTab
+          inventory={inventory}
+          searchQuery={searchQuery}
+          setActiveInventoryItem={setActiveInventoryItem}
+          setStockMovementDrawerOpen={setStockMovementDrawerOpen}
+          setLedgerHistoryDrawerOpen={setLedgerHistoryDrawerOpen}
+        />
+      )}
 
-      {activeModule === 'energy-water' && <EnergyWaterTab energyWater={energyWater} setManualIngestDrawerOpen={setManualIngestDrawerOpen} setDispatchDrawerOpen={setDispatchDrawerOpen} />}
+      {activeModule === 'energy-water' && (
+        <EnergyWaterTab
+          energyWater={energyWater}
+          setManualIngestDrawerOpen={setManualIngestDrawerOpen}
+          setDispatchDrawerOpen={setDispatchDrawerOpen}
+        />
+      )}
 
-      {activeModule === 'config' && <ConfigTab config={config} newTypeForm={newTypeForm} setNewTypeForm={setNewTypeForm} handleAddCustomType={handleAddCustomType} />}
+      {activeModule === 'config' && (
+        <ConfigTab
+          config={config}
+          newTypeForm={newTypeForm}
+          setNewTypeForm={setNewTypeForm}
+          handleAddCustomType={handleAddCustomType}
+        />
+      )}
 
       {/* CONTEXTUAL DETAIL DRAWER */}
       <Drawer anchor="right" open={detailDrawerOpen} onClose={() => setDetailDrawerOpen(false)} PaperProps={{
@@ -945,7 +1029,7 @@ export default function OperationsHub({
           borderTop: '1px solid rgba(27,67,50,0.08)'
         }}>
               <Button fullWidth variant="outlined" onClick={() => setDetailDrawerOpen(false)} sx={{
-            borderRadius: 2.5,
+            borderRadius: 1.5,
             textTransform: 'none',
             fontWeight: 700,
             borderColor: 'rgba(27,67,50,0.2)',
@@ -960,7 +1044,7 @@ export default function OperationsHub({
       {/* CONTEXTUAL ADD UNIVERSAL BATCH MODAL */}
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)} maxWidth="sm" fullWidth PaperProps={{
       sx: {
-        borderRadius: 4,
+        borderRadius: 1.5,
         p: 1.5,
         bgcolor: '#FFFFFF'
       }
@@ -987,7 +1071,7 @@ export default function OperationsHub({
                 name: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }} />
               </Grid>
@@ -997,7 +1081,7 @@ export default function OperationsHub({
                 domain: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }}>
                   <MenuItem value="Cultivation">Cultivation</MenuItem>
@@ -1012,7 +1096,7 @@ export default function OperationsHub({
                 status: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }}>
                   <MenuItem value="Draft">Draft</MenuItem>
@@ -1028,7 +1112,7 @@ export default function OperationsHub({
                 initialQuantity: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }} />
               </Grid>
@@ -1038,7 +1122,7 @@ export default function OperationsHub({
                 unit: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }}>
                   {config.measurementUnits.map(u => <MenuItem key={u} value={u}>{u}</MenuItem>)}
@@ -1052,7 +1136,7 @@ export default function OperationsHub({
                 startDate: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }} />
               </Grid>
@@ -1064,7 +1148,7 @@ export default function OperationsHub({
                 expectedEndDate: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }} />
               </Grid>
@@ -1074,7 +1158,7 @@ export default function OperationsHub({
                 zone: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }}>
                   <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
@@ -1091,7 +1175,7 @@ export default function OperationsHub({
                 notes: e.target.value
               })} size="small" sx={{
                 '& fieldset': {
-                  borderRadius: 2.5
+                  borderRadius: 1.5
                 }
               }} />
               </Grid>
@@ -1109,12 +1193,17 @@ export default function OperationsHub({
               Cancel
             </Button>
             <Button type="submit" variant="contained" sx={{
-            bgcolor: '#1B4332',
-            color: '#FFFFFF',
-            borderRadius: 2.5,
+            bgcolor: '#144E36',
+            color: '#FFFFFF !important',
+            borderRadius: 1.5,
             px: 3,
             textTransform: 'none',
-            fontWeight: 700
+            fontWeight: 700,
+            boxShadow: '0 2px 8px rgba(20,78,54,0.2)',
+            '&:hover': {
+              bgcolor: '#0F291E',
+              color: '#FFFFFF !important'
+            }
           }}>
               Create Universal Batch
             </Button>
@@ -1128,8 +1217,8 @@ export default function OperationsHub({
       horizontal: 'center'
     }}>
         <Alert onClose={() => setToastMsg('')} severity="success" sx={{
-        borderRadius: 3,
-        bgcolor: '#1B4332',
+        borderRadius: 1.5,
+        bgcolor: '#144E36',
         color: '#FFFFFF',
         fontWeight: 600
       }}>

@@ -22,7 +22,9 @@ import {
   Archive,
   Droplets,
   Settings,
+  Sparkles,
 } from 'lucide-react';
+import { useTia } from '../../context/TiaContext.jsx';
 import { Button } from '../ui/button.jsx';
 import {
   DropdownMenu,
@@ -36,6 +38,7 @@ import { Badge } from '../ui/badge.jsx';
 import { PATHS } from '../../app/router/paths.js';
 
 export default function TopNavBar() {
+  const { openTia } = useTia();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -98,13 +101,13 @@ export default function TopNavBar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[rgba(27,67,50,0.08)] bg-[#FAF9F5]/90 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-10 h-18 flex items-center justify-between">
         {/* Brand / Logo */}
         <div
           onClick={() => navigate(PATHS.HOME)}
           className="flex items-center gap-3 cursor-pointer group select-none"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#1B4332] to-[#059669] flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
+          <div className="w-10 h-10 rounded-md bg-gradient-to-br from-[#1B4332] to-[#059669] flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
             <Sprout className="w-5 h-5 text-emerald-300" />
           </div>
           <div>
@@ -119,7 +122,7 @@ export default function TopNavBar() {
         </div>
 
         {/* Central Horizontal Navigation (7 items) */}
-        <nav className="hidden md:flex items-center gap-1 bg-[#EDF4EE]/80 p-1.5 rounded-2xl border border-[rgba(27,67,50,0.08)] shadow-sm">
+        <nav className="hidden md:flex items-center gap-1 bg-[#EDF4EE]/80 p-1.5 rounded-md border border-[rgba(27,67,50,0.08)] shadow-sm">
           {navLinks.map((item) => {
             const Icon = item.icon;
             const isActive = item.path === PATHS.HOME
@@ -134,7 +137,7 @@ export default function TopNavBar() {
                   const active = item.path === PATHS.HOME
                     ? (location.pathname === '/' || location.pathname === '/overview')
                     : isMatch;
-                  return `flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  return `flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                     active
                       ? 'bg-white text-[#1B4332] shadow-sm border border-[rgba(27,67,50,0.08)]'
                       : 'text-[#486253] hover:text-[#1B4332] hover:bg-white/50'
@@ -152,7 +155,7 @@ export default function TopNavBar() {
             <div className="flex items-center">
               <NavLink
                 to={PATHS.MANAGEMENT.ROOT}
-                className={`flex items-center gap-1.5 pl-3.5 pr-1.5 py-1.5 rounded-l-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 rounded-l-md text-xs font-semibold transition-all ${
                   isManagementActive
                     ? 'bg-white text-[#1B4332] shadow-sm border-l border-y border-[rgba(27,67,50,0.08)]'
                     : 'text-[#486253] hover:text-[#1B4332] hover:bg-white/50'
@@ -163,7 +166,7 @@ export default function TopNavBar() {
               </NavLink>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-1.5 rounded-r-xl text-xs font-semibold transition-all ${
+                  className={`p-1.5 rounded-r-md text-xs font-semibold transition-all ${
                     isManagementActive
                       ? 'bg-white text-emerald-600 shadow-sm border-r border-y border-[rgba(27,67,50,0.08)]'
                       : 'text-[#486253] hover:text-[#1B4332] hover:bg-white/50'
@@ -175,10 +178,10 @@ export default function TopNavBar() {
               </DropdownMenuTrigger>
             </div>
 
-            <DropdownMenuContent align="end" className="w-72 p-2">
+            <DropdownMenuContent align="end" className="w-72 p-2 rounded-md">
               <DropdownMenuLabel className="flex items-center justify-between text-xs font-bold text-[#14281D]">
                 <span>Management Modules</span>
-                <Badge variant="secondary" className="text-[10px]">7 Domains</Badge>
+                <Badge variant="secondary" className="text-[10px] rounded-md">7 Domains</Badge>
               </DropdownMenuLabel>
               <p className="px-3 pb-2 text-[11px] text-[#486253]">
                 Contextual operations embedded within each module.
@@ -190,9 +193,9 @@ export default function TopNavBar() {
                   <DropdownMenuItem
                     key={sub.name}
                     onClick={() => navigate(sub.path)}
-                    className="flex items-start gap-2.5 p-2 rounded-xl cursor-pointer hover:bg-[#EDF4EE]"
+                    className="flex items-start gap-2.5 p-2 rounded-md cursor-pointer hover:bg-[#EDF4EE]"
                   >
-                    <div className="p-1.5 rounded-lg bg-[#EDF4EE] text-emerald-700 mt-0.5">
+                    <div className="p-1.5 rounded-md bg-[#EDF4EE] text-emerald-700 mt-0.5">
                       <SubIcon className="w-4 h-4" />
                     </div>
                     <div>
@@ -205,7 +208,7 @@ export default function TopNavBar() {
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => navigate(PATHS.MANAGEMENT.ROOT)}
-                className="justify-center font-bold text-xs text-emerald-700 py-2 hover:bg-emerald-50 rounded-xl"
+                className="justify-center font-bold text-xs text-emerald-700 py-2 hover:bg-emerald-50 rounded-md"
               >
                 Open All Management Modules →
               </DropdownMenuItem>
@@ -215,8 +218,8 @@ export default function TopNavBar() {
 
         {/* Right Accessories (Weather, Power, Profile) */}
         <div className="flex items-center gap-2">
-          {/* Weather & Power Pill */}
-          <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-2xl bg-white border border-[rgba(27,67,50,0.08)] shadow-sm text-xs font-semibold text-[#1B4332]">
+          {/* Weather & Power */}
+          <div className="hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-md bg-white border border-[rgba(27,67,50,0.08)] shadow-sm text-xs font-semibold text-[#1B4332]">
             <div className="flex items-center gap-1.5 text-amber-600">
               <Sun className="w-4 h-4" />
               <span>28°C</span>
@@ -233,17 +236,27 @@ export default function TopNavBar() {
             variant="outline"
             size="icon"
             onClick={() => navigate(PATHS.MAP)}
-            className="rounded-2xl border-[rgba(27,67,50,0.1)] text-[#486253] hover:text-[#1B4332]"
+            className="rounded-md border-[rgba(27,67,50,0.1)] text-[#486253] hover:text-[#1B4332]"
             title="Search Facilities & Batches"
           >
             <Search className="w-4 h-4" />
           </Button>
 
+          {/* Ask Tia AI Button */}
+          <button
+            onClick={() => openTia()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#144E36] text-white text-xs font-bold shadow-sm hover:bg-[#0F3827] transition-all cursor-pointer"
+            title="Ask Tia (Terra Interface AI)"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+            <span className="hidden sm:inline">Ask Tia</span>
+          </button>
+
           {/* Notifications */}
           <Button
             variant="outline"
             size="icon"
-            className="relative rounded-2xl border-[rgba(27,67,50,0.1)] text-[#486253] hover:text-[#1B4332]"
+            className="relative rounded-md border-[rgba(27,67,50,0.1)] text-[#486253] hover:text-[#1B4332]"
             title="Operational Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -252,19 +265,19 @@ export default function TopNavBar() {
 
           {/* User Profile */}
           <div className="flex items-center gap-2 pl-1 cursor-pointer">
-            <div className="w-9 h-9 rounded-2xl bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+            <div className="w-9 h-9 rounded-md bg-[#1B4332] text-white flex items-center justify-center font-bold text-xs shadow-sm">
               V
             </div>
             <div className="hidden xl:block text-left">
               <p className="text-xs font-bold text-[#14281D] leading-tight">Vincent</p>
-              <p className="text-[10px] text-[#486253]">Steward</p>
+              <p className="text-[10px] text-[#486253]">Owner</p>
             </div>
           </div>
 
           {/* Mobile menu trigger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-[#1B4332] hover:bg-gray-100"
+            className="md:hidden p-2 rounded-md text-[#1B4332] hover:bg-gray-100"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>

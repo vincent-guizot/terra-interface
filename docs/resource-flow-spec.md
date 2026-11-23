@@ -1,5 +1,7 @@
 # Resource Flow Architecture Specification — Terra Interface
 
+> Design reference: dimensions, hardware, biological targets and illustrative schema below describe the intended homestead. They are not verified installed hardware, live readings, or the exact Prisma/API contract. See [architecture](architecture-overview.md), [database reference](database-erd.md) and [API contracts](api-contracts.md) for current implementation.
+
 > **Ecological Network & Circular Flow Specification**  
 > **Homestead**: Vincent's Farm (300 m², West Java, Indonesia)  
 > **Circularity Target**: $\ge 95.0\%$ Closed Loop  
@@ -9,7 +11,13 @@
 
 ## 1. Ecological Closed-Loop Philosophy
 
-In a self-sustaining home operating system, waste is simply an unharvested resource. Terra Interface tracks materials and energy as a **Directed Resource Flow Graph** where the output of one biological or physical node serves as the input to another.
+In a self-sustaining home operating system, waste is simply an unharvested resource. This design models materials and energy as a **Directed Resource Flow Graph** where the output of one biological or physical node serves as the input to another.
+
+### Current software boundary
+
+The resource service in `core/src/modules/resources/resources.service.js` currently reads `CANONICAL_RESOURCE_FLOWS` and `CANONICAL_RESOURCES_DATA` from `core/src/constants/resources.constants.js`. Its overview and flow lookup/filter methods return constant-backed data. The existence of a `ResourceFlowLog` Prisma model does not mean these methods record persistent measurements.
+
+Current reads include `/api/v1/resources/overview`, `/api/v1/resources/flows` and `/api/v1/resource-flows`. See [the route inventory](api-contracts.md). The ecological equipment and performance values below describe the design; compare them with actual device and database records before using them as operational measurements.
 
 ```mermaid
 graph TD
@@ -52,7 +60,7 @@ graph TD
 
 ---
 
-## 2. The 5 Verified Circular Homestead Loops
+## 2. The 5 Designed Circular Homestead Loops
 
 ### Loop 1: Rainwater Harvesting & Gravity Filtration
 - **Collection Area**: 140 m² across residence roof and solar array shelter.
@@ -88,7 +96,7 @@ graph TD
 
 ## 3. Resource Flow Ledger Schema
 
-Flows are recorded in an append-only ledger to track mass/energy balances and detect leaks:
+The proposed ledger below illustrates the intended mass/energy tracking design. It is not a verbatim copy of the current Prisma model. Refer to [the database schema reference](database-erd.md) for implemented fields and relationships:
 
 ```prisma
 model ResourceFlowLog {
@@ -111,4 +119,4 @@ model ResourceFlowLog {
 
 $$\text{Circularity Index (\%)} = \left( 1 - \frac{\text{External Inputs (kg) + System Losses (kg)}}{\text{Total Biomass Cycled (kg)}} \right) \times 100$$
 
-*Current Vincent's Farm Operational Baseline: **95.4%***.
+*Illustrative design baseline: **95.4%**; not a verified live measurement.*

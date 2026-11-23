@@ -1,127 +1,270 @@
-# API Contract Specification — Terra Interface
+# API contracts and mounted routes
 
-> **REST API Documentation & Contract Blueprint**  
-> **Base URL**: `/api/v1/`  
-> **OpenAPI Swagger**: Accessible at `http://localhost:4000/api/docs`  
-> **Document Version**: 1.0.0 | **Status**: Verified Contract Blueprint
+The current Express app mounts /api/v1. No Swagger UI is mounted at /api/docs. This inventory lists declared routes from the router source; it does not claim every database operation or input payload has been validated end to end.
 
----
+## Response contract
 
-## 1. Global Standards & Envelope Formats
+See [the canonical response contract](../core/docs/api-response-contract.md) and [JSON Schema](../core/docs/api-response.schema.json). Successful JSON responses contain success, message, data and timestamp, with optional meta. Errors contain success: false, a nested error object (code, message, statusCode, details), and timestamp. HTTP 204 has no JSON body. No universal pagination metadata is implied.
 
-All requests and responses use `application/json`. Timestamps are ISO 8601 UTC strings (`YYYY-MM-DDTHH:mm:ss.sssZ`).
+Health endpoints /api/health and /health use monitoring fields. Telemetry SSE returns text/event-stream snapshots. /api/v1/intelligence/audit exports audit JSON directly. The Console client unwraps data and exposes structured ApiError fields.
 
-### Standard Success Response (`200 OK`, `201 Created`)
-```json
-{
-  "success": true,
-  "statusCode": 200,
-  "message": "Resource retrieved successfully",
-  "data": { ... },
-  "meta": {
-    "page": 1,
-    "limit": 10,
-    "total": 42
-  },
-  "timestamp": "2026-11-12T22:45:00.000Z"
-}
-```
+## Domain routes
 
-### Standard Error Response (`400`, `404`, `422`)
-```json
-{
-  "success": false,
-  "statusCode": 422,
-  "error": "Unprocessable Entity",
-  "message": "Transition from COMPLETED to ACTIVE is illegal",
-  "details": {
-    "batchId": "b1a2-...",
-    "currentStatus": "COMPLETED",
-    "attemptedStatus": "ACTIVE"
-  },
-  "timestamp": "2026-11-12T22:45:00.000Z"
-}
-```
+Paths below include their mount prefix. Read the linked router/controller/service for request fields, filters and side effects. The response schema does not validate those domain fields.
 
----
+### /universal-batches
 
-## 2. Exhaustive Endpoint Inventory
+Source: [universal-batch.router.js](../core/src/modules/universal-batch/universal-batch.router.js).
 
-### 2.1 Universal Batch Domain (`/api/v1/batches`)
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/universal-batches |
+| GET | /api/v1/universal-batches/:id |
+| POST | /api/v1/universal-batches |
+| PATCH | /api/v1/universal-batches/:id/transition |
+| POST | /api/v1/universal-batches/:id/events |
+| POST | /api/v1/universal-batches/:id/outputs |
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/batches` | List all batches across domains with filtering | Query: `domain`, `status`, `zoneId` | `200 OK` |
-| `POST` | `/batches` | Register a new batch | `CreateBatchDto` | `201 Created` |
-| `GET` | `/batches/:id` | Get complete batch dossier with outputs and history | None | `200 OK` |
-| `PATCH` | `/batches/:id/status` | Transition lifecycle state with validation | `TransitionBatchStatusDto` | `200 OK` |
-| `POST` | `/batches/:id/outputs` | Log harvest output & auto-increment inventory | `RecordBatchOutputDto` | `201 Created` |
-| `POST` | `/batches/:id/events` | Record feeding, observation, or water test event | `RecordBatchEventDto` | `201 Created` |
+### /spatial
 
-### 2.2 Cultivation Domain (`/api/v1/cultivation`)
+Source: [spatial.router.js](../core/src/modules/spatial/spatial.router.js).
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/cultivation/catalog` | Get catalog of plant species & varieties | Query: `category` | `200 OK` |
-| `POST` | `/cultivation/catalog` | Add a new crop/fungi variety | `CreatePlantCatalogDto` | `201 Created` |
-| `GET` | `/cultivation/batches/active` | Get active greenhouse & raised bed batches | None | `200 OK` |
-| `POST` | `/cultivation/ec-ph-log` | Log hydroponic nutrient reading | `LogNutrientDto` | `201 Created` |
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/spatial/zones |
+| GET | /api/v1/spatial/zones/:code |
+| GET | /api/v1/spatial/canonical |
 
-### 2.3 Livestock Domain (`/api/v1/livestock`)
+### /events
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/livestock/animals` | Get animal inventory (KUB, Joper, Goats) | Query: `breed`, `housingSystem` | `200 OK` |
-| `POST` | `/livestock/feeding` | Record daily feed ration (BSF larvae, mash) | `RecordLivestockFeedDto` | `201 Created` |
-| `POST` | `/livestock/egg-harvest` | Record daily egg collection & grade breakdown | `RecordEggHarvestDto` | `201 Created` |
-| `POST` | `/livestock/mortality` | Log mortality event & deduct live population | `RecordMortalityDto` | `201 Created` |
+Source: [events.router.js](../core/src/common/events/events.router.js).
 
-### 2.4 Aquaculture Domain (`/api/v1/aquaculture`)
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/events/audit |
+| GET | /api/v1/events/alerts |
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/aquaculture/ponds` | Get bio-pond status (Tilapia & Catfish) | None | `200 OK` |
-| `GET` | `/aquaculture/water-quality` | Get DO, pH, temp, ammonia historical logs | Query: `pondId`, `range` | `200 OK` |
-| `POST` | `/aquaculture/water-test` | Log chemical reagent water test | `RecordWaterTestDto` | `201 Created` |
-| `POST` | `/aquaculture/feeding` | Record feeding event (duckweed/pellets) | `RecordFishFeedDto` | `201 Created` |
+### /homesteads
 
-### 2.5 Circular Domain (`/api/v1/circular`)
+Source: [homesteads.router.js](../core/src/modules/homesteads/homesteads.router.js).
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `POST` | `/circular/bsf/load-substrate` | Load kitchen/crop waste into BSF trays | `LoadBsfSubstrateDto` | `201 Created` |
-| `POST` | `/circular/bsf/harvest` | Harvest live prepupae & insect frass | `HarvestBsfDto` | `201 Created` |
-| `POST` | `/circular/compost/turn` | Log aerobic turning & core temperature | `TurnCompostDto` | `201 Created` |
-| `GET` | `/circular/efficiency` | Calculate current homestead circularity % | None | `200 OK` |
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/homesteads/profile |
+| GET | /api/v1/homesteads/status |
+| GET | /api/v1/homesteads/autonomy |
+| GET | /api/v1/homesteads |
 
-### 2.6 Inventory Ledger Domain (`/api/v1/inventory`)
+### /zones
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/inventory/balances` | Query derived stock balances across locations | Query: `locationId`, `reorderOnly` | `200 OK` |
-| `POST` | `/inventory/movements` | Record manual purchase, intake, or adjustment | `CreateStockMovementDto` | `201 Created` |
-| `GET` | `/inventory/locations` | List all sheds, cellars, and seed vaults | None | `200 OK` |
-| `GET` | `/inventory/items/:id/ledger`| Get immutable transaction history for SKU | Param: `id` | `200 OK` |
+Source: [zones.router.js](../core/src/modules/zones/zones.router.js).
 
-### 2.7 Microgrid Domain (`/api/v1/microgrid`)
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/zones/facilities |
+| GET | /api/v1/zones/facilities/:id |
+| GET | /api/v1/zones/buildings |
+| GET | /api/v1/zones |
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/microgrid/telemetry/live` | Current Solar kW, Battery SoC %, Cistern L | None | `200 OK` |
-| `GET` | `/microgrid/telemetry/history`| Historical hourly generation & storage | Query: `metric`, `hours` | `200 OK` |
-| `POST` | `/microgrid/telemetry/ingest` | IoT gateway ingestion endpoint | `TelemetryIngestDto` | `202 Accepted` |
+### /batches
 
-### 2.8 Operations & Work Orders Domain (`/api/v1/operations`)
+Source: [batches.router.js](../core/src/modules/batches/batches.router.js).
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/operations/tasks/today` | Today's chores and scheduled routines | None | `200 OK` |
-| `PATCH` | `/operations/tasks/:id/complete`| Mark routine task as completed | `CompleteTaskDto` | `200 OK` |
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/batches |
+| GET | /api/v1/batches/:id |
 
-### 2.9 Intelligence Domain (`/api/v1/intelligence`)
+### /catalog
 
-| Method | Endpoint | Description | Request Body / Query | Success Status |
-| :--- | :--- | :--- | :--- | :---: |
-| `GET` | `/intelligence/insights` | Get active AI ecosystem recommendations | None | `200 OK` |
-| `POST` | `/intelligence/insights/:id/apply`| Accept recommendation & schedule task | Param: `id` | `200 OK` |
-| `GET` | `/intelligence/autonomy` | Food, water, energy self-sufficiency scores | None | `200 OK` |
+Source: [catalog.router.js](../core/src/modules/catalog/catalog.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/catalog/units |
+| GET | /api/v1/catalog/products |
+| GET | /api/v1/catalog |
+| POST | /api/v1/catalog/products |
+| POST | /api/v1/catalog/units/convert |
+
+### /production
+
+Source: [production.router.js](../core/src/modules/production/production.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/production/summary |
+| GET | /api/v1/production/categories |
+| GET | /api/v1/production/categories/:id |
+| GET | /api/v1/production |
+
+### /cultivation
+
+Source: [cultivation.router.js](../core/src/modules/cultivation/cultivation.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/cultivation/summary |
+| GET | /api/v1/cultivation |
+| GET | /api/v1/cultivation/microgreens/calibration |
+| GET | /api/v1/cultivation/catalog |
+| POST | /api/v1/cultivation/catalog |
+| GET | /api/v1/cultivation/batches/active |
+| POST | /api/v1/cultivation/nutrient-dosing |
+
+### /livestock
+
+Source: [livestock.router.js](../core/src/modules/livestock/livestock.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/livestock/summary |
+| GET | /api/v1/livestock/animals |
+| POST | /api/v1/livestock/egg-harvest |
+| GET | /api/v1/livestock/egg-harvest/history |
+| POST | /api/v1/livestock/feeding |
+| POST | /api/v1/livestock/mortality |
+| GET | /api/v1/livestock |
+
+### /aquaculture
+
+Source: [aquaculture.router.js](../core/src/modules/aquaculture/aquaculture.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/aquaculture/summary |
+| GET | /api/v1/aquaculture/ponds |
+| GET | /api/v1/aquaculture/water-quality |
+| POST | /api/v1/aquaculture/water-test |
+| POST | /api/v1/aquaculture/feeding |
+| GET | /api/v1/aquaculture/feeding-logs |
+| GET | /api/v1/aquaculture/aeration-schedule |
+| GET | /api/v1/aquaculture |
+
+### /circular
+
+Source: [circular.router.js](../core/src/modules/circular/circular.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/circular/overview |
+| GET | /api/v1/circular/bsf/trays |
+| POST | /api/v1/circular/bsf/feed |
+| POST | /api/v1/circular/bsf/harvest |
+| GET | /api/v1/circular/compost/batches |
+| GET | /api/v1/circular/compost/temperature-profile |
+| GET | /api/v1/circular |
+| GET | /api/v1/circular/compost/piles |
+| POST | /api/v1/circular/compost/turn |
+| POST | /api/v1/circular/compost/harvest |
+
+### /inventory
+
+Source: [inventory.router.js](../core/src/modules/inventory/inventory.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/inventory/summary |
+| GET | /api/v1/inventory/items |
+| POST | /api/v1/inventory/items |
+| GET | /api/v1/inventory/items/:id |
+| GET | /api/v1/inventory/locations |
+| POST | /api/v1/inventory/movements |
+| GET | /api/v1/inventory/movements |
+| GET | /api/v1/inventory |
+
+### /resources
+
+Source: [resources.router.js](../core/src/modules/resources/resources.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/resources/overview |
+| GET | /api/v1/resources/flows |
+| GET | /api/v1/resources/flows/:id |
+| GET | /api/v1/resources |
+
+### /activities
+
+Source: [activities.router.js](../core/src/modules/activities/activities.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/activities/summary |
+| GET | /api/v1/activities/tasks |
+| POST | /api/v1/activities/tasks |
+| GET | /api/v1/activities/tasks/:id |
+| PATCH | /api/v1/activities/tasks/:id/toggle |
+| GET | /api/v1/activities |
+
+### /intelligence
+
+Source: [intelligence.router.js](../core/src/modules/intelligence/intelligence.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/intelligence/autonomy |
+| GET | /api/v1/intelligence/recommendations |
+| POST | /api/v1/intelligence/recommendations/:id/apply |
+| POST | /api/v1/intelligence/recommendations/:id/dismiss |
+| GET | /api/v1/intelligence/diagnose |
+| GET | /api/v1/intelligence/rules |
+| GET | /api/v1/intelligence |
+| GET | /api/v1/intelligence/insights |
+| POST | /api/v1/intelligence/insights/:id/apply |
+| POST | /api/v1/intelligence/insights/:id/dismiss |
+| POST | /api/v1/intelligence/diagnose |
+| POST | /api/v1/intelligence/query |
+| GET | /api/v1/intelligence/forecast |
+| GET | /api/v1/intelligence/audit |
+
+### /energy-water
+
+Source: [energy-water.router.js](../core/src/modules/energy-water/energy-water.router.js).
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/energy-water/live |
+| GET | /api/v1/energy-water/historical |
+| GET | /api/v1/energy-water/policy |
+| PUT | /api/v1/energy-water/policy |
+| GET | /api/v1/energy-water/dump-load |
+| POST | /api/v1/energy-water/ingest |
+| GET | /api/v1/energy-water/stream |
+| GET | /api/v1/energy-water |
+| GET | /api/v1/energy-water/gateway/status |
+| POST | /api/v1/energy-water/gateway/ingest |
+| GET | /api/v1/energy-water/telemetry/live |
+| GET | /api/v1/energy-water/telemetry/history |
+| POST | /api/v1/energy-water/telemetry/ingest |
+| POST | /api/v1/energy-water/policy |
+| GET | /api/v1/energy-water/dump-load/status |
+| GET | /api/v1/energy-water/telemetry/stream |
+
+## Inline aliases
+
+These routes are declared directly in routes/v1/index.js.
+
+| Method | Path |
+| --- | --- |
+| GET | /api/v1/buildings |
+| GET | /api/v1/products |
+| GET | /api/v1/units |
+| GET | /api/v1/resource-flows |
+| GET | /api/v1/resource-flows/:id |
+| GET | /api/v1/telemetry/live |
+| GET | /api/v1/telemetry/stream |
+| GET | /api/v1/telemetry/historical |
+| GET | /api/v1/telemetry/policy |
+| PUT | /api/v1/telemetry/policy |
+| POST | /api/v1/telemetry/ingest |
+| GET | /api/v1/telemetry/dump-load |
+| GET | /api/v1/telemetry |
+
+## Validation and known limitations
+
+Validation is implemented per handler/service; there is no universal DTO validation pipeline or mounted authentication middleware. Error conventions do not imply authentication is implemented. Some endpoints return memory/constant-backed data even if PostgreSQL is unavailable.
+
+The universal-batch transition handler currently passes req.body as a single argument to transitionStatus(id, newStatus, reason). This signature mismatch must be fixed and covered with an HTTP regression test before its legal-transition path is treated as working. This documentation change does not alter that behavior.
+
+Source-of-truth files: core/src/app.js, core/src/routes/index.js and core/src/routes/v1/index.js. Update this inventory when adding, removing or remounting routes.

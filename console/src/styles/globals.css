@@ -25,7 +25,7 @@
     --border: 145 20% 88%;             /* Subtle Botanical Border */
     --input: 145 20% 88%;
     --ring: 160 84% 39%;               /* #10B981 Vibrant Emerald */
-    --radius: 1rem;                    /* 16px Rounded Cards */
+    --radius: 0.5rem;                  /* 8px Rounded-MD */
 
     /* Terra Interface Specific Design Tokens */
     --bg-warm-white: #FAF9F5;

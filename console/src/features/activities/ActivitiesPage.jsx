@@ -18,7 +18,8 @@ import {
   Snackbar,
   Alert,
   Divider,
-  IconButton
+  IconButton,
+  TablePagination
 } from '@mui/material';
 import {
   CheckCircleOutline,
@@ -41,6 +42,8 @@ export default function ActivitiesPage() {
   const [domainFilter, setDomainFilter] = useState('All');
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [taskPage, setTaskPage] = useState(0);
+  const [taskRowsPerPage, setTaskRowsPerPage] = useState(5);
 
   // New task form state
   const [taskForm, setTaskForm] = useState({
@@ -121,15 +124,16 @@ export default function ActivitiesPage() {
         <Button
           variant="contained"
           onClick={() => setAddTaskOpen(true)}
-          startIcon={<Add />}
+          startIcon={<Add sx={{ color: '#FFFFFF' }} />}
           sx={{
-            borderRadius: 3,
-            bgcolor: '#1B4332',
-            color: '#FFFFFF',
+            borderRadius: 1.5,
+            bgcolor: '#144E36',
+            color: '#FFFFFF !important',
             fontWeight: 700,
             fontSize: '0.85rem',
-            boxShadow: '0 4px 14px rgba(27,67,50,0.18)',
-            '&:hover': { bgcolor: '#123124' }
+            textTransform: 'none',
+            boxShadow: '0 4px 14px rgba(20,78,54,0.2)',
+            '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' }
           }}
         >
           Add Task
@@ -141,10 +145,10 @@ export default function ActivitiesPage() {
         elevation={0}
         sx={{
           p: 2.5,
-          borderRadius: 4,
+          borderRadius: 1.5,
           bgcolor: '#FFFFFF',
-          border: '1px solid rgba(27,67,50,0.08)',
-          boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+          border: '1px solid rgba(27,67,50,0.1)',
+          boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
           mb: 3.5,
         }}
       >
@@ -165,9 +169,9 @@ export default function ActivitiesPage() {
           value={progressPercent}
           sx={{
             height: 8,
-            borderRadius: 4,
+            borderRadius: 1.5,
             bgcolor: 'rgba(27,67,50,0.08)',
-            '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: 4 }
+            '& .MuiLinearProgress-bar': { bgcolor: '#10B981', borderRadius: 1.5 }
           }}
         />
       </Paper>
@@ -179,16 +183,19 @@ export default function ActivitiesPage() {
             key={domain}
             label={domain}
             clickable
-            onClick={() => setDomainFilter(domain)}
+            onClick={() => {
+              setDomainFilter(domain);
+              setTaskPage(0);
+            }}
             sx={{
               fontWeight: 700,
               fontSize: '0.8rem',
-              borderRadius: 3,
+              borderRadius: 1.5,
               px: 1,
-              bgcolor: domainFilter === domain ? '#1B4332' : '#FFFFFF',
+              bgcolor: domainFilter === domain ? '#144E36' : '#FFFFFF',
               color: domainFilter === domain ? '#FFFFFF' : '#486253',
-              border: '1px solid rgba(27,67,50,0.1)',
-              '&:hover': { bgcolor: domainFilter === domain ? '#1B4332' : '#F0F6F1' }
+              border: `1px solid ${domainFilter === domain ? '#144E36' : 'rgba(27,67,50,0.12)'}`,
+              '&:hover': { bgcolor: domainFilter === domain ? '#0F291E' : '#F0F6F1' }
             }}
           />
         ))}
@@ -202,10 +209,10 @@ export default function ActivitiesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -218,7 +225,9 @@ export default function ActivitiesPage() {
             </Box>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              {filteredTasks.map((task) => (
+              {filteredTasks
+                .slice(taskPage * taskRowsPerPage, taskPage * taskRowsPerPage + taskRowsPerPage)
+                .map((task) => (
                 <Box
                   key={task.id}
                   sx={{
@@ -226,7 +235,7 @@ export default function ActivitiesPage() {
                     alignItems: 'flex-start',
                     gap: 1.5,
                     p: 2,
-                    borderRadius: 3,
+                    borderRadius: 1.5,
                     bgcolor: task.completed ? 'rgba(240, 248, 242, 0.6)' : '#FAF9F5',
                     border: `1.5px solid ${task.completed ? 'rgba(16, 185, 129, 0.25)' : 'rgba(27, 67, 50, 0.08)'}`,
                     transition: 'all 0.2s ease',
@@ -262,6 +271,7 @@ export default function ActivitiesPage() {
                           height: 18,
                           fontSize: '0.65rem',
                           fontWeight: 800,
+                          borderRadius: 1,
                           bgcolor: task.priority === 'High' ? 'rgba(220,38,38,0.1)' : 'rgba(217,119,6,0.1)',
                           color: task.priority === 'High' ? '#DC2626' : '#D97706',
                         }}
@@ -279,6 +289,19 @@ export default function ActivitiesPage() {
                 </Box>
               ))}
             </Box>
+
+            <TablePagination
+              component="div"
+              count={filteredTasks.length}
+              page={taskPage}
+              onPageChange={(e, newPage) => setTaskPage(newPage)}
+              rowsPerPage={taskRowsPerPage}
+              onRowsPerPageChange={(e) => {
+                setTaskRowsPerPage(parseInt(e.target.value, 10));
+                setTaskPage(0);
+              }}
+              rowsPerPageOptions={[5, 10, 15]}
+            />
           </Paper>
         </Grid>
 
@@ -288,10 +311,10 @@ export default function ActivitiesPage() {
             elevation={0}
             sx={{
               p: 3,
-              borderRadius: 4,
+              borderRadius: 1.5,
               bgcolor: '#FFFFFF',
-              border: '1px solid rgba(27,67,50,0.08)',
-              boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)',
+              border: '1px solid rgba(27,67,50,0.1)',
+              boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
             }}
           >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -312,7 +335,7 @@ export default function ActivitiesPage() {
                   key={idx}
                   sx={{
                     p: 1.8,
-                    borderRadius: 2.5,
+                    borderRadius: 1.5,
                     bgcolor: '#FAF9F5',
                     border: '1px solid rgba(27,67,50,0.06)',
                     display: 'flex',
@@ -335,6 +358,7 @@ export default function ActivitiesPage() {
                       height: 22,
                       fontSize: '0.72rem',
                       fontWeight: 700,
+                      borderRadius: 1,
                       bgcolor: 'rgba(27,67,50,0.08)',
                       color: '#1B4332'
                     }}
@@ -352,7 +376,7 @@ export default function ActivitiesPage() {
         onClose={() => setAddTaskOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 4, p: 1.5, bgcolor: '#FFFFFF' } }}
+        PaperProps={{ sx: { borderRadius: 1.5, p: 1.5, bgcolor: '#FFFFFF' } }}
       >
         <DialogTitle>
           <Typography variant="h6" sx={{ fontWeight: 800, color: '#1B4332' }}>
@@ -374,7 +398,7 @@ export default function ActivitiesPage() {
                   value={taskForm.title}
                   onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -385,7 +409,7 @@ export default function ActivitiesPage() {
                   value={taskForm.time}
                   onChange={(e) => setTaskForm({ ...taskForm, time: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -396,7 +420,7 @@ export default function ActivitiesPage() {
                   value={taskForm.duration}
                   onChange={(e) => setTaskForm({ ...taskForm, duration: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -407,7 +431,7 @@ export default function ActivitiesPage() {
                   value={taskForm.zone}
                   onChange={(e) => setTaskForm({ ...taskForm, zone: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
                   <MenuItem value="Zone 2: Aquaponics">Zone 2: Aquaponics Pond</MenuItem>
@@ -425,7 +449,7 @@ export default function ActivitiesPage() {
                   value={taskForm.domain}
                   onChange={(e) => setTaskForm({ ...taskForm, domain: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
                   <MenuItem value="Aquaculture">Aquaculture</MenuItem>
                   <MenuItem value="Livestock">Livestock</MenuItem>
@@ -444,7 +468,7 @@ export default function ActivitiesPage() {
                   value={taskForm.notes}
                   onChange={(e) => setTaskForm({ ...taskForm, notes: e.target.value })}
                   size="small"
-                  sx={{ '& fieldset': { borderRadius: 2.5 } }}
+                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 />
               </Grid>
             </Grid>
@@ -456,7 +480,7 @@ export default function ActivitiesPage() {
             <Button
               type="submit"
               variant="contained"
-              sx={{ bgcolor: '#1B4332', color: '#FFFFFF', borderRadius: 2.5, px: 3, textTransform: 'none', fontWeight: 700 }}
+              sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >
               Add Activity
             </Button>
@@ -471,7 +495,7 @@ export default function ActivitiesPage() {
         onClose={() => setToastMsg('')}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 3, bgcolor: '#1B4332', color: '#FFFFFF', fontWeight: 600 }}>
+        <Alert onClose={() => setToastMsg('')} severity="success" sx={{ borderRadius: 1.5, bgcolor: '#144E36', color: '#FFFFFF', fontWeight: 600 }}>
           {toastMsg}
         </Alert>
       </Snackbar>

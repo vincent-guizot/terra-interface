@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -9,7 +9,8 @@ import {
   TableHead,
   TableBody,
   TableRow,
-  TableCell
+  TableCell,
+  TablePagination
 } from '@mui/material';
 import {
   Add,
@@ -23,6 +24,9 @@ export default function InventoryTab({
   setStockMovementDrawerOpen,
   setLedgerHistoryDrawerOpen
 }) {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   const filteredItems = inventory.items.filter(
     (i) =>
       (i.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,9 +37,10 @@ export default function InventoryTab({
     <Paper
       elevation={0}
       sx={{
-        borderRadius: 4,
+        borderRadius: 1.5,
         bgcolor: '#FFFFFF',
-        border: '1px solid rgba(27,67,50,0.08)',
+        border: '1px solid rgba(27,67,50,0.1)',
+        boxShadow: '0 2px 8px rgba(27,67,50,0.03)',
         overflow: 'hidden',
       }}
     >
@@ -62,7 +67,7 @@ export default function InventoryTab({
           <Chip
             label="4 Storage Locations"
             size="small"
-            sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800 }}
+            sx={{ bgcolor: 'rgba(27,67,50,0.08)', color: '#1B4332', fontWeight: 800, borderRadius: 1.5 }}
           />
           <Button
             size="small"
@@ -73,12 +78,13 @@ export default function InventoryTab({
               setStockMovementDrawerOpen(true);
             }}
             sx={{
-              bgcolor: '#10B981',
-              color: '#FFFFFF',
-              borderRadius: 2,
+              bgcolor: '#144E36',
+              color: '#FFFFFF !important',
+              borderRadius: 1.5,
               fontWeight: 700,
               textTransform: 'none',
-              '&:hover': { bgcolor: '#059669' },
+              boxShadow: '0 2px 8px rgba(20,78,54,0.2)',
+              '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
             }}
           >
             + Record Movement
@@ -97,7 +103,7 @@ export default function InventoryTab({
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredItems.map((item) => (
+          {filteredItems.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((item) => (
             <TableRow key={item.id} hover>
               <TableCell sx={{ fontWeight: 800, color: '#1B4332' }}>
                 {item.code || item.sku}
@@ -106,7 +112,7 @@ export default function InventoryTab({
                 {item.name}
               </TableCell>
               <TableCell>
-                <Chip label={item.category} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700 }} />
+                <Chip label={item.category} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, borderRadius: 1 }} />
               </TableCell>
               <TableCell sx={{ color: '#5A7565', fontSize: '0.82rem' }}>
                 {item.location || item.locationName}
@@ -133,7 +139,7 @@ export default function InventoryTab({
                       setLedgerHistoryDrawerOpen(true);
                     }}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 1.5,
                       textTransform: 'none',
                       color: '#1B4332',
                       borderColor: 'rgba(27,67,50,0.3)',
@@ -151,7 +157,7 @@ export default function InventoryTab({
                       setStockMovementDrawerOpen(true);
                     }}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 1.5,
                       textTransform: 'none',
                       color: '#10B981',
                       borderColor: 'rgba(16,185,129,0.5)',
@@ -165,8 +171,27 @@ export default function InventoryTab({
               </TableCell>
             </TableRow>
           ))}
+          {filteredItems.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} align="center" sx={{ py: 3, color: '#748B7D' }}>
+                No inventory items found matching your query.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      <TablePagination
+        component="div"
+        count={filteredItems.length}
+        page={page}
+        onPageChange={(e, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={(e) => {
+          setRowsPerPage(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        rowsPerPageOptions={[5, 10, 25]}
+      />
     </Paper>
   );
 }
