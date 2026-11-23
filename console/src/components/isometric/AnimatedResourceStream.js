@@ -10,10 +10,10 @@ export function AnimatedResourceStream({ className = '' }) {
       elevation={0}
       sx={{
         p: 2.5,
-        borderRadius: 4,
+        borderRadius: 1.5,
         bgcolor: '#FFFFFF',
         border: '1px solid rgba(27,67,50,0.1)',
-        boxShadow: '0 8px 24px -6px rgba(27,67,50,0.04)',
+        boxShadow: '0 4px 12px -2px rgba(27,67,50,0.04)',
       }}
       className={className}
     >
@@ -35,8 +35,9 @@ export function AnimatedResourceStream({ className = '' }) {
             onClick={() => setActiveLoop('all')}
             sx={{
               fontWeight: 700,
-              bgcolor: activeLoop === 'all' ? '#1B4332' : '#F0F6F1',
-              color: activeLoop === 'all' ? '#FFFFFF' : '#1B4332',
+              borderRadius: 1.5,
+              bgcolor: activeLoop === 'all' ? '#144E36' : '#F0F6F1',
+              color: activeLoop === 'all' ? '#FFFFFF' : '#144E36',
             }}
           />
           <Chip
@@ -47,6 +48,7 @@ export function AnimatedResourceStream({ className = '' }) {
             onClick={() => setActiveLoop('energy')}
             sx={{
               fontWeight: 700,
+              borderRadius: 1.5,
               bgcolor: activeLoop === 'energy' ? '#D97706' : '#FEF3C7',
               color: activeLoop === 'energy' ? '#FFFFFF' : '#92400E',
             }}
@@ -59,6 +61,7 @@ export function AnimatedResourceStream({ className = '' }) {
             onClick={() => setActiveLoop('water')}
             sx={{
               fontWeight: 700,
+              borderRadius: 1.5,
               bgcolor: activeLoop === 'water' ? '#0284C7' : '#E0F2FE',
               color: activeLoop === 'water' ? '#FFFFFF' : '#0369A1',
             }}
@@ -71,6 +74,7 @@ export function AnimatedResourceStream({ className = '' }) {
             onClick={() => setActiveLoop('biomass')}
             sx={{
               fontWeight: 700,
+              borderRadius: 1.5,
               bgcolor: activeLoop === 'biomass' ? '#059669' : '#D1FAE5',
               color: activeLoop === 'biomass' ? '#FFFFFF' : '#065F46',
             }}
@@ -79,7 +83,7 @@ export function AnimatedResourceStream({ className = '' }) {
       </Box>
 
       {/* Animated SVG Stream Canvas */}
-      <Box sx={{ width: '100%', height: 260, bgcolor: '#FAF9F5', borderRadius: 3, position: 'relative', overflow: 'hidden' }}>
+      <Box sx={{ width: '100%', height: 260, bgcolor: '#FAF9F5', borderRadius: 1.5, position: 'relative', overflow: 'hidden' }}>
         <svg
           viewBox="0 0 820 260"
           style={{ width: '100%', height: '100%' }}

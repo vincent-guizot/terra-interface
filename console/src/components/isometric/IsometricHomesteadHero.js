@@ -12,6 +12,10 @@ import {
   Layers,
   ZoomIn,
   ZoomOut,
+  RotateLeft,
+  RotateRight,
+  RestartAlt,
+  Close,
   InfoOutlined,
   CheckCircle,
   Spa,
@@ -26,14 +30,51 @@ import {
 } from '@mui/icons-material';
 
 export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
+  const [selectedFacility, setSelectedFacility] = useState(null);
   const [hoveredFacility, setHoveredFacility] = useState(null);
   const [showLabels, setShowLabels] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Configurable canonical Master Plan facilities (Vincent's Farm 300 m²)
   const facilities = masterPlanFacilities;
 
-  const currentSelection = hoveredFacility || facilities.find(f => f.id === activeZoneId) || facilities[0];
+  const handleFacilityClick = (facId) => {
+    const fac = facilities.find(f => f.id === facId);
+    if (fac) {
+      setSelectedFacility(fac);
+    }
+    if (onSelectZone) {
+      onSelectZone(facId);
+    }
+  };
+
+  const handleMouseDown = (e) => {
+    // Only drag with primary mouse button
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
+  const handleRotate = (delta) => {
+    setRotation((prev) => (prev + delta) % 360);
+  };
+
+  const handleReset = () => {
+    setZoomLevel(1);
+    setPan({ x: 0, y: 0 });
+    setRotation(0);
+  };
 
   const getFacilityIcon = (id) => {
     switch (id) {
@@ -56,11 +97,11 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
       sx={{
         position: 'relative',
         width: '100%',
-        borderRadius: 4,
+        borderRadius: 1.5,
         overflow: 'hidden',
         background: 'linear-gradient(145deg, #F9FAF5 0%, #F3F7F2 60%, #E8F0E7 100%)',
         border: '1px solid rgba(27, 67, 50, 0.1)',
-        boxShadow: '0 20px 40px -15px rgba(27, 67, 50, 0.08)',
+        boxShadow: '0 4px 16px rgba(27, 67, 50, 0.05)',
         p: { xs: 2, md: 3 },
       }}
     >
@@ -87,7 +128,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               backdropFilter: 'blur(8px)',
               px: 2,
               py: 0.8,
-              borderRadius: 3,
+              borderRadius: 1.5,
               border: '1px solid rgba(27, 67, 50, 0.08)',
             }}
           >
@@ -112,22 +153,23 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
                 fontWeight: 800,
                 fontSize: '0.72rem',
                 height: 22,
+                borderRadius: 1,
               }}
             />
           </Box>
           <Typography variant="caption" sx={{ color: '#5A7565', display: { xs: 'none', sm: 'block' }, fontWeight: 600 }}>
-            Visual-First Isometric Model • No Invented Buildings
+            Visual-First Isometric Model • Drag to Pan • Click to Inspect
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Button
             size="small"
             variant="outlined"
             onClick={() => setShowLabels(!showLabels)}
             startIcon={<Layers fontSize="small" />}
             sx={{
-              borderRadius: 2.5,
+              borderRadius: 1.5,
               borderColor: 'rgba(27, 67, 50, 0.2)',
               color: '#1B4332',
               bgcolor: 'rgba(255, 255, 255, 0.85)',
@@ -139,17 +181,19 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
           >
             {showLabels ? 'Hide Overlay' : 'Show Overlay'}
           </Button>
+
+          {/* Zoom, Rotate & Pan Controls */}
           <Box
             sx={{
               display: 'flex',
               bgcolor: 'rgba(255,255,255,0.85)',
-              borderRadius: 2.5,
+              borderRadius: 1.5,
               border: '1px solid rgba(27,67,50,0.1)',
             }}
           >
             <IconButton
               size="small"
-              onClick={() => setZoomLevel(Math.min(1.25, zoomLevel + 0.1))}
+              onClick={() => setZoomLevel(Math.min(1.4, zoomLevel + 0.1))}
               sx={{ color: '#1B4332' }}
               title="Zoom In"
             >
@@ -157,18 +201,46 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
             </IconButton>
             <IconButton
               size="small"
-              onClick={() => setZoomLevel(Math.max(0.85, zoomLevel - 0.1))}
+              onClick={() => setZoomLevel(Math.max(0.7, zoomLevel - 0.1))}
               sx={{ color: '#1B4332' }}
               title="Zoom Out"
             >
               <ZoomOut fontSize="small" />
             </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => handleRotate(-45)}
+              sx={{ color: '#1B4332' }}
+              title="Rotate Counter-Clockwise (-45°)"
+            >
+              <RotateLeft fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => handleRotate(45)}
+              sx={{ color: '#1B4332' }}
+              title="Rotate Clockwise (+45°)"
+            >
+              <RotateRight fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={handleReset}
+              sx={{ color: '#1B4332' }}
+              title="Reset View & Rotation"
+            >
+              <RestartAlt fontSize="small" />
+            </IconButton>
           </Box>
         </Box>
       </Box>
 
-      {/* SVG Canvas for Isometric Visual Rendering */}
+      {/* SVG Canvas for Isometric Visual Rendering - Drag & Rotate Enabled */}
       <Box
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
         sx={{
           position: 'relative',
           width: '100%',
@@ -177,13 +249,14 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          cursor: 'grab',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
         }}
       >
         <Box
           sx={{
-            transform: `scale(${zoomLevel})`,
-            transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoomLevel}) rotate(${rotation}deg)`,
+            transition: isDragging ? 'none' : 'transform 0.25s ease-out',
             transformOrigin: 'center center',
             width: '100%',
             height: '100%',
@@ -273,7 +346,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-pft"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-pft-01')}
+                onClick={() => handleFacilityClick('fac-pft-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-pft-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -303,7 +376,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-crg"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-crg-01')}
+                onClick={() => handleFacilityClick('fac-crg-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-crg-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -331,7 +404,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-tog"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-tog-01')}
+                onClick={() => handleFacilityClick('fac-tog-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-tog-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -355,7 +428,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-hyd"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-hyd-01')}
+                onClick={() => handleFacilityClick('fac-hyd-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-hyd-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -376,7 +449,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-gud"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-gud-01')}
+                onClick={() => handleFacilityClick('fac-gud-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-gud-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -414,7 +487,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-msh"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-msh-01')}
+                onClick={() => handleFacilityClick('fac-msh-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-msh-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -435,7 +508,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-bsf"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-bsf-01')}
+                onClick={() => handleFacilityClick('fac-bsf-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-bsf-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -457,7 +530,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-chk"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-chk-01')}
+                onClick={() => handleFacilityClick('fac-chk-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-chk-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -480,7 +553,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-gt"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-gt-01')}
+                onClick={() => handleFacilityClick('fac-gt-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-gt-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -506,7 +579,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               <g
                 id="facility-shp"
                 style={{ cursor: 'pointer' }}
-                onClick={() => onSelectZone && onSelectZone('fac-shp-01')}
+                onClick={() => handleFacilityClick('fac-shp-01')}
                 onMouseEnter={() => setHoveredFacility(facilities.find(f => f.id === 'fac-shp-01'))}
                 onMouseLeave={() => setHoveredFacility(null)}
               >
@@ -594,22 +667,22 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
           </svg>
         </Box>
 
-        {/* Live Hover Inspection Floating Card */}
-        {currentSelection && (
+        {/* Information Card - Appears only when facility clicked, border-md, with shadow & close button */}
+        {selectedFacility && (
           <Paper
-            elevation={4}
+            elevation={3}
             sx={{
               position: 'absolute',
               bottom: 16,
               left: 16,
               maxWidth: 360,
-              p: 2,
-              borderRadius: 3.5,
-              bgcolor: 'rgba(255, 255, 255, 0.96)',
+              p: 2.2,
+              borderRadius: 1.5,
+              bgcolor: 'rgba(255, 255, 255, 0.98)',
               backdropFilter: 'blur(14px)',
-              border: `1.5px solid ${currentSelection.color || 'rgba(27,67,50,0.1)'}`,
-              zIndex: 20,
-              boxShadow: '0 16px 36px rgba(27, 67, 50, 0.14)',
+              border: `1.5px solid ${selectedFacility.color || 'rgba(27,67,50,0.12)'}`,
+              zIndex: 30,
+              boxShadow: '0 8px 24px rgba(27, 67, 50, 0.12)',
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
@@ -618,40 +691,55 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
                   sx={{
                     width: 34,
                     height: 34,
-                    borderRadius: 2.5,
-                    bgcolor: `${currentSelection.color}18`,
+                    borderRadius: 1.5,
+                    bgcolor: `${selectedFacility.color}18`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  {getFacilityIcon(currentSelection.id)}
+                  {getFacilityIcon(selectedFacility.id)}
                 </Box>
                 <Box>
                   <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1B4332', lineHeight: 1.2 }}>
-                    {currentSelection.name}
+                    {selectedFacility.name}
                   </Typography>
                   <Typography variant="caption" sx={{ color: '#5A7565', fontWeight: 600 }}>
-                    {currentSelection.code} • {currentSelection.category}
+                    {selectedFacility.code} • {selectedFacility.category}
                   </Typography>
                 </Box>
               </Box>
 
-              <DataSourceBadge
-                source={currentSelection.dataSource || 'DEMO'}
-                lastUpdated={currentSelection.lastUpdated}
-                size="small"
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <DataSourceBadge
+                  source={selectedFacility.dataSource || 'DEMO'}
+                  lastUpdated={selectedFacility.lastUpdated}
+                  size="small"
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => setSelectedFacility(null)}
+                  sx={{
+                    color: '#5A7565',
+                    p: 0.5,
+                    borderRadius: 1,
+                    '&:hover': { color: '#1B4332', bgcolor: 'rgba(27,67,50,0.08)' }
+                  }}
+                  title="Close Information Card"
+                >
+                  <Close sx={{ fontSize: 18 }} />
+                </IconButton>
+              </Box>
             </Box>
 
             <Typography variant="body2" sx={{ color: '#4A6B56', fontSize: '0.8rem', mb: 1.5, lineHeight: 1.4 }}>
-              {currentSelection.description}
+              {selectedFacility.description}
             </Typography>
 
             <Box
               sx={{
                 p: 1.2,
-                borderRadius: 2.5,
+                borderRadius: 1.5,
                 bgcolor: '#FAF9F5',
                 border: '1px solid rgba(27,67,50,0.06)',
                 mb: 1.5,
@@ -661,7 +749,7 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
                 Area / Dimension Specification
               </Typography>
               <Typography variant="body2" sx={{ fontWeight: 800, color: '#1B4332', fontSize: '0.82rem' }}>
-                {currentSelection.area}
+                {selectedFacility.area}
               </Typography>
             </Box>
 
@@ -670,16 +758,17 @@ export default function IsometricHomesteadHero({ activeZoneId, onSelectZone }) {
               size="small"
               variant="contained"
               endIcon={<ArrowForward fontSize="small" />}
-              onClick={() => onSelectZone && onSelectZone(currentSelection.id)}
+              onClick={() => onSelectZone && onSelectZone(selectedFacility.id)}
               sx={{
-                bgcolor: '#1B4332',
-                color: '#FFFFFF',
-                borderRadius: 2.5,
+                bgcolor: '#144E36',
+                color: '#FFFFFF !important',
+                borderRadius: 1.5,
                 textTransform: 'none',
                 fontWeight: 700,
                 fontSize: '0.8rem',
                 py: 0.8,
-                '&:hover': { bgcolor: '#133326' },
+                boxShadow: 'none',
+                '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' },
               }}
             >
               Inspect Facility Details

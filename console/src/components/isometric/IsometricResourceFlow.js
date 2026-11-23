@@ -1,19 +1,32 @@
 import { getFlowTypeColor } from "@/helpers/presentation.js";
 import { ecologicalLoops } from "../../data/isometric/ecological-loops.data.js";
 import React, { useState } from 'react';
-import { Box, Typography, Paper, Chip, Grid, Table, TableHead, TableBody, TableRow, TableCell, ButtonGroup, Button } from '@mui/material';
+import { Box, Typography, Paper, Chip, Grid, Table, TableHead, TableBody, TableRow, TableCell, ButtonGroup, Button, TablePagination } from '@mui/material';
 import { Sync, Bolt, Opacity, Grass, Loop, CheckCircle, ArrowForward, SwapHoriz, FilterList, Egg, Pets, Yard, Park, Warehouse } from '@mui/icons-material';
 import { masterPlanResourceFlows } from '../../data/homestead/master-plan.js';
 import DataSourceBadge from '../ui/DataSourceBadge.js';
 export default function IsometricResourceFlow() {
   const [activeCycle, setActiveCycle] = useState('all');
   const [flowTypeFilter, setFlowTypeFilter] = useState('all'); // 'all' | 'ACTUAL' | 'PLANNED' | 'ESTIMATED'
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
 
   const filteredFlows = masterPlanResourceFlows.filter(flow => {
     const matchesType = flowTypeFilter === 'all' || flow.flowType === flowTypeFilter;
     const matchesCycle = activeCycle === 'all' || activeCycle === 'bsf-protein' && (flow.id.includes('chk') || flow.id.includes('bsf') || flow.id.includes('scraps')) || activeCycle === 'compost-soil' && (flow.id.includes('frass') || flow.id.includes('compost') || flow.id.includes('manure')) || activeCycle === 'water-consumers' && flow.id.includes('water') || activeCycle === 'aqua-hydro' && flow.id.includes('aqua');
     return matchesType && matchesCycle;
   });
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const paginatedFlows = filteredFlows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   return <Box sx={{
     width: '100%',
     py: 1
@@ -35,15 +48,15 @@ export default function IsometricResourceFlow() {
       }}>
           <Chip label="All Ecological Loops" onClick={() => setActiveCycle('all')} sx={{
           fontWeight: 700,
-          borderRadius: 3,
+          borderRadius: 1.5,
           px: 1,
-          bgcolor: activeCycle === 'all' ? '#1B4332' : 'rgba(255,255,255,0.9)',
-          color: activeCycle === 'all' ? '#FFFFFF' : '#1B4332',
+          bgcolor: activeCycle === 'all' ? '#144E36' : 'rgba(255,255,255,0.9)',
+          color: activeCycle === 'all' ? '#FFFFFF' : '#144E36',
           border: '1px solid rgba(27,67,50,0.1)'
         }} />
           {ecologicalLoops.map(c => <Chip key={c.id} label={c.name} onClick={() => setActiveCycle(c.id)} sx={{
           fontWeight: 700,
-          borderRadius: 3,
+          borderRadius: 1.5,
           px: 1,
           bgcolor: activeCycle === c.id ? `${c.color}25` : 'rgba(255,255,255,0.9)',
           color: activeCycle === c.id ? c.color : '#486253',
@@ -56,11 +69,11 @@ export default function IsometricResourceFlow() {
         {/* Flow Classification Switcher: ACTUAL vs PLANNED vs ESTIMATED */}
         <ButtonGroup size="small" sx={{
         bgcolor: '#FFFFFF',
-        borderRadius: 2.5,
+        borderRadius: 1.5,
         p: 0.4,
         border: '1px solid rgba(27,67,50,0.12)',
         '& .MuiButton-root': {
-          borderRadius: '8px !important',
+          borderRadius: '6px !important',
           border: 'none !important',
           px: 1.5,
           py: 0.5,
@@ -70,7 +83,7 @@ export default function IsometricResourceFlow() {
         }
       }}>
           <Button onClick={() => setFlowTypeFilter('all')} sx={{
-          bgcolor: flowTypeFilter === 'all' ? '#1B4332 !important' : 'transparent',
+          bgcolor: flowTypeFilter === 'all' ? '#144E36 !important' : 'transparent',
           color: flowTypeFilter === 'all' ? '#FFFFFF !important' : '#486253'
         }}>
             All Flows ({masterPlanResourceFlows.length})
@@ -102,7 +115,7 @@ export default function IsometricResourceFlow() {
         xs: 2.5,
         md: 3.5
       },
-      borderRadius: 4,
+      borderRadius: 1.5,
       background: 'linear-gradient(135deg, #FAFBF8 0%, #F1F6F0 100%)',
       border: '1px solid rgba(27, 67, 50, 0.1)',
       mb: 3
@@ -140,7 +153,7 @@ export default function IsometricResourceFlow() {
             bgcolor: 'rgba(16, 185, 129, 0.15)',
             px: 2,
             py: 0.8,
-            borderRadius: 3
+            borderRadius: 1.5
           }}>
               <Loop sx={{
               color: '#059669',
@@ -266,11 +279,11 @@ export default function IsometricResourceFlow() {
 
       {/* DETAILED FLOW LEDGER TABLE (Supports Source, Destination, Quantity, Unit, Timestamp, FlowType, Status) */}
       <Paper elevation={0} sx={{
-      borderRadius: 4,
+      borderRadius: 1.5,
       bgcolor: '#FFFFFF',
       border: '1px solid rgba(27,67,50,0.08)',
       overflow: 'hidden',
-      boxShadow: '0 8px 24px -6px rgba(27,67,50,0.05)'
+      boxShadow: '0 4px 16px -4px rgba(27,67,50,0.05)'
     }}>
         <Box sx={{
         p: 2.5,
@@ -297,7 +310,8 @@ export default function IsometricResourceFlow() {
           <Chip icon={<FilterList fontSize="small" />} label={`Filter: ${flowTypeFilter.toUpperCase()}`} size="small" sx={{
           bgcolor: 'rgba(27,67,50,0.08)',
           color: '#1B4332',
-          fontWeight: 700
+          fontWeight: 700,
+          borderRadius: 1
         }} />
         </Box>
 
@@ -344,7 +358,7 @@ export default function IsometricResourceFlow() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredFlows.map(flow => {
+            {paginatedFlows.map(flow => {
             const typeStyle = getFlowTypeColor(flow.flowType);
             return <TableRow key={flow.id} hover>
                   <TableCell sx={{
@@ -416,7 +430,8 @@ export default function IsometricResourceFlow() {
                   border: `1px solid ${typeStyle.border}`,
                   fontWeight: 800,
                   fontSize: '0.68rem',
-                  height: 20
+                  height: 20,
+                  borderRadius: 1
                 }} />
                   </TableCell>
                   <TableCell sx={{
@@ -431,13 +446,24 @@ export default function IsometricResourceFlow() {
                   bgcolor: 'rgba(16, 185, 129, 0.12)',
                   color: '#065F46',
                   fontWeight: 700,
-                  fontSize: '0.7rem'
+                  fontSize: '0.7rem',
+                  borderRadius: 1
                 }} />
                   </TableCell>
                 </TableRow>;
           })}
           </TableBody>
         </Table>
+        <TablePagination
+          component="div"
+          count={filteredFlows.length}
+          page={page}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[5, 8, 15, 25]}
+          sx={{ borderTop: '1px solid rgba(27,67,50,0.08)' }}
+        />
       </Paper>
     </Box>;
 }
