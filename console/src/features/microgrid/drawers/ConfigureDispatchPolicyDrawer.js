@@ -14,16 +14,22 @@ export default function ConfigureDispatchPolicyDrawer({
   const [stewardName, setStewardName] = useState('Vincent');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     if (open) {
+      let active = true;
+      setLoaded(false);
+      setError(null);
       TelemetryService.getDispatchPolicy().then(pol => {
-        if (pol) {
+        if (active && pol) {
+          setLoaded(true);
           if (pol.solarDumpMode) setSolarDumpMode(pol.solarDumpMode);
           if (pol.rainwaterPriority) setRainwaterPriority(pol.rainwaterPriority);
           if (pol.batteryFloorReservePercent) setBatteryFloor(pol.batteryFloorReservePercent);
           if (pol.stewardName) setStewardName(pol.stewardName);
         }
-      }).catch(() => {});
+      }).catch(err => { if (active) setError(err.message); });
+      return () => { active = false; };
     }
   }, [open]);
   const handleSubmit = async e => {
@@ -39,7 +45,7 @@ export default function ConfigureDispatchPolicyDrawer({
       };
       const result = await TelemetryService.updateDispatchPolicy(payload);
       if (onPolicyUpdated) {
-        await onPolicyUpdated(payload);
+        await onPolicyUpdated(result);
       }
       onClose();
     } catch (err) {
@@ -220,7 +226,7 @@ export default function ConfigureDispatchPolicyDrawer({
           <Grid item xs={12} sx={{
           mt: 2
         }}>
-            <Button type="submit" fullWidth variant="contained" disabled={submitting} startIcon={<CheckCircle />} sx={{
+            <Button type="submit" fullWidth variant="contained" disabled={submitting || !loaded} startIcon={<CheckCircle />} sx={{
             bgcolor: '#10B981',
             color: '#FFFFFF',
             py: 1.2,

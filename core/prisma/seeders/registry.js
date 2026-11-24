@@ -36,4 +36,6 @@ import sensorDevice from './tables/sensor-device.seeder.js';
 import telemetryReading from './tables/telemetry-reading.seeder.js';
 import aiRecommendation from './tables/ai-recommendation.seeder.js';
 
-export const tableSeeders = [homestead, sitePlanVersion, zone, building, facility, equipment, productCategory, measurementUnit, productDefinition, unitConversion, customFieldDefinition, productionType, customField, batch, customFieldValue, batchCustomFieldValue, batchStatusHistory, batchEvent, batchOutput, batchHistory, cultivationBatchDetail, livestockBatchDetail, aquacultureBatchDetail, bsfBatchDetail, compostBatchDetail, growingRecord, storageLocation, inventoryItem, stockMovement, stockTx, energyNode, waterNode, resourceFlowLog, workOrder, sensorDevice, telemetryReading, aiRecommendation];
+import dispatchPolicy from './tables/dispatch-policy.seeder.js';
+
+export const tableSeeders = [homestead, sitePlanVersion, zone, building, facility, equipment, productCategory, measurementUnit, productDefinition, unitConversion, customFieldDefinition, productionType, customField, batch, customFieldValue, batchCustomFieldValue, batchStatusHistory, batchEvent, batchOutput, batchHistory, cultivationBatchDetail, livestockBatchDetail, aquacultureBatchDetail, bsfBatchDetail, compostBatchDetail, growingRecord, storageLocation, inventoryItem, stockMovement, stockTx, energyNode, waterNode, resourceFlowLog, workOrder, sensorDevice, telemetryReading, aiRecommendation, dispatchPolicy];

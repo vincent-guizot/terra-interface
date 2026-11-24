@@ -2,7 +2,7 @@
 
 This reference is derived from core/prisma/schema.prisma via the generated Prisma Client metadata. Regenerate the client after schema changes before updating this reference. It describes models and explicit foreign-key relations, not verified deployed migrations.
 
-Current schema: 37 models. PostgreSQL is the configured provider.
+Current schema: 38 models. PostgreSQL is the configured provider.
 
 ## Relationships
 
@@ -163,6 +163,11 @@ erDiagram
 ```
 
 ## Model fields
+
+### DispatchPolicy
+
+Stores the site's dispatch configuration under the single key `default`. Fields are `solarDumpMode`, `rainwaterPriority`, `batteryFloorReservePercent`, and `stewardName`.
+
 
 Nullable fields use ?, lists use []. Relation fields identify the linked model; foreign-key scalar fields are listed separately. Defaults, indexes and delete actions remain authoritative in schema.prisma.
 

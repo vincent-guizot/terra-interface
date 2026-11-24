@@ -31,7 +31,7 @@ import { useMicrogridTelemetry } from '../../hooks/useMicrogridTelemetry.js';
 import { ConfigureDispatchPolicyDrawer, ManualTelemetryIngestDrawer } from '../microgrid/index.js';
 
 export default function ResourcesPage() {
-  const { telemetry, alerts, connectionStatus, ingest, updatePolicy } = useMicrogridTelemetry();
+  const { telemetry, alerts, connectionStatus, acceptIngest } = useMicrogridTelemetry();
   const [dispatchDrawerOpen, setDispatchDrawerOpen] = useState(false);
   const [manualIngestOpen, setManualIngestOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -41,6 +41,7 @@ export default function ResourcesPage() {
   };
 
   const handleTelemetryIngested = (snapshot) => {
+    acceptIngest(snapshot);
     setToastMsg(`Telemetry ingested: Solar ${snapshot.solarGenerationKw} kW, Battery ${snapshot.batterySoC}%, Cistern ${snapshot.cisternTotalLiters} L`);
   };
 
@@ -49,9 +50,10 @@ export default function ResourcesPage() {
       return { label: '● SSE Stream: LIVE', bgcolor: 'rgba(16,185,129,0.15)', color: '#065F46' };
     }
     if (connectionStatus === 'POLLING') {
-      return { label: '● REST Polling: 5s', bgcolor: 'rgba(2,132,199,0.15)', color: '#0369A1' };
+      return { label: '● REST Polling: 10s', bgcolor: 'rgba(2,132,199,0.15)', color: '#0369A1' };
     }
-    return { label: '● Diurnal Generator Active', bgcolor: 'rgba(245,158,11,0.15)', color: '#B45309' };
+    const labels = { DEMO: 'Demo telemetry', CONNECTING: 'Connecting to telemetry', STALE: 'Telemetry disconnected' };
+    return { label: labels[connectionStatus], bgcolor: 'rgba(245,158,11,0.15)', color: '#B45309' };
   };
 
   const statusChip = getStatusChipProps();
@@ -74,6 +76,12 @@ export default function ResourcesPage() {
               size="small"
               sx={{ bgcolor: statusChip.bgcolor, color: statusChip.color, fontWeight: 800, fontSize: '0.72rem' }}
             />
+            {telemetry?.timestamp && (
+              <Typography variant="caption">
+                {connectionStatus === 'STALE' ? 'Last known reading' : 'Reading time'}{' '}
+                <time dateTime={telemetry.timestamp}>{new Date(telemetry.timestamp).toLocaleString()}</time>
+              </Typography>
+            )}
             {telemetry?.dumpLoad?.isActive && (
               <Chip
                 label={`⚡ Dump Load: ${telemetry.dumpLoad.targetAppliance}`}
@@ -184,6 +192,8 @@ export default function ResourcesPage() {
       )}
 
       {/* 4 CORE RESOURCE PILLARS */}
+      {!telemetry && <Alert severity="info">No telemetry reading available.</Alert>}
+      {telemetry && (
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* PILLAR 1: CLEAN ENERGY */}
         <Grid item xs={12} lg={6}>
@@ -411,7 +421,10 @@ export default function ResourcesPage() {
         </Grid>
       </Grid>
 
+      )}
+
       {/* LOWER 2 RESOURCE SECTIONS: FOOD RESERVES & CIRCULAR CYCLES */}
+
       <Grid container spacing={3}>
         {/* Food Pantry & Long-term Reserves */}
         <Grid item xs={12} lg={6}>

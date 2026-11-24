@@ -30,7 +30,7 @@ The diagram describes code boundaries, not verified physical device deployment. 
 
 ## Persistence and contracts
 
-The schema contains 37 models. Per-table seeders read explicit demo JSON and execute in dependency order within a transaction. The REST envelope is documented in [the Core contract](../core/docs/api-response-contract.md); health, SSE and audit export retain separate formats.
+The schema contains 38 models. Per-table seeders read explicit demo JSON and execute in dependency order within a transaction. The REST envelope is documented in [the Core contract](../core/docs/api-response-contract.md); health, SSE and audit export retain separate formats.
 
 Persistence is mixed: several services use Prisma, while others return canonical data or maintain in-memory state. Restarting Core can discard in-memory operations. Treat offline operation, complete durable auditability, authentication and physical automation as requirements to verify per feature, not guarantees of the whole application.
 

@@ -4,7 +4,7 @@ import { ApiClient } from './apiClient.js';
 export class TelemetryService {
   static async getLiveSnapshot() {
     try {
-      return await ApiClient.get('/microgrid/telemetry/live');
+      return await ApiClient.get('/telemetry/live');
     } catch (err) {
       if (ApiClient.isDemoMode()) {
         return this.getDemoTelemetrySnapshot();
@@ -54,7 +54,7 @@ export class TelemetryService {
 
   static async ingestTelemetry(packet) {
     try {
-      return await ApiClient.post('/microgrid/telemetry/ingest', packet);
+      return await ApiClient.post('/telemetry/ingest', packet);
     } catch (err) {
       if (ApiClient.isDemoMode()) {
         return {
@@ -69,7 +69,7 @@ export class TelemetryService {
 
   static async getHistoricalTelemetry(hours = 24) {
     try {
-      return await ApiClient.get('/microgrid/telemetry/history', { hours });
+      return await ApiClient.get('/telemetry/historical', { hours });
     } catch (err) {
       if (ApiClient.isDemoMode()) {
         return Array.from({ length: hours }, (_, i) => {
@@ -90,7 +90,7 @@ export class TelemetryService {
 
   static async getDispatchPolicy() {
     try {
-      return await ApiClient.get('/microgrid/policy');
+      return await ApiClient.get('/telemetry/policy');
     } catch (err) {
       if (ApiClient.isDemoMode()) {
         return {
@@ -106,7 +106,7 @@ export class TelemetryService {
 
   static async updateDispatchPolicy(policy) {
     try {
-      return await ApiClient.post('/microgrid/policy', policy);
+      return await ApiClient.request('/telemetry/policy', { method: 'PUT', body: JSON.stringify(policy) });
     } catch (err) {
       if (ApiClient.isDemoMode()) {
         return {
@@ -121,32 +121,34 @@ export class TelemetryService {
   static subscribeToTelemetryStream(onData, onError) {
     if (typeof window === 'undefined') return () => {};
 
-    const url = `${ApiClient.getBaseUrl()}/microgrid/telemetry/stream`;
+    const url = `${ApiClient.getBaseUrl()}/telemetry/stream`;
     let eventSource;
-
-    try {
+    let retry;
+    function connect() {
       eventSource = new EventSource(url);
-
-      eventSource.onmessage = (event) => {
+      eventSource.onmessage = event => {
         try {
-          const parsed = JSON.parse(event.data);
-          if (onData) onData(parsed);
-        } catch (e) {
-          console.error('[SSE Parse Error]', e);
+          onData(JSON.parse(event.data));
+        } catch (error) {
+          console.error('[SSE Parse Error]', error);
         }
       };
-
-      eventSource.onerror = (err) => {
-        if (onError) onError(err);
+      eventSource.onerror = () => {
+        onError();
+        // Native EventSource reconnects while CONNECTING, but not after a terminal response.
+        if (eventSource.readyState === EventSource.CLOSED && !retry) {
+          retry = setTimeout(() => {
+            retry = undefined;
+            eventSource.close();
+            connect();
+          }, 3000);
+        }
       };
-    } catch (err) {
-      if (onError) onError(err);
     }
-
+    connect();
     return () => {
-      if (eventSource) {
-        eventSource.close();
-      }
+      clearTimeout(retry);
+      eventSource.close();
     };
   }
 

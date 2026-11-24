@@ -1,3 +1,4 @@
+import { AppError } from '../../middlewares/errorHandler.js';
 import energyWaterService from './energy-water.service.js';
 import { sendSuccess, sendCreated } from '../../utils/response.js';
 export async function getLiveSnapshot(req, res, next) {
@@ -27,7 +28,7 @@ export async function getDispatchPolicy(req, res, next) {
 }
 export async function updateDispatchPolicy(req, res, next) {
   try {
-    const updated = energyWaterService.updateDispatchPolicy(req.body);
+    const updated = await energyWaterService.saveDispatchPolicy(req.body);
     return sendSuccess(res, updated, 'Dispatch policy updated successfully');
   } catch (err) {
     next(err);
@@ -43,7 +44,16 @@ export async function getDumpLoadStatus(req, res, next) {
 }
 export async function ingestTelemetry(req, res, next) {
   try {
-    const snapshot = await energyWaterService.ingestTelemetry(req.body);
+    const packet = req.body ?? {};
+    const limits = { solarGenerationKw: [0, Infinity], inverterLoadWatts: [0, Infinity],
+      batterySoC: [0, 100], cisternLevelLiters: [0, 12000] };
+    const invalid = Object.entries(limits).some(([key, [min, max]]) =>
+      !Number.isFinite(packet[key]) || packet[key] < min || packet[key] > max);
+    if (invalid || (packet.timestamp !== undefined &&
+        (typeof packet.timestamp !== 'string' || !Number.isFinite(Date.parse(packet.timestamp))))) {
+      throw new AppError('Invalid telemetry values or timestamp', 400, 'VALIDATION_ERROR');
+    }
+    const snapshot = await energyWaterService.ingestTelemetry(packet);
     return sendCreated(res, snapshot, 'Telemetry reading ingested');
   } catch (err) {
     next(err);

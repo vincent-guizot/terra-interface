@@ -1,6 +1,7 @@
 import env from './config/env.js';
 import { testDbConnection, closeDbConnection } from './config/database.js';
 import app from './app.js';
+import energyWaterService from './modules/energy-water/energy-water.service.js';
 let server = null;
 async function startServer() {
   console.log('=================================================');
@@ -18,6 +19,13 @@ async function startServer() {
     console.error(` [FATAL] Reason: ${dbResult.error}`);
     console.error(' [FATAL] Server aborting start. Exiting with status code 1.');
     console.error('=================================================');
+    process.exit(1);
+  }
+
+  try {
+    await energyWaterService.loadDispatchPolicy();
+  } catch (error) {
+    console.error('[STARTUP] Unable to load dispatch policy:', error.message);
     process.exit(1);
   }
 

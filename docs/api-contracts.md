@@ -292,6 +292,12 @@ These routes are declared directly in routes/v1/index.js.
 | GET | /api/v1/telemetry/dump-load |
 | GET | /api/v1/telemetry |
 
+## Telemetry on the Resources page
+
+Console uses `GET /api/v1/telemetry/live`, `GET /api/v1/telemetry/stream`, and `POST /api/v1/telemetry/ingest`. The latest snapshot includes the reading timestamp. Console retains the last reading when SSE is disconnected, tries REST every 10 seconds while disconnected, and resumes SSE automatically. The latest readings are held in Core memory, while the solar metric is recorded when the configured zone exists.
+
+`GET /api/v1/telemetry/policy` reads the current policy. `PUT /api/v1/telemetry/policy` validates changes and persists them in PostgreSQL. Core restores that policy on startup.
+
 ## Validation and known limitations
 
 Validation is implemented per handler/service; there is no universal DTO validation pipeline or mounted authentication middleware. Error conventions do not imply authentication is implemented. Some endpoints return memory/constant-backed data even if PostgreSQL is unavailable.

@@ -1,5 +1,6 @@
 "use strict";
 
+import { AppError } from '../../middlewares/errorHandler.js';
 import * as rxjs_1 from "rxjs";
 import * as battery_bms_service_1 from "./battery-bms.service.js";
 import * as autonomy_forecast_service_1 from "./autonomy-forecast.service.js";
@@ -35,6 +36,32 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
   }
   getDispatchPolicy() {
     return this.currentPolicy;
+  }
+  async loadDispatchPolicy() {
+    const saved = await this.prisma.dispatchPolicy.findUnique({ where: { id: 'default' } });
+    if (saved) {
+      const { id, ...policy } = saved;
+      this.updateDispatchPolicy(policy);
+    }
+  }
+  async saveDispatchPolicy(dto = {}) {
+    const changes = Object.fromEntries(Object.keys(this.currentPolicy)
+      .filter(key => Object.hasOwn(dto, key)).map(key => [key, dto[key]]));
+    const { solarDumpMode, rainwaterPriority, batteryFloorReservePercent, stewardName } = {
+      ...this.currentPolicy, ...changes
+    };
+    if (!['EVAPORATIVE_MISTING', 'POND_CASCADE_AERATOR', 'WATER_HEATER', 'BATTERY_STORAGE_ONLY'].includes(solarDumpMode) ||
+        !['AQUAPONICS_FIRST', 'LIVING_SOIL_FIRST', 'DOMESTIC_FIRST', 'BALANCED'].includes(rainwaterPriority) ||
+        !Number.isFinite(batteryFloorReservePercent) || batteryFloorReservePercent < 15 || batteryFloorReservePercent > 40 ||
+        typeof stewardName !== 'string' || !stewardName.trim()) {
+      throw new AppError('Invalid dispatch policy', 400, 'VALIDATION_ERROR');
+    }
+    const { id, ...saved } = await this.prisma.dispatchPolicy.upsert({
+      where: { id: 'default' },
+      create: { id: 'default', ...this.currentPolicy, ...changes },
+      update: changes
+    });
+    return this.updateDispatchPolicy(saved);
   }
   updateDispatchPolicy(dto) {
     this.currentPolicy = {
@@ -127,6 +154,7 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
     // Evaluate protection rules & automated control
     this.evaluateRulesAndAlerts(snapshot);
     this.currentSnapshot = snapshot;
+    this.telemetrySubject.next({ data: snapshot });
     // Persist to Prisma TelemetryReading if DB is connected
     try {
       const zone5 = await this.prisma.zone.findFirst({
@@ -140,17 +168,14 @@ let EnergyWaterService = EnergyWaterService_1 = class EnergyWaterService {
             zoneId: zone5.id,
             metric: 'SOLAR_KW',
             value: dto.solarGenerationKw,
-            unit: 'kW'
+            unit: 'kW',
+            timestamp: new Date(timestamp)
           }
         });
       }
     } catch (err) {
       // Graceful fallback for demo/offline
     }
-    // Push live snapshot through SSE Stream
-    this.telemetrySubject.next({
-      data: snapshot
-    });
     return snapshot;
   }
   evaluateRulesAndAlerts(snapshot) {

@@ -1,0 +1,14 @@
+[
+  {
+    "key": "default",
+    "demo": true,
+    "match": { "id": "default" },
+    "data": {
+      "id": "default",
+      "solarDumpMode": "EVAPORATIVE_MISTING",
+      "rainwaterPriority": "AQUAPONICS_FIRST",
+      "batteryFloorReservePercent": 20,
+      "stewardName": "Vincent"
+    }
+  }
+]

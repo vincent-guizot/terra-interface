@@ -30,12 +30,12 @@ For an existing database previously initialized with db push, compare the live s
 
 - prisma/data/: one JSON fixture per model.
 - prisma/seeders/tables/: one seeder per Prisma delegate.
-- registry.js: explicit dependency order for all 37 tables.
+- registry.js: explicit dependency order for all 38 tables.
 - seed-table.js: identity, reference resolution, record creation/reuse.
 - run-seeders.js: validation and transactional orchestration.
 - seed.js: CLI entry point.
 
-The demo dataset contains 82 records. Each fixture record has a key, demo: true, data, and optionally match. References use {"$ref":{"table":"zone","key":"Z-01"}} and resolve against records already seeded. Metadata fields are not inserted as model columns.
+The demo dataset contains 83 records. Each fixture record has a key, demo: true, data, and optionally match. References use {"$ref":{"table":"zone","key":"Z-01"}} and resolve against records already seeded. Metadata fields are not inserted as model columns.
 
 ```sh
 npm run prisma:seed:check --workspace terra-core

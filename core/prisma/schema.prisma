@@ -520,6 +520,14 @@ model SensorDevice {
   createdAt   DateTime           @default(now())
 }
 
+model DispatchPolicy {
+  id                         String @id
+  solarDumpMode              String
+  rainwaterPriority          String
+  batteryFloorReservePercent Float
+  stewardName                String
+}
+
 model TelemetryReading {
   id        String        @id @default(uuid())
   zoneId    String

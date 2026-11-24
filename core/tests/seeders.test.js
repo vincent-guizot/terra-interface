@@ -31,15 +31,15 @@ function mockDatabase(failTable) {
 
 test('all Prisma tables have valid demo JSON and resolved dependencies', async () => {
   const result = await validateSeedData();
-  assert.equal(result.tables, 37);
-  assert.equal(result.records, 82);
+  assert.equal(result.tables, 38);
+  assert.equal(result.records, 83);
   for (const seed of tableSeeders) assert((await seed.load()).length > 0, `${seed.table} needs demo examples`);
 });
 
 test('reruns preserve existing IDs and do not duplicate records or history', async () => {
   const database = mockDatabase();
   const first = await seedDatabase(database);
-  assert.equal(first.reduce((sum, row) => sum + row.created, 0), 81);
+  assert.equal(first.reduce((sum, row) => sum + row.created, 0), 82);
   for (const zone of database.store.get('zone')) assert.equal(zone.homesteadId, 'existing-farm-id');
   const before = structuredClone(database.store);
   const second = await seedDatabase(database);

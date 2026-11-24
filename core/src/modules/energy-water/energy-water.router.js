@@ -52,18 +52,8 @@ router.get('/telemetry/history', async (req, res, next) => {
     next(err);
   }
 });
-router.post('/telemetry/ingest', async (req, res, next) => {
-  try {
-    const result = await service.ingestTelemetry(req.body);
-    sendCreated(res, result);
-  } catch (err) {
-    next(err);
-  }
-});
-router.post('/policy', (req, res) => {
-  const updated = service.updateDispatchPolicy(req.body);
-  sendSuccess(res, updated);
-});
+router.post('/telemetry/ingest', energyWaterController.ingestTelemetry);
+router.post('/policy', energyWaterController.updateDispatchPolicy);
 router.get('/dump-load/status', (req, res) => {
   const status = service.getDumpLoadStatus();
   sendSuccess(res, status);
