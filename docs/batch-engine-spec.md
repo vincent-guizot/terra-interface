@@ -30,6 +30,6 @@ The service rejects illegal transitions with a bad-request exception. ON_HOLD an
 - POST /api/v1/universal-batches/:id/events: append an event.
 - POST /api/v1/universal-batches/:id/outputs: record output.
 
-Known limitation: the transition route passes req.body as one argument, while transitionStatus expects (id, newStatus, reason). A legal HTTP transition needs a code fix and regression test before this route can be documented as working. This documentation update does not change runtime behavior.
+Send JSON such as `{"newStatus":"ON_HOLD","reason":"Inspect pump"}`. The route requires a valid `newStatus` and a non-blank `reason` for `ON_HOLD` or `CANCELLED`. Successful transitions return HTTP 200 with the updated batch in `data`.
 
 Batch activation/output code coordinates stock movements and cached quantities in service transactions. Refer to the actual service and [inventory behavior](inventory-ledger-spec.md) when assessing atomicity. Mock invariant tests verify selected business rules; they are not proof of live database behavior.

@@ -1,3 +1,5 @@
+import { BatchStatus } from '@prisma/client';
+import { AppError } from '../../middlewares/errorHandler.js';
 import { sendSuccess, sendCreated } from "../../utils/response.js";
 const universalBatchRouter = (0, express_1.Router)();
 "use strict";
@@ -17,6 +19,16 @@ universalBatchRouter.get('/', async (req, res, next) => {
     next(err);
   }
 });
+universalBatchRouter.get('/form-options', async (req, res, next) => {
+  try {
+    const db = prisma_service_1.prisma;
+    const [zones, items] = await Promise.all([
+      db.zone.findMany({ select: { id: true, name: true, homesteadId: true }, orderBy: { name: 'asc' } }),
+      db.inventoryItem.findMany({ select: { id: true, name: true, sku: true, unit: true, homesteadId: true }, orderBy: { name: 'asc' } })
+    ]);
+    sendSuccess(res, { zones, items });
+  } catch (error) { next(error); }
+});
 universalBatchRouter.get('/:id', async (req, res, next) => {
   try {
     const batch = await service.findOne(req.params.id);
@@ -35,7 +47,19 @@ universalBatchRouter.post('/', async (req, res, next) => {
 });
 universalBatchRouter.patch('/:id/transition', async (req, res, next) => {
   try {
-    const updated = await service.transitionStatus(req.params.id, req.body);
+    const { newStatus, reason } = req.body ?? {};
+    if (!Object.values(BatchStatus).includes(newStatus)) {
+      throw new AppError('Invalid batch status', 400, 'VALIDATION_ERROR', [
+        { field: 'newStatus', message: 'Provide a valid batch status' }
+      ]);
+    }
+    const requiresReason = newStatus === BatchStatus.ON_HOLD || newStatus === BatchStatus.CANCELLED;
+    if ((reason !== undefined || requiresReason) && (typeof reason !== 'string' || !reason.trim())) {
+      throw new AppError('Invalid transition reason', 400, 'VALIDATION_ERROR', [
+        { field: 'reason', message: 'Provide a non-blank explanation' }
+      ]);
+    }
+    const updated = await service.transitionStatus(req.params.id, newStatus, reason?.trim());
     sendSuccess(res, updated);
   } catch (err) {
     next(err);

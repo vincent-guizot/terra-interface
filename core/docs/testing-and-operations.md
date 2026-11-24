@@ -25,6 +25,13 @@ Telemetry streams use text/event-stream snapshots, not the REST envelope. Ensure
 
 app.js currently trusts one proxy hop. Review proxy topology before external hosting. Configure TLS, process lifecycle, database backups, secrets and access control for the actual environment. The current application does not mount authentication middleware. Build and test success alone is not a deployment security review.
 
-## Known contract gap
+## Batch transition coverage
 
-The universal-batch transition route currently passes an object to a service expecting separate newStatus and reason arguments. Track a focused code fix with an HTTP regression test; do not claim that route's happy path is covered by service-level invariant tests alone.
+The HTTP contract suite exercises the transition route with a mock Prisma client. To test real persistence, provision a disposable local database named terra_interface_test. Set DATABASE_URL for migrate deploy and TERRA_TEST_DATABASE_URL for the test to the same dedicated local database. From the repository root:
+
+```sh
+npx prisma migrate deploy --schema core/prisma/schema.prisma
+node --test core/tests/batch-persistence.test.js
+```
+
+The opt-in test uses PostgreSQL directly and starts two independent Core app processes. It checks persisted status, status history and audit logs after restart and that a rejected transition adds no log rows. The test adds temporary constraints to force failures while saving a stock movement and a harvest audit entry. It verifies rollback and retries the same harvest request. The database user needs permission to alter these test tables. It removes its batch fixture afterward and skips when TERRA_TEST_DATABASE_URL is unset. Core may initialize its default AI recommendations in the disposable database on startup.

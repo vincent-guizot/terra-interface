@@ -23,7 +23,7 @@ Telemetry uses long-lived text/event-stream responses. Configure proxy buffering
 
 ## Database rollout
 
-The schema is in core/prisma/schema.prisma; no migration history is currently checked in. Establish and review migrations and a baseline strategy before applying schema changes to an existing database. The presence of a prisma:migrate script alone is not a reviewed production migration process.
+The initial migration in core/prisma/migrations/ creates the schema on an empty PostgreSQL database. For an existing database, compare its schema and review a baseline plan before running migrate deploy. See the [database guide](../core/docs/database-and-seeding.md#initial-migration-and-existing-databases).
 
 The db:setup script generates Prisma Client, runs prisma db push and loads demo seed data. It is a development initialization tool, not a production rollout command. The seed command inserts demo records explicitly and does not clean them up afterward.
 

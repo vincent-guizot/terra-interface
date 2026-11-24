@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ApiClient } from '../../services/apiClient.js';
 import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
@@ -38,8 +40,22 @@ import { productionData } from '../../data/homestead/index.js';
 
 export default function ProductionPage() {
   const [activeCategoryTab, setActiveCategoryTab] = useState('all');
-  const [batches, setBatches] = useState(productionData.activeBatches);
-  const [harvests, setHarvests] = useState(productionData.recentHarvests);
+  const records = useQuery({ queryKey: ['production-batches'], queryFn: () => ApiClient.get('/universal-batches') });
+  const options = useQuery({ queryKey: ['production-options'], queryFn: () => ApiClient.get('/universal-batches/form-options') });
+  const zones = options.data?.zones ?? [];
+  const items = options.data?.items ?? [];
+  const batches = (records.data ?? []).map(b => ({
+    id: b.id, code: b.batchCode, crop: b.name, category: b.domain, stage: b.status,
+    plantedDate: b.startDate.slice(0, 10), estimatedHarvest: b.expectedEndDate?.slice(0, 10) ?? '—',
+    status: b.status, initialQuantity: b.initialQuantity, unit: b.measurementUnit, targetYield: b.notes ?? '—', zone: b.zone.name, farm: b.zone.homesteadId
+  }));
+  const harvests = (records.data ?? []).flatMap(b => b.outputs.map(h => ({
+    id: h.id, date: h.harvestDate, item: h.productName, qty: h.quantity + ' ' + h.measurementUnit,
+    quality: h.qualityGrade, zone: b.zone.name
+  }))).sort((a, b) => b.date.localeCompare(a.date));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const [batchPage, setBatchPage] = useState(0);
   const [batchRowsPerPage, setBatchRowsPerPage] = useState(4);
 
@@ -52,55 +68,55 @@ export default function ProductionPage() {
   const [harvestForm, setHarvestForm] = useState({
     item: '',
     qty: '',
-    zone: 'Zone 1: Micro-Greenhouse',
+    batchId: '',
     quality: 'Grade A',
   });
 
   const [batchForm, setBatchForm] = useState({
     crop: '',
     category: 'Crops & Greens',
-    zone: 'Zone 4: Permaculture Beds',
+    zone: '',
     targetYield: '15.0 kg',
-    estDate: '2026-12-10',
+    initialQuantity: '1',
+    measurementUnit: 'pcs',
+    estDate: '',
   });
 
-  const handleLogHarvestSubmit = (e) => {
-    e.preventDefault();
-    const newEntry = {
-      id: `h-${Date.now()}`,
-      date: 'Just now',
-      item: harvestForm.item,
-      qty: harvestForm.qty,
-      zone: harvestForm.zone.split(':')[0],
-      steward: 'Vincent',
-      quality: harvestForm.quality,
-    };
-    setHarvests([newEntry, ...harvests]);
+  async function submit(event, action, onSuccess) {
+    event.preventDefault();
+    if (saving) return;
+    setSaving(true);
+    setError('');
+    try {
+      await action();
+      onSuccess();
+      await records.refetch();
+    } catch (cause) { setError(cause.message); }
+    finally { setSaving(false); }
+  }
+  const handleLogHarvestSubmit = event => submit(event, () => {
+    const item = items.find(i => i.id === harvestForm.item);
+    if (!item) throw new Error('Select an inventory item.');
+    return ApiClient.post('/universal-batches/' + harvestForm.batchId + '/outputs', {
+      requestId, itemId: item.id, quantity: Number(harvestForm.qty), measurementUnit: item.unit,
+      qualityGrade: harvestForm.quality
+    });
+  }, () => {
+    setRequestId(crypto.randomUUID());
+    setHarvestForm({ batchId: '', item: '', qty: '', quality: 'Grade A' });
     setLogHarvestOpen(false);
-    setToastMsg(`Logged harvest: ${harvestForm.qty} of ${harvestForm.item}!`);
-    setHarvestForm({ item: '', qty: '', zone: 'Zone 1: Micro-Greenhouse', quality: 'Grade A' });
-  };
-
-  const handleNewBatchSubmit = (e) => {
-    e.preventDefault();
-    const newBatch = {
-      id: `batch-${Date.now()}`,
-      code: `B-${Math.floor(10 + Math.random() * 89)}-NEW`,
-      crop: batchForm.crop,
-      category: batchForm.category,
-      stage: 'Seedling / Nursery',
-      progress: 10,
-      plantedDate: 'Today',
-      estimatedHarvest: batchForm.estDate,
-      targetYield: batchForm.targetYield,
-      zone: batchForm.zone,
-      status: 'Sprouting',
-    };
-    setBatches([newBatch, ...batches]);
+    setToastMsg('Harvest and inventory movement saved.');
+  });
+  const handleNewBatchSubmit = event => submit(event, () => ApiClient.post('/universal-batches', {
+    batchCode: 'BAT-' + crypto.randomUUID(), name: batchForm.crop.trim(), domain: batchForm.category,
+    startDate: new Date().toISOString(), zoneId: batchForm.zone,
+    measurementUnit: batchForm.measurementUnit.trim(), initialQuantity: Number(batchForm.initialQuantity),
+    expectedEndDate: batchForm.estDate ? new Date(batchForm.estDate).toISOString() : undefined,
+    notes: batchForm.targetYield
+  }), () => {
     setNewBatchOpen(false);
-    setToastMsg(`Started new batch: ${batchForm.crop} in ${batchForm.zone}!`);
-    setBatchForm({ crop: '', category: 'Crops & Greens', zone: 'Zone 4: Permaculture Beds', targetYield: '15.0 kg', estDate: '2026-12-10' });
-  };
+    setToastMsg('Batch saved.');
+  });
 
   const filteredBatches = activeCategoryTab === 'all'
     ? batches
@@ -108,6 +124,7 @@ export default function ProductionPage() {
 
   return (
     <>
+      {(records.error || options.error) && <Alert severity="error">{(records.error || options.error).message}</Alert>}
       <Head>
         <title>Terra Interface — Production (What are we producing?)</title>
       </Head>
@@ -341,21 +358,11 @@ export default function ProductionPage() {
                       Stage: {batch.stage} • Placed: {batch.plantedDate}
                     </Typography>
                     <Typography variant="caption" sx={{ fontWeight: 700, color: '#1B4332' }}>
-                      Target: {batch.targetYield}
+                      Initial quantity: {batch.initialQuantity} {batch.unit} · Target: {batch.targetYield}
                     </Typography>
                   </Box>
 
-                  <LinearProgress
-                    variant="determinate"
-                    value={batch.progress}
-                    sx={{
-                      height: 6,
-                      borderRadius: 1.5,
-                      bgcolor: 'rgba(27,67,50,0.08)',
-                      mb: 1,
-                      '& .MuiLinearProgress-bar': { bgcolor: batch.progress > 85 ? '#10B981' : '#65A30D', borderRadius: 1.5 }
-                    }}
-                  />
+
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="caption" sx={{ color: '#748B7D', fontWeight: 600 }}>
@@ -464,25 +471,26 @@ export default function ProductionPage() {
         </DialogTitle>
         <form onSubmit={handleLogHarvestSubmit}>
           <DialogContent>
+            {error && <Alert severity="error">{error}</Alert>}
             <Grid container spacing={2}>
               <Grid item xs={12} sm={8}>
                 <TextField
                   fullWidth
                   required
-                  label="Crop or Product"
-                  placeholder="e.g. Nile Tilapia, Tuscan Kale"
+                  select label="Inventory item"
                   value={harvestForm.item}
-                  onChange={(e) => setHarvestForm({ ...harvestForm, item: e.target.value })}
-                  size="small"
-                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
-                />
+                  onChange={e => setHarvestForm({ ...harvestForm, item: e.target.value })}
+                >
+                  {items.filter(i => i.homesteadId === batches.find(b => b.id === harvestForm.batchId)?.farm).map(i =>
+                    <MenuItem key={i.id} value={i.id}>{i.name} ({i.sku}, {i.unit})</MenuItem>)}
+                </TextField>
               </Grid>
               <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
                   required
                   label="Quantity"
-                  placeholder="e.g. 5.2 kg / 24 pcs"
+                  type="number" inputProps={{ min: 0.000001, step: "any" }}
                   value={harvestForm.qty}
                   onChange={(e) => setHarvestForm({ ...harvestForm, qty: e.target.value })}
                   size="small"
@@ -493,16 +501,11 @@ export default function ProductionPage() {
                 <TextField
                   fullWidth
                   select
-                  label="Origin Zone"
-                  value={harvestForm.zone}
-                  onChange={(e) => setHarvestForm({ ...harvestForm, zone: e.target.value })}
-                  size="small"
-                  sx={{ '& fieldset': { borderRadius: 1.5 } }}
+                  required label="Harvest batch"
+                  value={harvestForm.batchId}
+                  onChange={e => setHarvestForm({ ...harvestForm, batchId: e.target.value, item: '' })}
                 >
-                  <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
-                  <MenuItem value="Zone 2: Aquaponics">Zone 2: Aquaponics Pond</MenuItem>
-                  <MenuItem value="Zone 3: Poultry Hub">Zone 3: Poultry & BSF</MenuItem>
-                  <MenuItem value="Zone 4: Permaculture Beds">Zone 4: Permaculture Beds</MenuItem>
+                  {batches.map(b => <MenuItem key={b.id} value={b.id}>{b.crop} ({b.code})</MenuItem>)}
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={5}>
@@ -527,7 +530,7 @@ export default function ProductionPage() {
               Cancel
             </Button>
             <Button
-              type="submit"
+              type="submit" disabled={saving}
               variant="contained"
               sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >
@@ -555,6 +558,7 @@ export default function ProductionPage() {
         </DialogTitle>
         <form onSubmit={handleNewBatchSubmit}>
           <DialogContent>
+            {error && <Alert severity="error">{error}</Alert>}
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -587,6 +591,23 @@ export default function ProductionPage() {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  fullWidth required type="number" label="Initial Quantity"
+                  inputProps={{ min: 0, step: 'any' }}
+                  value={batchForm.initialQuantity}
+                  onChange={e => setBatchForm({ ...batchForm, initialQuantity: e.target.value })}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth required label="Measurement Unit"
+                  value={batchForm.measurementUnit}
+                  onChange={e => setBatchForm({ ...batchForm, measurementUnit: e.target.value })}
+                  size="small"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
                   fullWidth
                   label="Target Yield (kg)"
                   value={batchForm.targetYield}
@@ -600,15 +621,12 @@ export default function ProductionPage() {
                   fullWidth
                   select
                   label="Assigned Zone"
-                  value={batchForm.zone}
+                  required value={batchForm.zone}
                   onChange={(e) => setBatchForm({ ...batchForm, zone: e.target.value })}
                   size="small"
                   sx={{ '& fieldset': { borderRadius: 1.5 } }}
                 >
-                  <MenuItem value="Zone 1: Micro-Greenhouse">Zone 1: Micro-Greenhouse</MenuItem>
-                  <MenuItem value="Zone 2: Aquaponics">Zone 2: Aquaponics</MenuItem>
-                  <MenuItem value="Zone 3: Poultry Hub">Zone 3: Poultry Hub</MenuItem>
-                  <MenuItem value="Zone 4: Permaculture Beds">Zone 4: Permaculture Beds</MenuItem>
+                  {zones.map(z => <MenuItem key={z.id} value={z.id}>{z.name}</MenuItem>)}
                 </TextField>
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -630,7 +648,7 @@ export default function ProductionPage() {
               Cancel
             </Button>
             <Button
-              type="submit"
+              type="submit" disabled={saving}
               variant="contained"
               sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >

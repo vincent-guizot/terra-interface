@@ -1,65 +1,61 @@
-import { CANONICAL_ACTIVITIES } from "../../constants/activities.constants.js";
-export { CANONICAL_ACTIVITIES };
+import prisma from '../../prisma/prisma.service.js';
+import { AppError } from '../../middlewares/errorHandler.js';
+import { farmNow } from '../dashboard/dashboard.service.js';
+export { CANONICAL_ACTIVITIES } from '../../constants/activities.constants.js';
+
+const present = row => ({
+  ...row.details, id: row.id, title: row.title, domain: row.domain, priority: row.priority,
+  time: farmNow(row.dueDate).time, completed: row.status === 'COMPLETED'
+});
+
 export class ActivitiesService {
-  constructor() {
-    this.tasks = [...CANONICAL_ACTIVITIES];
-  }
-  async getActivitiesSummary() {
-    const total = this.tasks.length;
-    const completed = this.tasks.filter(t => t.completed).length;
-    const pending = total - completed;
-    const efficiency = total > 0 ? `${Math.round(completed / total * 100)}%` : '100%';
-    return {
-      homestead: "Vincent's Farm (300 m² Master Plan)",
-      todaySummary: {
-        total,
-        completed,
-        pending,
-        efficiency
-      },
-      tasks: this.tasks,
-      calculatedAt: new Date().toISOString()
-    };
-  }
   async getTasks(domain, completed) {
-    let result = [...this.tasks];
-    if (domain) {
-      result = result.filter(t => t.domain.toLowerCase() === domain.toLowerCase());
-    }
-    if (completed !== undefined) {
-      const isCompleted = completed === 'true' || completed === true;
-      result = result.filter(t => t.completed === isCompleted);
-    }
-    return result;
+    const start = new Date(farmNow().date + 'T00:00:00+07:00');
+    const rows = await prisma.workOrder.findMany({
+      where: {
+        dueDate: { gte: start, lt: new Date(start.getTime() + 86400000) },
+        ...(domain && { domain: { equals: domain, mode: 'insensitive' } }),
+        ...(completed !== undefined && { status: String(completed) === 'true' ? 'COMPLETED' : { not: 'COMPLETED' } })
+      }, orderBy: [{ dueDate: 'asc' }, { id: 'asc' }]
+    });
+    return rows.map(present);
   }
+
+  async getActivitiesSummary() {
+    const tasks = await this.getTasks();
+    const completed = tasks.filter(task => task.completed).length;
+    const total = tasks.length;
+    return { homestead: "Vincent's Farm (300 m² Master Plan)", tasks,
+      todaySummary: { total, completed, pending: total - completed, efficiency: Math.round(completed * 100 / (total || 1)) + '%' },
+      calculatedAt: new Date().toISOString() };
+  }
+
   async getTaskById(id) {
-    return this.tasks.find(t => t.id === id) || null;
+    const row = await prisma.workOrder.findUnique({ where: { id } });
+    return row && present(row);
   }
+
   async createTask(dto) {
-    const newTask = {
-      id: `act-${Date.now()}`,
-      time: dto.time || new Date().toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      title: dto.title,
-      zone: dto.zone || 'Zone 1: General',
-      domain: dto.domain || 'General',
-      priority: dto.priority || 'Medium',
-      duration: dto.duration || '15 min',
-      completed: false,
-      notes: dto.notes || ''
-    };
-    this.tasks.push(newTask);
-    return newTask;
-  }
-  async toggleTaskCompleted(id) {
-    const task = await this.getTaskById(id);
-    if (!task) {
-      throw new Error(`Task '${id}' not found`);
+    const now = farmNow();
+    const time = dto?.time ?? now.time;
+    if (typeof dto?.title !== 'string' || !dto.title.trim() || typeof time !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
+      throw new AppError('Provide a title and a valid 24-hour time', 400, 'VALIDATION_ERROR');
     }
-    task.completed = !task.completed;
-    return task;
+    const row = await prisma.workOrder.create({ data: {
+      title: dto.title.trim(), domain: dto.domain || 'General', priority: dto.priority || 'Medium',
+      dueDate: new Date(now.date + 'T' + time + ':00+07:00'),
+      details: { zone: dto.zone || '', duration: dto.duration || '', notes: dto.notes || '' }
+    } });
+    return present(row);
+  }
+
+  async toggleTaskCompleted(id) {
+    const rows = await prisma.$queryRaw`UPDATE "WorkOrder"
+      SET status = CASE WHEN status = 'COMPLETED' THEN 'PENDING' ELSE 'COMPLETED' END,
+          "completedAt" = CASE WHEN status = 'COMPLETED' THEN NULL ELSE CURRENT_TIMESTAMP END
+      WHERE id = ${id} RETURNING *`;
+    if (!rows.length) throw new AppError('Task not found', 404, 'NOT_FOUND');
+    return present(rows[0]);
   }
 }
 export default new ActivitiesService();

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ApiClient } from '../../services/apiClient.js';
 import Head from '../../components/shared/PageHead.jsx';
 import {
   Box,
@@ -38,7 +40,10 @@ import {
 import { activitiesData } from '../../data/homestead/index.js';
 
 export default function ActivitiesPage() {
-  const [tasks, setTasks] = useState(activitiesData.todayTasks);
+  const list = useQuery({ queryKey: ['work-orders'], queryFn: () => ApiClient.get('/activities/tasks') });
+  const tasks = list.data ?? [];
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const [domainFilter, setDomainFilter] = useState('All');
   const [addTaskOpen, setAddTaskOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
@@ -48,7 +53,7 @@ export default function ActivitiesPage() {
   // New task form state
   const [taskForm, setTaskForm] = useState({
     title: '',
-    time: '02:00 PM',
+    time: '14:00',
     zone: 'Zone 4: Permaculture Beds',
     domain: 'Cultivation',
     priority: 'Medium',
@@ -56,39 +61,34 @@ export default function ActivitiesPage() {
     notes: '',
   });
 
-  const handleToggleTask = (id) => {
-    setTasks(tasks.map(t => {
-      if (t.id === id) {
-        const nextState = !t.completed;
-        setToastMsg(nextState ? `Completed: "${t.title}"! Excellent stewardship.` : `Marked "${t.title}" as pending.`);
-        return { ...t, completed: nextState };
-      }
-      return t;
-    }));
-  };
+  async function save(action, success) {
+    if (saving) return;
+    setSaving(true);
+    setError('');
+    try {
+      await action();
+      await list.refetch();
+      success();
+    } catch (cause) { setError(cause.message); }
+    finally { setSaving(false); }
+  }
 
-  const handleAddTaskSubmit = (e) => {
-    e.preventDefault();
-    const newTask = {
-      id: `act-${Date.now()}`,
-      time: taskForm.time,
-      title: taskForm.title,
-      zone: taskForm.zone,
-      domain: taskForm.domain,
-      priority: taskForm.priority,
-      duration: taskForm.duration,
-      completed: false,
-      notes: taskForm.notes || 'Added by steward Vincent.',
-    };
-    setTasks([...tasks, newTask]);
-    setAddTaskOpen(false);
-    setToastMsg(`Scheduled new homestead activity: "${taskForm.title}"!`);
-    setTaskForm({ title: '', time: '02:00 PM', zone: 'Zone 4: Permaculture Beds', domain: 'Cultivation', priority: 'Medium', duration: '20 min', notes: '' });
+  const handleToggleTask = id => save(
+    () => ApiClient.patch('/activities/tasks/' + id + '/toggle', {}),
+    () => setToastMsg('Task updated.')
+  );
+  const handleAddTaskSubmit = event => {
+    event.preventDefault();
+    save(() => ApiClient.post('/activities/tasks', taskForm), () => {
+      setAddTaskOpen(false);
+      setTaskForm({ ...taskForm, title: '', notes: '' });
+      setToastMsg('Task scheduled.');
+    });
   };
 
   const completedCount = tasks.filter(t => t.completed).length;
   const totalCount = tasks.length;
-  const progressPercent = Math.round((completedCount / totalCount) * 100);
+  const progressPercent = Math.round((completedCount / (totalCount || 1)) * 100);
 
   const filteredTasks = domainFilter === 'All'
     ? tasks
@@ -96,6 +96,7 @@ export default function ActivitiesPage() {
 
   return (
     <>
+      {(error || list.error) && <Alert severity="error">{error || list.error.message}</Alert>}
       <Head>
         <title>Terra Interface — Activities (What needs to be done?)</title>
       </Head>
@@ -241,7 +242,7 @@ export default function ActivitiesPage() {
                     transition: 'all 0.2s ease',
                   }}
                 >
-                  <Checkbox
+                  <Checkbox disabled={saving}
                     checked={task.completed}
                     onChange={() => handleToggleTask(task.id)}
                     sx={{
@@ -388,6 +389,7 @@ export default function ActivitiesPage() {
         </DialogTitle>
         <form onSubmit={handleAddTaskSubmit}>
           <DialogContent>
+            {error && <Alert severity="error">{error}</Alert>}
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
@@ -405,7 +407,7 @@ export default function ActivitiesPage() {
                 <TextField
                   fullWidth
                   label="Scheduled Time"
-                  placeholder="e.g. 03:00 PM"
+                  type="time" required
                   value={taskForm.time}
                   onChange={(e) => setTaskForm({ ...taskForm, time: e.target.value })}
                   size="small"
@@ -478,7 +480,7 @@ export default function ActivitiesPage() {
               Cancel
             </Button>
             <Button
-              type="submit"
+              type="submit" disabled={saving}
               variant="contained"
               sx={{ bgcolor: '#144E36', color: '#FFFFFF !important', borderRadius: 1.5, px: 3, textTransform: 'none', fontWeight: 700, boxShadow: '0 2px 8px rgba(20,78,54,0.2)', '&:hover': { bgcolor: '#0F291E', color: '#FFFFFF !important' } }}
             >

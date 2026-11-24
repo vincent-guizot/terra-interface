@@ -1,4 +1,6 @@
 import { getStatusColor } from "@/helpers/presentation.js";
+import { useQuery } from '@tanstack/react-query';
+import { ApiClient } from '../../services/apiClient.js';
 import React, { useState, useEffect } from 'react';
 import Head from '../../components/shared/PageHead.jsx';
 import { Box, Typography, Paper, Chip, Button, Grid, TextField, InputAdornment, IconButton, Divider, Drawer, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert } from '@mui/material';
@@ -47,7 +49,12 @@ export default function OperationsHub({
   const [livestock, setLivestock] = useState(initialLivestockData);
   const [aquaculture, setAquaculture] = useState(initialAquacultureData);
   const [circular, setCircular] = useState(initialCircularData);
-  const [inventory, setInventory] = useState(initialInventoryData);
+  const [localInventory, setInventory] = useState(initialInventoryData);
+  const inventoryQuery = useQuery({
+    queryKey: ['inventory-items'], queryFn: () => ApiClient.get('/inventory/items'),
+    enabled: activeModule === 'inventory', staleTime: 0
+  });
+  const inventory = { ...localInventory, items: inventoryQuery.data ?? [] };
   const [energyWater, setEnergyWater] = useState(initialEnergyWaterData);
 
   // Drawer & Dialog States for Contextual CRUD
@@ -221,36 +228,9 @@ export default function OperationsHub({
     }));
     setToastMsg(`Compost pile turned. Temp: ${payload.coreTemperatureC}°C (Target: ${payload.inactivationTargetStatus || 'Active'})`);
   };
-  const handleStockMovementLogged = (itemId, payload) => {
-    setInventory(prev => {
-      const updatedItems = prev.items.map(i => {
-        if (i.id === itemId || i.code === payload.sku || i.sku === payload.sku) {
-          const newQty = Math.max(0, Math.round((Number(i.inStock) + Number(payload.quantityDelta)) * 100) / 100);
-          return {
-            ...i,
-            inStock: newQty
-          };
-        }
-        return i;
-      });
-      const matchedItem = prev.items.find(i => i.id === itemId || i.code === payload.sku || i.sku === payload.sku);
-      return {
-        ...prev,
-        items: updatedItems,
-        transactions: [{
-          id: `tx-${Date.now()}`,
-          date: new Date().toISOString().replace('T', ' ').substring(0, 16),
-          sku: payload.sku || matchedItem?.code,
-          itemName: matchedItem?.name || payload.sku,
-          type: payload.type,
-          quantity: Math.abs(payload.quantityDelta),
-          unit: payload.unit,
-          destination: payload.referenceBatchCode || 'Storage Movement',
-          steward: payload.stewardName || 'Vincent'
-        }, ...prev.transactions]
-      };
-    });
-    setToastMsg(`Ledger movement committed: ${payload.type} (${payload.quantityDelta > 0 ? '+' : ''}${payload.quantityDelta} ${payload.unit})`);
+  const handleStockMovementLogged = async () => {
+    await inventoryQuery.refetch();
+    setToastMsg('Inventory movement saved.');
   };
 
   // Form States
@@ -740,6 +720,7 @@ export default function OperationsHub({
         />
       )}
 
+      {activeModule === 'inventory' && inventoryQuery.error && <div role="alert">{inventoryQuery.error.message}</div>}
       {activeModule === 'inventory' && (
         <InventoryTab
           inventory={inventory}

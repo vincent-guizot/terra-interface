@@ -53,7 +53,7 @@ let InventoryService = InventoryService_1 = class InventoryService {
       });
       if (items.length > 0) {
         const mapped = items.map(i => {
-          const derivedStock = i.movements.reduce((acc, m) => acc + m.quantityDelta, 0);
+          const derivedStock = i.inStock;
           const isLow = derivedStock <= i.minThreshold;
           return {
             id: i.id,
@@ -261,30 +261,29 @@ let InventoryService = InventoryService_1 = class InventoryService {
     return newItem;
   }
   async recordStockMovement(dto) {
-    const item = await this.getItemById(dto.itemId);
-    if (!item) {
-      throw new Error(`Inventory item '${dto.itemId}' not found`);
+    const delta = dto.quantityDelta;
+    const type = dto.type ?? (delta < 0 ? 'FEEDING_OUT' : 'HARVEST_IN');
+    if (!dto.itemId || !Number.isFinite(delta) || delta === 0 ||
+        !Object.values(client_1.StockMovementType).includes(type) ||
+        (type.endsWith('_OUT') && delta > 0) || (type.endsWith('_IN') && delta < 0)) {
+      throw new common_1.BadRequestException('Invalid stock movement.');
     }
-    const delta = Number(dto.quantityDelta);
-    item.inStock = Math.round((item.inStock + delta) * 100) / 100;
-    item.isLowStock = item.inStock <= item.minThreshold;
-    item.lastUpdated = new Date().toISOString();
-    const movement = {
-      id: `mov-${Date.now()}`,
-      itemId: item.id,
-      sku: item.sku,
-      itemName: item.name,
-      type: dto.type || (delta < 0 ? 'FEEDING_OUT' : 'HARVEST_IN'),
-      quantityDelta: delta,
-      unit: item.unit,
-      balanceAfter: item.inStock,
-      referenceBatchCode: dto.referenceBatchCode || null,
-      stewardName: dto.stewardName || 'Vincent',
-      notes: dto.notes || '',
-      timestamp: new Date().toISOString()
-    };
-    this.memoryMovements.unshift(movement);
-    return movement;
+    return this.prisma.$transaction(async tx => {
+      const item = await tx.inventoryItem.findUnique({ where: { id: dto.itemId } });
+      if (!item) throw new common_1.NotFoundException('Inventory item not found.');
+      if (dto.unit && dto.unit !== item.unit) throw new common_1.BadRequestException('Incorrect stock unit.');
+      const updated = await tx.inventoryItem.updateMany({
+        where: { id: item.id, ...(delta < 0 && { inStock: { gte: -delta } }) },
+        data: { inStock: { increment: delta } }
+      });
+      if (!updated.count) throw new common_1.BadRequestException('Insufficient stock.');
+      const movement = await tx.stockMovement.create({ data: {
+        itemId: item.id, type, unit: item.unit, quantityDelta: delta,
+        referenceBatchCode: dto.referenceBatchCode, stewardName: dto.stewardName || 'Vincent', notes: dto.notes
+      } });
+      const { inStock } = await tx.inventoryItem.findUniqueOrThrow({ where: { id: item.id } });
+      return { ...movement, sku: item.sku, itemName: item.name, balanceAfter: inStock };
+    });
   }
   async getSummary() {
     const items = await this.getItems();

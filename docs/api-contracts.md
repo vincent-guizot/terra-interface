@@ -241,6 +241,37 @@ Source: [energy-water.router.js](../core/src/modules/energy-water/energy-water.r
 | GET | /api/v1/energy-water/dump-load/status |
 | GET | /api/v1/energy-water/telemetry/stream |
 
+### /dashboard
+
+Source: [dashboard.router.js](../core/src/modules/dashboard/dashboard.router.js).
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| GET | /api/v1/dashboard/overview | Overview aggregation |
+| GET | /api/v1/dashboard/map | Ecosystem map data |
+| GET | /api/v1/dashboard/production | Production and harvest schedule |
+| GET | /api/v1/dashboard/resources | Resource metrics |
+| GET | /api/v1/dashboard/activities | Tasks and progress |
+| POST | /api/v1/dashboard/activities/tasks | Create a task from title and time (HH:MM), returns 201 |
+| PATCH | /api/v1/dashboard/activities/tasks/:id/toggle | Toggle task completion |
+| GET | /api/v1/dashboard/intelligence | Intelligence metrics and recommendations |
+| POST | /api/v1/dashboard/intelligence/recommendations/:id/apply | Apply a recommendation, reapplying preserves its applied timestamp |
+| POST | /api/v1/dashboard/intelligence/ask | Accept a non-blank query and return reply and intentCategory |
+
+Dashboard tasks and applied recommendations are kept in Core process memory. The assistant builds replies from dashboard data and keyword rules.
+
+### /notifications
+
+Source: [notifications.router.js](../core/src/modules/notifications/notifications.router.js).
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| GET | /api/v1/notifications | Return items, unreadCount and total. Use ?unread=true to filter items only |
+| POST | /api/v1/notifications/read-all | Mark current notifications as read and return marked count |
+| POST | /api/v1/notifications/:id/read | Mark an existing notification as read and return id and read. Unknown IDs return 404 |
+
+Reminders are computed from tasks, the harvest schedule and recent telemetry alerts. The read flags are shared within one Core process and reset when it restarts.
+
 ## Inline aliases
 
 These routes are declared directly in routes/v1/index.js.
@@ -265,6 +296,6 @@ These routes are declared directly in routes/v1/index.js.
 
 Validation is implemented per handler/service; there is no universal DTO validation pipeline or mounted authentication middleware. Error conventions do not imply authentication is implemented. Some endpoints return memory/constant-backed data even if PostgreSQL is unavailable.
 
-The universal-batch transition handler currently passes req.body as a single argument to transitionStatus(id, newStatus, reason). This signature mismatch must be fixed and covered with an HTTP regression test before its legal-transition path is treated as working. This documentation change does not alter that behavior.
+For the universal-batch transition payload and allowed states, see the [batch engine guide](batch-engine-spec.md#allowed-transitions).
 
 Source-of-truth files: core/src/app.js, core/src/routes/index.js and core/src/routes/v1/index.js. Update this inventory when adding, removing or remounting routes.

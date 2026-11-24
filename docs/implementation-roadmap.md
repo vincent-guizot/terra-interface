@@ -9,9 +9,8 @@ Vite React Console, Express JavaScript Core, Prisma schema, domain constants, sh
 | Area | Next work | Evidence needed before calling it complete |
 | --- | --- | --- |
 | Persistence | Identify constant-backed/in-memory reads and writes and implement durable behavior per domain | Integration tests against PostgreSQL, including restart persistence and failed-write rollback |
-| Migrations | Establish a reviewed Prisma migration history; none is currently checked in | Fresh-database setup and an explicit baseline plan for existing databases |
+| Migrations | Review baseline and rollout for existing databases | Compare existing schemas with the initial migration and rehearse deployment |
 | Request contracts | Define and validate domain payloads in JavaScript | Negative tests for missing fields, invalid enums, bounds and malformed values |
-| Batch operations | Resolve the transition handler/service signature mismatch | HTTP test proving a legal transition succeeds and illegal transitions fail |
 | Inventory | Reconcile memory fallbacks, cached balances and persisted movements | Tests comparing balances to movement totals, including repeated requests and concurrency |
 | Events | Decide delivery/retry requirements | Tests for duplicate events, subscriber failures and process restarts if durability is required |
 | Console | Verify operational drawers, data-source indicators and remaining MUI views | Browser checks for loading, empty, failure and persisted-success states |

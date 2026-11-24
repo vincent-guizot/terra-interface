@@ -86,7 +86,7 @@ Start with [docs/README.md](docs/README.md):
 - [Core documentation](core/docs/README.md)
 - [Known gaps and roadmap](docs/implementation-roadmap.md)
 
-Domain services currently mix Prisma persistence, canonical data and in-memory behavior. Review the relevant service before treating a successful response as a durable write. The current app does not mount Swagger UI or authentication middleware. The universal-batch transition route has a documented argument mismatch, and there is no checked-in Prisma migration history. See the roadmap for the required follow-up work.
+Domain services currently mix Prisma persistence, canonical data and in-memory behavior. Review the relevant service before treating a successful response as a durable write. The current app does not mount Swagger UI or authentication middleware. An initial Prisma migration supports empty PostgreSQL databases. Existing installations need a reviewed baseline before applying migrations. See the roadmap for the required follow-up work.
 
 The homestead dimensions and ecological targets in the design documents are reference specifications, not independently verified construction or live telemetry.
 

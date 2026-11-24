@@ -12,7 +12,19 @@ npm run prisma:migrate --workspace terra-core
 npm run db:test --workspace terra-core
 ```
 
-migrate dev is a development command. The repository currently has no checked-in prisma/migrations/ history. On a new development database this command creates migration files; review and commit them in a dedicated database change. Existing databases need an explicit baseline/migration plan before deployment. A successful source check does not validate database migration compatibility.
+migrate dev is a development command for authoring schema changes.
+
+## Initial migration and existing databases
+
+For an empty database, set DATABASE_URL and run the following from core/:
+
+```sh
+npx prisma migrate deploy --schema prisma/schema.prisma
+```
+
+The initial migration creates the schema only. Demo seeding remains optional and separate.
+
+For an existing database previously initialized with db push, compare the live schema with the initial migration before doing anything to its migration history. If they match, review and record the initial migration as applied with prisma migrate resolve --applied 20261124000000_initial_schema. If they differ, reconcile the differences first. Back up existing data before a rollout.
 
 ## Fixture layout
 

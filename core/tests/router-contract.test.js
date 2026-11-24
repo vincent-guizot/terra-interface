@@ -47,3 +47,73 @@ test('legacy operational endpoints and SSE survive the ESM cleanup', async () =>
     await prisma.$disconnect();
   }
 });
+
+
+test('batch transition accepts valid input and rejects invalid requests before writing', async t => {
+  const id = 'contract-batch';
+  const originalRead = prisma.batch.findUnique;
+  const originalTransaction = prisma.$transaction;
+  t.after(() => {
+    prisma.batch.findUnique = originalRead;
+    prisma.$transaction = originalTransaction;
+  });
+  const read = t.mock.fn(async () => ({ id, status: 'ACTIVE' }));
+  prisma.batch.findUnique = read;
+  const writes = [];
+  prisma.$transaction = async run => run({
+    batch: {
+      async update({ where, data }) {
+        assert.equal(where.id, id);
+        writes.push(data);
+        return { id, status: data.status, statusHistory: [data.statusHistory.create] };
+      }
+    }
+  });
+
+  const server = app.listen(0, '127.0.0.1');
+  try {
+    await new Promise((resolve, reject) => {
+      server.once('listening', resolve);
+      server.once('error', reject);
+    });
+    const url = 'http://127.0.0.1:' + server.address().port + '/api/v1/universal-batches/' + id + '/transition';
+    const patch = body => fetch(url, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    for (const [body, field] of [
+      [{}, 'newStatus'],
+      [{ newStatus: 'UNKNOWN' }, 'newStatus'],
+      [{ newStatus: 'ON_HOLD' }, 'reason'],
+      [{ newStatus: 'CANCELLED', reason: '   ' }, 'reason'],
+      [{ newStatus: 'COMPLETED', reason: 123 }, 'reason']
+    ]) {
+      const response = await patch(body);
+      assert.equal(response.status, 400);
+      const { error } = await response.json();
+      assert.equal(error.code, 'VALIDATION_ERROR');
+      assert.equal(error.details[0].field, field);
+    }
+    assert.equal(read.mock.callCount(), 0);
+
+    const illegal = await patch({ newStatus: 'PLANNED' });
+    assert.equal(illegal.status, 400);
+    assert.match((await illegal.json()).error.message, /Illegal lifecycle state transition/);
+    assert.equal(writes.length, 0);
+
+    const valid = await patch({ newStatus: 'ON_HOLD', reason: '  Inspect pump  ' });
+    assert.equal(valid.status, 200);
+    const { success, data } = await valid.json();
+    assert.equal(success, true);
+    assert.equal(data.status, 'ON_HOLD');
+    assert.equal(data.statusHistory[0].reason, 'Inspect pump');
+    assert.equal(writes.length, 1);
+    assert.equal(writes[0].auditLogs.create.details, 'Inspect pump');
+  } finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
+    await prisma.$disconnect();
+  }
+});

@@ -494,6 +494,7 @@ model ResourceFlowLog {
 // =========================================================================
 
 model WorkOrder {
+  details     Json?
   id          String    @id @default(uuid())
   title       String    // e.g. "Clean K1 Bio-Filter", "Harvest NFT Bok Choy"
   domain      String

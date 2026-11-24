@@ -26,11 +26,11 @@ docker compose up -d postgres
 For that local Docker service, use DATABASE_URL=postgresql://terra:terra_secret@localhost:5432/terra_interface in core/.env. These are development credentials from docker-compose.yml; replace them for other environments. Redis is included in Compose, but Core does not currently require a Redis client.
 
 ```sh
-npm run prisma:migrate --workspace terra-core
+npx prisma migrate deploy --schema core/prisma/schema.prisma
 npm run prisma:seed:check --workspace terra-core
 ```
 
-Migrations modify the configured database. Review the destination and migration changes before running them. Demo seeding is optional and writes sample records:
+Run migrate deploy against the empty development database you just configured. For an existing database, follow the [baseline guidance](../core/docs/database-and-seeding.md#initial-migration-and-existing-databases) first. Demo seeding is optional and writes sample records:
 
 ```sh
 npm run prisma:seed --workspace terra-core

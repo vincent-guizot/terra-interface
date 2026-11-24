@@ -62,7 +62,10 @@ test('REST routes emit uniform success, not-found, validation and parser errors'
   await new Promise(resolve => server.once('listening', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
   const oldSummary = inventoryService.getSummary;
-  const oldTasks = [...activitiesService.tasks];
+  const originalCreate = activitiesService.createTask;
+  const originalLookup = activitiesService.getTaskById;
+  activitiesService.createTask = async dto => ({ id: 'test', ...dto });
+  activitiesService.getTaskById = async () => null;
   try {
     for (const endpoint of ['/api/v1/events/audit', '/api/v1/energy-water/gateway/status', '/api/v1/cultivation/microgreens/calibration']) {
       const response = await fetch(base + endpoint);
@@ -101,7 +104,8 @@ test('REST routes emit uniform success, not-found, validation and parser errors'
     assert.equal(failureBody.error.details, null);
   } finally {
     inventoryService.getSummary = oldSummary;
-    activitiesService.tasks = oldTasks;
+    activitiesService.createTask = originalCreate;
+    activitiesService.getTaskById = originalLookup;
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
     await prisma.$disconnect();

@@ -79,7 +79,13 @@ let UniversalBatchService = class UniversalBatchService {
     if (!batch) throw new common_1.NotFoundException(`Universal Batch ${id} not found`);
     return batch;
   }
-  async create(data) {
+  async create(data = {}) {
+    const { initialQuantity = 1 } = data;
+    const measurementUnit = typeof data.measurementUnit === 'string' ? data.measurementUnit.trim() : '';
+    if (!Number.isFinite(initialQuantity) || initialQuantity <= 0 || !measurementUnit ||
+        typeof data.name !== 'string' || !data.name.trim()) {
+      throw new common_1.BadRequestException('Provide a batch name, positive initial quantity, and measurement unit.');
+    }
     return this.prisma.batch.create({
       data: {
         batchCode: data.batchCode,
@@ -89,9 +95,9 @@ let UniversalBatchService = class UniversalBatchService {
         productDefinitionId: data.productDefinitionId,
         startDate: data.startDate,
         expectedEndDate: data.expectedEndDate,
-        initialQuantity: data.initialQuantity,
-        currentQuantity: data.initialQuantity,
-        measurementUnit: data.measurementUnit,
+        initialQuantity,
+        currentQuantity: initialQuantity,
+        measurementUnit,
         status: client_1.BatchStatus.ACTIVE,
         notes: data.notes,
         statusHistory: {
@@ -106,7 +112,7 @@ let UniversalBatchService = class UniversalBatchService {
           create: {
             action: 'Universal Batch Created',
             performedBy: 'Vincent',
-            details: `Initial quantity: ${data.initialQuantity} ${data.measurementUnit}`
+            details: `Initial quantity: ${initialQuantity} ${measurementUnit}`
           }
         }
       },
@@ -188,61 +194,46 @@ let UniversalBatchService = class UniversalBatchService {
     });
   }
   async addOutput(batchId, outputData) {
+    const { requestId, itemId, productName, quantity, measurementUnit, qualityGrade = 'Grade A',
+      destination = 'Homestead Pantry', notes } = outputData;
+    if (!Number.isFinite(quantity) || quantity <= 0 || !measurementUnit ||
+        (!itemId && !productName) || (requestId !== undefined && !/^[a-f0-9-]{36}$/i.test(requestId))) {
+      throw new common_1.BadRequestException('Provide an inventory item, positive quantity, unit and valid request ID.');
+    }
     const batch = await this.findOne(batchId);
-    return this.prisma.$transaction(async tx => {
-      const output = await tx.batchOutput.create({
-        data: {
-          batchId,
-          ...outputData,
-          stewardName: 'Vincent'
-        }
+    const matches = await this.prisma.inventoryItem.findMany({ where: {
+      homesteadId: batch.zone.homesteadId, unit: measurementUnit,
+      ...(itemId ? { id: itemId } : { name: { equals: productName, mode: 'insensitive' } })
+    }, take: 2 });
+    if (matches.length !== 1) throw new common_1.BadRequestException('Select a matching inventory item and unit for this farm.');
+    const item = matches[0];
+    try {
+      return await this.prisma.$transaction(async tx => {
+        const output = await tx.batchOutput.create({ data: {
+          id: requestId, batchId, productName: item.name, quantity, measurementUnit, qualityGrade, destination, notes
+        } });
+        await tx.stockMovement.create({ data: {
+          itemId: item.id, type: 'HARVEST_IN', quantityDelta: quantity, unit: measurementUnit,
+          referenceBatchCode: batch.batchCode, batchOutputId: output.id, stewardName: 'Vincent'
+        } });
+        await tx.inventoryItem.update({ where: { id: item.id }, data: { inStock: { increment: quantity } } });
+        await tx.batchHistory.create({ data: {
+          batchId, action: 'Harvest Output Recorded: ' + quantity + ' ' + measurementUnit,
+          details: item.name + ' -> ' + destination, performedBy: 'Vincent'
+        } });
+        return output;
       });
-      await tx.batchHistory.create({
-        data: {
-          batchId,
-          action: `Harvest Output Recorded: ${outputData.quantity} ${outputData.measurementUnit}`,
-          details: `Product: ${outputData.productName} (${outputData.qualityGrade || 'Standard'}) -> ${outputData.destination || 'Homestead Pantry'}`,
-          performedBy: 'Vincent'
-        }
-      });
-      const matchingItem = await tx.inventoryItem.findFirst({
-        where: {
-          OR: [{
-            name: {
-              contains: outputData.productName,
-              mode: 'insensitive'
-            }
-          }, ...(batch.productDefinitionId ? [{
-            productDefId: batch.productDefinitionId
-          }] : [])]
-        }
-      });
-      if (matchingItem) {
-        await tx.stockMovement.create({
-          data: {
-            itemId: matchingItem.id,
-            type: client_1.StockMovementType.HARVEST_IN,
-            quantityDelta: Math.abs(outputData.quantity),
-            unit: outputData.measurementUnit,
-            referenceBatchCode: batch.batchCode,
-            batchOutputId: output.id,
-            stewardName: 'Vincent',
-            notes: `Auto intake from harvest output of ${batch.batchCode} (${outputData.qualityGrade || 'Grade A'})`
-          }
-        });
-        await tx.inventoryItem.update({
-          where: {
-            id: matchingItem.id
-          },
-          data: {
-            inStock: {
-              increment: Math.abs(outputData.quantity)
-            }
-          }
-        });
+    } catch (error) {
+      if (!requestId || error.code !== 'P2002') throw error;
+      const previous = await this.prisma.batchOutput.findUnique({ where: { id: requestId }, include: { stockMovement: true } });
+      if (previous?.batchId === batchId && previous.stockMovement?.itemId === item.id &&
+          previous.quantity === quantity && previous.measurementUnit === measurementUnit &&
+          previous.qualityGrade === qualityGrade && previous.destination === destination && previous.notes === (notes ?? null)) {
+        const { stockMovement, ...output } = previous;
+        return output;
       }
-      return output;
-    });
+      throw new common_1.BadRequestException('Request ID already used for a different harvest.');
+    }
   }
   async attachCultivationDetail(batchId, dto) {
     await this.findOne(batchId);
